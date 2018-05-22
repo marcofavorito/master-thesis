@@ -1,0 +1,38 @@
+% !TeX root = thesis.tex
+% !TeX spellcheck = en_US
+% !TeX encoding = UTF-8
+\documentclass[]{report}
+
+%\usepackage[autostyle]{csquotes}  
+\usepackage{graphicx}
+\graphicspath{{./images/}}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+
+%opening
+\title{Titolo}
+\author{Marco Favorito}
+
+
+\begin{document}
+	\input{macros}
+	
+	\maketitle
+	\tableofcontents
+	
+	\input{chapters/01-introduction}
+	\input{chapters/02-preliminaries}
+	\input{chapters/03-reduced}
+	\input{chapters/04-reward-shaping}
+	\input{chapters/05-experiments}
+	\input{chapters/06-conclusions}
+	\appendix 
+	\input{chapters/appendix-flloat}
+	\input{chapters/appendix-rltg}
+
+\bibliography{bib.bib}{}
+\bibliographystyle{plain}
+
+\end{document}
