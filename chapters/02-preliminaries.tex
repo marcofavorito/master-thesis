@@ -1,11 +1,22 @@
 \chapter{Preliminaries}
+\label{preliminaries}
 In this chapter we describe the background knowledge required for this work. We introduce Markov Decision Process (MDP) and Non-Markovian Reward Decision Process (NMRDP), common formalisms in the context of Reinforcement Learning. We describe Linear Temporal Logic over finite traces (\LTLf) and Linear Dynamic Logic over finite traces (\LDLf), that we use for define temporal goal in a RL setting. Then, we describe an important result about RL for NMRDP with \LTLf/\LDLf rewards, that is the basis for this work.
 
 \section{Reinforcement Learning}
+\label{RL}
+Reinforcement Learning \citep{Sutton:1998:IRL:551283} is a sort of optimization problem where an \emph{agent} interacts with an \emph{environment} and obtains a \emph{reward} for each action he chooses and the new observed state. The task is to maximize a numerical reward signal obtained after each action during the interaction with the environment. The agent does not know a priori how the environment works (i.e. the effects of his actions), but he can make observations in order to know the new state and the reward. Hence, learning is made in a \emph{trial-and-error} fashion. Moreover, it is worth to notice that in many situation reward might not been affected only from the last action but from an indefinite number of previous action. In other words, the reward can be \emph{delayed}, i.e. the agent should be able to foresee the effect of his actions in terms of future expected reward. 
+
+In the next subsections we introduce some of the classical mathematical frameworks for RL: Markov Decision Process (MDP) and Non-Markovian Reward Decision Process (NMRDP).
 \subsection{MDP}
+\label{MDP}
+
+	A Markov Decision Process $\MDP$ is a tuple $\tup{\States, \Actions, \TrFun, \Reward, \DiscFact}$ containing a set of \emph{states} $\States$, a set of \emph{actions} $\Actions$, a \emph{transition function} $\TrFun: \States \times \Actions \to Prob(\States)$ that returns for every pair state-action a probability distribution over the states, a \emph{reward function} $\Reward: \States \times \Actions \times \States \to \Reals$ that returns the reward received by the agent when he performs action $a$ in $s$ and transitions in $s'$, and a \emph{discount factor} $\DiscFact$, with $0 \le \DiscFact \le 1$, that indicates the present value of future rewards.
+\subsection{Temporal Difference Learning}
 \subsection{NMRDP}
-\section{\LTLf\ and \LDLf\ }
+\label{NMRDP}
+\subsection{Reward Shaping}
+\section{\LTLf and \LDLf}
 \subsection{Linear Temporal Logic for finite traces: \LTLf}
 \subsection{Linear Dynamic Logic for finite traces: \LDLf}
-\subsection{\LTLf\ and \LDLf\ translation to automata}
+\subsection{\LTLf and \LDLf translation to automata}
 \section{RL for NMRDP with \LTLf/\LDLf rewards}

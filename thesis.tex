@@ -1,27 +1,91 @@
 % !TeX root = thesis.tex
 % !TeX spellcheck = en_US
 % !TeX encoding = UTF-8
-\documentclass[]{report}
+%\documentclass[]{report}
+\documentclass[english, LaM, oneside]{sapthesis}%remove "english" for a thesis written in Italian
 
+%\usepackage[utf8]{inputenx}
+%\usepackage{xcolor}
+%\usepackage{indentfirst}
+%\usepackage{microtype}
+
+%\usepackage{lettrine}
+\linespread{0.9}
+
+% This can be used to make space between section names more compact. The titlesec package allows changing how chapters are displayed, numerated, etc.
+%\usepackage[compact]{titlesec}
+% to get the bibliography in the toc
+\usepackage[nottoc,notlot,notlof,chapter]{tocbibind}
+
+\newcommand{\thesistitle}{Reward shaping in RL for {\sc LTL}$_f$/{\sc LDL}$_f$ Goals: Theory and Practice}
+
+\usepackage{index}
+\usepackage{hyperref}
+\usepackage{wrapfig}
+\usepackage[round]{natbib}
+\bibliographystyle{plainnat}
+
+\usepackage[intoc,refpage]{nomencl} %refeq
+\makenomenclature
+
+%\usepackage{qtree}
+% The algorithm packages have to be after hyperref.
+\usepackage{algorithm, algorithmic} %algpseudocode
+\usepackage{amssymb, amsmath}
+\usepackage{xspace, float, graphicx, pstricks}
 %\usepackage[autostyle]{csquotes}  
 \usepackage{graphicx}
 \graphicspath{{./images/}}
-\usepackage{amssymb}
-\usepackage{amsmath}
-\usepackage{algpseudocode}
-\usepackage{algorithm}
+
+
+\hypersetup{
+	hyperfootnotes=true,            
+	bookmarks=true,         
+	colorlinks=true,
+	linkcolor=red,
+	linktoc=page,
+	anchorcolor=black,
+	citecolor=red,
+	urlcolor=blue,
+	pdftitle={\thesistitle},
+	pdfsubject = {Master Thesis, University of Rome "La Sapienza"},
+	pdfauthor={Marco Favortio},
+	pdfkeywords={thesis, sapienza, roma, university}
+	pdfauthor = {\textcopyright\ \today\ Marco Favorito},
+}
+
+
 
 %opening
-\title{Titolo}
-\author{Marco Favorito}
+\title{\thesistitle}
+\author{Marrco Favorito}
+\IDnumber{1609890}
+\course[]{Master in Engineering in Computer Science}
+\courseorganizer{Facolt\`a di Ingegneria dell'Informazione, Informatica e Statistica}
+\submitdate{2017/2018}
+\copyyear{2018}
+\advisor{Prof. Giuseppe De Giacomo}
+\coadvisor{Dr. co-advisor}
+\authoremail{favorito.1609890@studenti.uniroma1.it}
+\examdate{1}
+\examiner{Prof. ...} \examiner{Prof. ...} \examiner{Prof. ...}  \examiner{Prof. ...}  \examiner{Prof. ...} \examiner{Prof. ...}  \examiner{Prof. ...} 
+
+
 
 
 \begin{document}
 	\input{macros}
 	
+	\frontmatter	
 	\maketitle
+	
+	\begin{abstract}
+		write your abstract here
+	\end{abstract}
+	
 	\tableofcontents
 	
+	\mainmatter
 	\input{chapters/01-introduction}
 	\input{chapters/02-preliminaries}
 	\input{chapters/03-reduced}
@@ -31,8 +95,13 @@
 	\appendix 
 	\input{chapters/appendix-flloat}
 	\input{chapters/appendix-rltg}
+	
+	\backmatter
+	\phantomsection
+	
+	\bibliography{bib.bib}{}
 
-\bibliography{bib.bib}{}
-\bibliographystyle{plain}
+
+	
 
 \end{document}

@@ -4,7 +4,9 @@
 *.bbl
 *.blg
 *.synctex.gz
-
+*.nlo
+*.out
+newthesis.tex
 
 *.toc
 macros_.tex
