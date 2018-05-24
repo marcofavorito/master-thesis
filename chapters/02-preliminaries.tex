@@ -67,6 +67,16 @@ In the next subsections we introduce some of the classical mathematical framewor
 
 \emph{Temporal difference learning} (TD) refers to a class of model-free reinforcement learning methods which learn by bootstrapping from the current estimate of the value function. These methods sample from the environment, like Monte Carlo methods, and perform updates based on current estimates, like dynamic programming methods.
 
+Q-Learning and Sarsa are such a methods. They updates $\qFunEst(s, a)$, i.e. the estimation of $\qOptFun(s, a)$ at each transition $(s, a) \to (s', r)$. Q-Learning uses the following update rule:
+\begin{equation}
+\qFunEst(s, a) \leftarrow \qFunEst(s, a) + \LRate [r + \DiscFact \max_a' \qFunEst(s', a') - \qFunEst(s, a)]
+\end{equation}
+
+while Sarsa:
+\begin{equation}
+\qFunEst(s, a) \leftarrow \qFunEst(s, a) + \LRate [r + \DiscFact \qFunEst(s', a') - \qFunEst(s, a)]
+\end{equation}
+
 \subsection{NMRDP}
 \label{NMRDP}
 \section{\LTLf and \LDLf}
