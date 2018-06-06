@@ -1,0 +1,195 @@
+\chapter{Preliminaries}
+\label{preliminaries}
+In this chapter we describe the background knowledge required for this work. We introduce Markov Decision Process (MDP) and Non-Markovian Reward Decision Process (NMRDP), common formalisms in the context of Reinforcement Learning. We describe Linear Temporal Logic over finite traces (\LTLf) and Linear Dynamic Logic over finite traces (\LDLf), that we use for define temporal goal in a RL setting. Then, we describe an important result about RL for NMRDP with \LTLf/\LDLf rewards, that is the basis for this work.
+
+\section{Reinforcement Learning}
+\label{RL}
+Reinforcement Learning \citep{Sutton:1998:IRL:551283} is a sort of optimization problem where an \emph{agent} interacts with an \emph{environment} and obtains a \emph{reward} for each action he chooses and the new observed state. The task is to maximize a numerical reward signal obtained after each action during the interaction with the environment. The agent does not know a priori how the environment works (i.e. the effects of his actions), but he can make observations in order to know the new state and the reward. Hence, learning is made in a \emph{trial-and-error} fashion. Moreover, it is worth to notice that in many situation reward might not been affected only from the last action but from an indefinite number of previous action. In other words, the reward can be \emph{delayed}, i.e. the agent should be able to foresee the effect of his actions in terms of future expected reward. 
+
+In the next subsections we introduce some of the classical mathematical frameworks for RL: Markov Decision Process (MDP) and Non-Markovian Reward Decision Process (NMRDP).
+\subsection{Markov Decision Process}
+\label{MDP}
+
+	A Markov Decision Process (MDP) $\MDP$ is a tuple $\tup{\States, \Actions, \TrFun, \Reward, \DiscFact}$ containing a set of \emph{states} $\States$, a set of \emph{actions} $\Actions$, a \emph{transition function} $\TrFun: \States \times \Actions \to Prob(\States)$ that returns for every pair state-action a probability distribution over the states, a \emph{reward function} $\Reward: \States \times \Actions \times \States \to \Reals$ that returns the reward received by the agent when he performs action $a$ in $s$ and transitions in $s'$, and a \emph{discount factor} $\DiscFact$, with $0 \le \DiscFact \le 1$, that indicates the present value of future rewards.
+	
+	A \emph{policy} $\Policy: \States \to \Actions$ for an MDP $\MDP$ is a mapping from states to actions, and represents a solution for $\MDP$. Given a sequence of rewards $\Reward_{t+1}, \Reward_{t+2}, \dots, \Reward_{T}$, the \emph{expected return} $\ExpRet_t$ at time step $t$
+	is defined as: 
+	\begin{equation}
+		\ExpRet_t \defeq \sum_{t=k+1}^T \DiscFact^{k-t-1}\Reward_k
+	\end{equation} where can be $T = \infty$ and $\DiscFact = 1$ (but not both). 
+	
+	The \emph{value function} of a state $s$, the \emph{state-value function} $\ValFun_\Policy(s)$ is defined as the expected return when starting in $s$ and following policy $\Policy$, i.e.:
+	\begin{equation}
+	\label{state-value-fun}
+		\ValFun_\Policy(s) \defeq \mathbb{E}_{\Policy}[\ExpRet_t | \States_t = s], \forall s \in \States
+	\end{equation}
+	
+	Similarly, we define $\qFun_\Policy$, the \emph{action-value function for policy $\Policy$}, as:
+	\begin{equation}
+		\label{action-value-fun}
+		\qFun_\Policy(s, a) \defeq \mathbb{E}_{\Policy}[\ExpRet_t | \States_t = s, \Actions_t = a], , \forall s \in \States, \forall a \in \Actions
+	\end{equation}
+	
+	Notice that we can rewrite \ref{state-value-fun} and \ref{action-value-fun} recursively, yielding the \emph{Bellman equations}:
+	
+	\begin{equation}
+	\label{bellman-state-value-fun}
+	\ValFun_\Policy(s) =  \sum_{s'} P(s' | s,a)[\Reward(s,a,s') + \DiscFact \ValFun(s')] 
+	\end{equation}
+	
+	where we used the definition of the transition function:
+	\begin{equation}
+	\TrFun(s,a,s') = P(s' | s,a)
+	\end{equation}
+	
+	We define the \emph{optimal state-value function} and the \emph{optimal action-value function} as follows:
+	\begin{equation}
+	\label{optimal-state-value-fun}
+		\ValOptFun(s)  \defeq \max_\Policy  \ValFun_\Policy(s), \forall s\in \States		
+	\end{equation}
+	
+	\begin{equation}
+	\label{optimal-action-value-fun}
+	\qOptFun(s, a) \defeq \max_\Policy  \qFun_\Policy(s, a), \forall s\in \States, \forall a\in \Actions
+	\end{equation}
+	
+	Notice that with \ref{optimal-state-value-fun} and \ref{optimal-action-value-fun} we can show the correlation between $\ValOptFun_\Policy(s)$ and $\qOptFun_\Policy(s, a)$:
+	
+	\begin{equation}
+		\qOptFun(s, a) = \mathbb{E}_\Policy[R_{t+1} + \DiscFact \ValOptFun_\Policy(\States_{t+1})| \States_t = s, \Actions_t = a]
+	\end{equation}
+	
+	
+	We can define a partial order over policies using value functions, i.e. $\forall s\in \States. \Policy \ge \Policy' \iff \ValFun_\Policy(s) \ge \ValFun_{\Policy'}(s)$. An \emph{optimal policy} $\OptPolicy$ is a policy such that $\OptPolicy \ge \Policy$ for all $\Policy$. 
+	
+	
+\subsection{Temporal Difference Learning}
+
+\emph{Temporal difference learning} (TD) refers to a class of model-free reinforcement learning methods which learn by bootstrapping from the current estimate of the value function. These methods sample from the environment, like Monte Carlo (MC) methods, and perform updates based on current estimates, like dynamic programming methods (DP). We do not discuss MC and DP methods here.
+
+Q-Learning and Sarsa are such a methods. They updates $\qFunEst(s, a)$, i.e. the estimation of $\qOptFun(s, a)$ at each transition $(s, a) \to (s', r)$. Q-Learning uses the following update rule:
+\begin{equation}
+\qFunEst(s, a) \leftarrow \qFunEst(s, a) + \LRate [r + \DiscFact \max_{a'} \qFunEst(s', a') - \qFunEst(s, a)]
+\end{equation}
+
+while Sarsa:
+\begin{equation}
+\qFunEst(s, a) \leftarrow \qFunEst(s, a) + \LRate [r + \DiscFact \qFunEst(s', a') - \qFunEst(s, a)]
+\end{equation}
+
+TD$(\lambda)$ is an algorithm which uses \emph{eligibility traces}. The parameter $\lambda$ refers to the use of an eligibility trace. The algorithm generalizes MC methods and TD learning, obtained respectively by setting $\lambda = 1$ and $\lambda = 0$. Intermediate values of $\lambda$ yield methods that are often better of the extreme methods. Q-Learning and Sarsa that has been shown before can be rephrased with this new formalism as Q-Learning(0) and Sarsa(0), special cases of Watkin's Q$(\lambda)$ and Sarsa($\lambda$).
+
+\section{\LTLf and \LDLf}
+In this section we introduce \LTLf and \LDLf, two formalisms that we will use for define the reward function of a RL task over \emph{sequence of transitions} rather than one transition.
+
+\subsection{Linear Temporal Logic on Finite Traces: \LTLf}
+Linear-time Temporal Logic over finite traces, \LTLf, is essentially standard 
+\LTL \citep{Pnueli:1977:TLP:1382431.1382534} interpreted over finite, instead of over infinite, traces \citep{de2013linear}.
+
+Indeed, the syntax of \LTLf is the same of \LTLf, i.e. \emph{formulas} of \LTLf are built from a set $\Prop$ of propositional symbols and are closed under the boolean connectives, the unary temporal operator \Next (\emph{next-time}) and the binary operator $\Until$ (\emph{until}):
+
+\[\begin{array}{rcl}
+\varphi &::=& \phi \mid \lnot \varphi \mid \varphi_1\land \varphi_2 \mid \Next\varphi \mid \varphi_1 \Until \varphi_2
+\end{array}
+\]
+With $A\in \Prop$.
+
+We use the standard abbreviations:
+$\varphi_1\lor\varphi_2 \doteq \lnot(\lnot \varphi_1\land \lnot
+\varphi_2)$;
+\emph{eventually} as $\Diamond\varphi \doteq \true\Until\varphi$;
+\emph{always} as $\Box\varphi \doteq\lnot\Diamond\lnot\varphi$; 
+week next $\Wnext\varphi \doteq \lnot\Next\lnot\varphi$ (note that on finite
+traces $\lnot\Next\varphi \not\equiv \Next\lnot\varphi$); and $Last \doteq \Wnext\false$ denoting the end of the trace. 
+
+Formally, a \emph{finite trace} $\pi$ is a finite word over the alphabet $2^\Prop$, i.e. as alphabet we have all the possible propositional interpretations of the propositional symbols in $\Prop$. For the semantics we refer to \citep{de2013linear}.
+
+\LTLf is as expressive as 
+first-order logic (\FO)
+over finite traces
+and star-free regular expressions (\REGEX).
+
+\subsection{Linear Dynamic Logic on Finite Traces: \LDLf}
+\LDLf, \emph{Linear Dynamic Logic of Finite Traces} merges \LTLf with \REGEX$_f$ (\REGEX on finite traces) in a very natural way.
+The logic is called LDL f
+\LTLf can be extended to 
+
+
+ which is expressive as monadic second-order logic 
+(\MSO) over finite traces \cite{de2013linear}.
+
+Linear Dynamic Logic of Finite
+Traces
+
+%Formally, \LDLf formulas $\varphi$ are built as follows:
+%%%
+%\[\begin{array}{lcl}
+%\varphi &::=& \ttrue  \mid \lnot \varphi \mid \varphi_1 \land \varphi_2 \mid \DIAM{\varrho}\varphi \\
+%\varrho &::=& \phi \mid \varphi? \mid  \varrho_1 + \varrho_2 \mid \varrho_1; \varrho_2 \mid \varrho^*
+%\end{array}
+%\]
+%%%
+%where $\ttrue$ stands for logical true; $\phi$ is a propositional
+%formula over $\Prop$; $\varrho$ denotes path expressions, which are \REGEX over
+%propositional formulas $\phi$ with the addition of the test construct
+%$\varphi?$ typical of \PDL.  We use abbreviations
+%$\BOX{\varrho}\varphi\doteq\lnot\DIAM{\varrho}{\lnot\varphi}$ as in \PDL.
+%Intuitively, $\DIAM{\varrho}\varphi$ states that, from the current step
+%in the trace, there exists an execution satisfying the \REGEX $\varrho$ 
+%such that its last step satisfies $\varphi$, while
+%$\BOX{\varrho}\varphi$ states that, from the current step, all executions
+%satisfying the \REGEX $\varrho$ are such that their last step
+%satisfies $\varphi$.
+%%
+%Tests are used to insert into the execution path checks for
+%satisfaction of additional \LDLf formulas.
+%
+%
+%%%
+%Given an \LTLf/\LDLf formula $\varphi$,
+%we can construct a deterministic finite state automaton (\DFA)~\cite{RaSc59} 
+%$\A_\varphi$ that tracks satisfaction of $\varphi$, 
+%given a finite trace~\footnote{An analogous
+%	transformation to automata applies to several other formalisms for
+%	representing non-Markovian rewards  \cite{BBG96,ThiebauxGSPK06,Slaney05,Gretton07,Gretton14,LacerdaPH14,LacerdaPH15}. 
+%	All results presented here apply to those formalisms as well.},
+%accepting a sequence of propositional interpretations {\em
+%	iff} the sequence satisfies $\varphi$. This construction
+%is a key element in the efficient transformation from non-Markovian
+%rewards to Markovian rewards over an extended MDP \cite{BDP-AAAI18}.
+%%%
+%
+%The idea is to use \LTLf/\LDLf formulas to specify when sequences of 
+%state-action pairs, rather than one pair only, should be rewarded.
+%Notice that we can easily incorporate the executed action in the current state
+%by using propositions. In this way, we can make \LTLf/\LDLf deal with 
+%actions, as well. From now on, we assume this is the case.
+
+\newcommand{\Rnm}{\bar{R}}
+\newcommand{\rhonm}{\bar{\rho}}
+
+
+
+
+
+\subsection{\LTLf and \LDLf translation to automata}
+
+\section{RL for NMRDP with \LTLf/\LDLf rewards}
+In this section we introduce the formalism of Non-Markovian Reward Decision Process \citep{BacchusBG96} 
+\subsection{Non-Markovian Reward Decision Process}
+\label{NMRDP}
+A Non-Markovian Reward Decision Process (NMRDP) $\NMRDP$ is a tuple $\tup{\States, \Actions, \TrFun, \NMReward, \DiscFact}$ where everything is defined as in the MDP but the reward function is defined as $\NMReward : (\States \times \Actions)^* \to \Reals$, i.e. is defined over sequences of states and actions. 	Given a trace $\pi = \tup{s_0, a_0, s_1, a_1, \dots, s_n, a_n}$, the \emph{value of $\pi$} is:
+$$
+v(\pi) = \sum_{i=1}^{|\pi|} \DiscFact^{i-1}\NMReward(\tup{\pi(1), \pi(2), \dots, \pi(i)})
+$$
+where $\pi(i) = (s_i, a_i)$.
+
+The policy $\NMPolicy$ in this setting is defined over sequences of states, i.e. $\NMPolicy: \States^* \to \Actions$. 
+
+The \emph{value of $\NMPolicy$} given an initial state $s_0$ is defined as:
+
+$$
+\ValFun^{\NMPolicy}(s) = \mathbb{E}_{\pi \sim \MDP, \NMPolicy, s_0}[v(\pi)]
+$$
+i.e. the expected value in state $s$ considering the distribution of traces defined by the transition function of $\MDP$, the policy $\NMPolicy$ and the initial state $s_0$.
+
