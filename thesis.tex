@@ -32,11 +32,11 @@
 % The algorithm packages have to be after hyperref.
 \usepackage{algorithm, algorithmic} %algpseudocode
 \usepackage{mathtools}
-\usepackage{amssymb, amsmath}
+\usepackage{amssymb, amsmath, amsthm}
 \usepackage{xspace, float, graphicx, pstricks}
 %\usepackage[autostyle]{csquotes}  
 \usepackage{graphicx}
-\graphicspath{{./images/}}
+%\graphicspath{{./images/}}
 
 
 \hypersetup{
@@ -51,11 +51,15 @@
 	pdftitle={\thesistitle},
 	pdfsubject = {Master Thesis, University of Rome "La Sapienza"},
 	pdfauthor={Marco Favortio},
-	pdfkeywords={thesis, sapienza, roma, university}
+	pdfkeywords={thesis, sapienza, roma, university, marco favorito}
 	pdfauthor = {\textcopyright\ \today\ Marco Favorito},
 }
 
-
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter] % reset theorem numbering for each chapter
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{example}{Example}[chapter]
 
 %opening
 \title{\thesistitle}
@@ -87,11 +91,11 @@
 	\tableofcontents
 	
 	\mainmatter
-	\input{chapters/introduction.tex}
-	\input{chapters/preliminaries}
+	\input{chapters/introduction}
+	\input{chapters/logic}
+	\input{chapters/flloat}
 	\input{chapters/reduced}
 	\input{chapters/reward-shaping}
-	\input{chapters/flloat}
 	\input{chapters/rltg}
 	\input{chapters/experiments}
 	\input{chapters/conclusions}

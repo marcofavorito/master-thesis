@@ -1,0 +1,145 @@
+\chapter{\LTLf and \LDLf}
+\label{logic}
+%In this chapter we describe the background knowledge required for this work. We introduce Markov Decision Process (MDP) and Non-Markovian Reward Decision Process (NMRDP), common formalisms in the context of Reinforcement Learning. We describe Linear Temporal Logic over finite traces (\LTLf) and Linear Dynamic Logic over finite traces (\LDLf), that we use for define temporal goal in a RL setting. Then, we describe an important result about RL for NMRDP with \LTLf/\LDLf rewards, that is the basis for this work.
+
+In this chapter we introduce the reader to the main important framework for talk about behaviors over time, which gives the basis for our approach.
+First we talk about the well known Linear time Temporal Logic \LTL, \PDL and their main applications; then we go more in deep by presenting a specific formalism, namely \emph{Linear Temporal Logic over Finite Traces} \LTLf and \emph{Linear Dynamic Logic over Finite Traces} \LDLf.
+We require the reader to know foundations of classical logic \citep{sep-logic-classical}.
+\section{Linear time Temporal Logic (\LTL)}
+\emph{Temporal Logic} \citep{sep-logic-temporal} is a category of formal languages aimed to talk about properties of a system whose truth value might change over time. This is in contrast with atemporal logics, which can only discuss about statements whose truth value is constant. 
+
+\emph{Linear time Temporal Logic} \citep{Pnueli:1977:TLP:1382431.1382534}, or \emph{Linear Temporal Logic} (\LTL) is such a logic. It is the most popular and widely used temporal logic in computer science, especially in formal verification of software/hardware systems, in AI to reasoning about actions and planning, and in the area of Business Process Specification and Verification to specify processes declaratively.
+
+It allows to express temporal patterns about some property $p$, like \emph{liveness} (\emph{$p$ will eventually happen}), \emph{safety} (\emph{$p$ will never happen}) and \emph{fairness}, combinations of the previous patterns (\emph{infinitely often $p$ holds}, \emph{eventually always $p$ holds}).
+
+\subsection{Syntax}
+A \LTL formula $\varphi$ is defined over a set of propositional symbols $\Prop$ and are closed under the boolean connectives, the unary temporal operator \Next (\emph{next-time}) and the binary operator $\Until$ (\emph{until}):
+
+\[\begin{array}{rcl}
+\varphi &::=& A \mid \lnot \varphi \mid \varphi_1\land \varphi_2 \mid \Next\varphi \mid \varphi_1 \Until \varphi_2
+\end{array}
+\]
+With $A\in \Prop$.
+
+Additional operators can be defined in terms of the ones above: as usual logical operators such as $\OR, \Rightarrow, \Leftrightarrow, \true, \false$ and temporal formulas like \emph{eventually} as $\Diamond \varphi \doteq \true \Until \varphi$, \emph{always} as $\Box \varphi \doteq \lnot \Diamond \lnot \varphi$ and \emph{release} as $\varphi_1 \Release \varphi_2 \doteq \lnot (\lnot \varphi_1 \Until \lnot \varphi_2)$.
+
+\subsection{Semantics}
+The semantics of \LTL is provided by \textit{traces}, i.e. $\omega$-word over the alphabet $2^\Prop$. More formally, a \emph{trace} is a \emph{word} on a \emph{path} of a \emph{Kripke structure}.
+\begin{definition}[\citep{Clarke:2000:MC:332656}]\label{kripke}
+	a Kripke structure $\Kripke$ over a set of propositional symbols $\Prop$ is a 4-tuple $\tup{\States, I, R, L}$ where $\States$ is a finite set of states, $I\subseteq \States$ is the set of initial states, $R \subseteq \States \times \States$ is the transition relation such that $R$ is left-total and $L: \States \to 2^\Prop$ is a labeling function.
+\end{definition}
+A \emph{path} $\rho$ over $\Kripke$ is a sequence of states $\tup{s_1, s_2, \dots}$ such that $\forall i. R(s_i, s_{i+1})$. From a path we can build a \emph{word} $w$ on the path $\rho$ by  
+mapping each state of the sequence with $L$, namely:
+\[
+w = \tup{L(s_1), L(s_2), \dots}
+\]
+
+In simpler words, a trace of propositional symbols $\Prop$ is a infinite sequence of combinations of propositional symbols in $\Prop$.
+
+\begin{figure}[h]
+	  \centering
+	\includegraphics[width=.5\linewidth]{images/KripkeStructureExample}
+\end{figure}
+Several interesting temporal properties can be defined in \LTL:
+\begin{itemize}
+	\item a
+\end{itemize}
+\section{Propositional Dynamic Logic (\PDL)}
+
+\subsection{Syntax}
+\subsection{Semantics}
+	
+\section{Linear Temporal Logic on Finite Traces: \LTLf}
+Linear-time Temporal Logic over finite traces, \LTLf, is essentially standard 
+\LTL \citep{Pnueli:1977:TLP:1382431.1382534} interpreted over finite, instead of over infinite, traces \citep{de2013linear}.
+
+Indeed, the syntax of \LTLf is the same of \LTLf, i.e. \emph{formulas} of \LTLf are built from a set $\Prop$ of propositional symbols and are closed under the boolean connectives, the unary temporal operator \Next (\emph{next-time}) and the binary operator $\Until$ (\emph{until}):
+
+\[\begin{array}{rcl}
+\varphi &::=& \phi \mid \lnot \varphi \mid \varphi_1\land \varphi_2 \mid \Next\varphi \mid \varphi_1 \Until \varphi_2
+\end{array}
+\]
+With $A\in \Prop$.
+
+We use the standard abbreviations:
+$\varphi_1\lor\varphi_2 \doteq \lnot(\lnot \varphi_1\land \lnot
+\varphi_2)$;
+\emph{eventually} as $\Diamond\varphi \doteq \true\Until\varphi$;
+\emph{always} as $\Box\varphi \doteq\lnot\Diamond\lnot\varphi$; 
+week next $\Wnext\varphi \doteq \lnot\Next\lnot\varphi$ (note that on finite
+traces $\lnot\Next\varphi \not\equiv \Next\lnot\varphi$); and $Last \doteq \Wnext\false$ denoting the end of the trace. 
+
+Formally, a \emph{finite trace} $\pi$ is a finite word over the alphabet $2^\Prop$, i.e. as alphabet we have all the possible propositional interpretations of the propositional symbols in $\Prop$. For the semantics we refer to \citep{de2013linear}.
+
+\LTLf is as expressive as 
+first-order logic (\FO)
+over finite traces
+and star-free regular expressions (\REGEX).
+
+\section{Linear Dynamic Logic on Finite Traces: \LDLf}
+\LDLf, \emph{Linear Dynamic Logic of Finite Traces} merges \LTLf with \REGEX$_f$ (\REGEX on finite traces) in a very natural way.
+The logic is called LDL f
+\LTLf can be extended to 
+
+
+ which is expressive as monadic second-order logic 
+(\MSO) over finite traces \citep{de2013linear}.
+
+Linear Dynamic Logic of Finite
+Traces
+
+Formally, \LDLf formulas $\varphi$ are built as follows:
+%%%
+\[\begin{array}{lcl}
+\varphi &::=& \ttrue  \mid \lnot \varphi \mid \varphi_1 \land \varphi_2 \mid \DIAM{\varrho}\varphi \\
+\varrho &::=& \phi \mid \varphi? \mid  \varrho_1 + \varrho_2 \mid \varrho_1; \varrho_2 \mid \varrho^*
+\end{array}
+\]
+%%%
+where $\ttrue$ stands for logical true; $\phi$ is a propositional
+formula over $\Prop$; $\varrho$ denotes path expressions, which are \REGEX over
+propositional formulas $\phi$ with the addition of the test construct
+$\varphi?$ typical of \PDL.  We use abbreviations
+$\BOX{\varrho}\varphi\doteq\lnot\DIAM{\varrho}{\lnot\varphi}$ as in \PDL.
+Intuitively, $\DIAM{\varrho}\varphi$ states that, from the current step
+in the trace, there exists an execution satisfying the \REGEX $\varrho$ 
+such that its last step satisfies $\varphi$, while
+$\BOX{\varrho}\varphi$ states that, from the current step, all executions
+satisfying the \REGEX $\varrho$ are such that their last step
+satisfies $\varphi$.
+%%
+Tests are used to insert into the execution path checks for
+satisfaction of additional \LDLf formulas.
+%
+%
+%%%
+
+Given an \LTLf/\LDLf formula $\varphi$,
+we can construct a deterministic finite state automaton (\DFA) \citep{RaSc59} 
+$\automaton_\varphi$ that tracks satisfaction of $\varphi$, 
+given a finite trace
+%~\footnote{An analogous transformation to automata applies to several other formalisms for representing non-Markovian rewards \cite{BBG96,ThiebauxGSPK06,Slaney05,Gretton07,Gretton14,LacerdaPH14,LacerdaPH15}. All results presented here apply to those formalisms as well.},
+
+accepting a sequence of propositional interpretations {\em
+	iff} the sequence satisfies $\varphi$. This construction
+is a key element in the efficient transformation from non-Markovian
+rewards to Markovian rewards over an extended MDP \citep{BDP-AAAI18}.
+%%%
+%
+The idea is to use \LTLf/\LDLf formulas to specify when sequences of 
+state-action pairs, rather than one pair only, should be rewarded.
+Notice that we can easily incorporate the executed action in the current state
+by using propositions. In this way, we can make \LTLf/\LDLf deal with 
+actions, as well. From now on, we assume this is the case.
+
+\section{\LTLf and \LDLf translation to automata}
+Both \LTLf and \LDLf can be directly translated into alternating automata on words (\AFW). Formally, an 
+
+
+
+delta function for the NFA:
+\include{chapters/misc/ldlf_delta}
+
+
+
+

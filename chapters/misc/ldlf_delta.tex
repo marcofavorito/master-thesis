@@ -1,0 +1,29 @@
+\begin{align}
+\begin{aligned}
+\Dfun{\ttrue} 			\ind &= \ind \true\\
+\Dfun{\ffalse} 			\ind &= \ind \false\\
+\Dfun{\PropFormula}   	\ind &= \ind a\\
+\Dfun{\varphi_1 \AND \varphi_2} 			\ind &= \ind   \Dfun{\varphi_1} \AND \Dfun{\varphi_2}\\
+\Dfun{\varphi_1 \OR  \varphi_2} 			\ind &= \ind   \Dfun{\varphi_1} \OR \Dfun{\varphi_2}\\
+\Dfun{\DIAM{\PropFormula}\varphi}             \ind &= \ind 
+	\begin{cases}
+		\textbf{\textit{E}}(\varphi) 	& \text{if}\ \PropInt \models \PropFormula\\
+		\false     						& \text{if}\ \PropInt \not\models \PropFormula\\
+	\end{cases}\\
+\Dfun{\DIAM{\regexp?}\varphi}             			\ind &= \ind \Dfun{\regexp} \AND \Dfun{\varphi}\\
+\Dfun{\DIAM{\regexp_1 + \regexp_2}\varphi}             \ind &= \ind \Dfun{\DIAM{\regexp_1}\varphi} \OR \Dfun{\DIAM{\regexp_2}\varphi}\\
+\Dfun{\DIAM{\regexp_1 ; \regexp_2}\varphi}             \ind &= \ind \Dfun{\DIAM{\regexp_1}\DIAM{\regexp_2}\varphi}\\
+\Dfun{\DIAM{\regexp^*}\varphi}             			\ind &= \ind \Dfun{\varphi} \OR \Dfun{\DIAM{\regexp}\FalseDelta{\DIAM{\regexp^*}\varphi}}\\
+\Dfun{\BOX{\PropFormula}\varphi}             \ind &= \ind 
+	\begin{cases}
+		\textbf{\textit{E}}(\varphi) 	& \text{if}\ \PropInt \models \PropFormula\\
+		\true     						& \text{if}\ \PropInt \not\models \PropFormula\\
+	\end{cases}\\
+\Dfun{\BOX{\regexp?}\varphi}             			\ind &= \ind \Dfun{\nnf(\NOT \regexp)} \OR \Dfun{\varphi}\\
+\Dfun{\BOX{\regexp_1 + \regexp_2}\varphi}             \ind &= \ind \Dfun{\BOX{\regexp_1}\varphi} \AND \Dfun{\BOX{\regexp_2}\varphi}\\
+\Dfun{\BOX{\regexp_1 ; \regexp_2}\varphi}             \ind &= \ind \Dfun{\BOX{\regexp_1}\BOX{\regexp_2}\varphi}\\
+\Dfun{\BOX{\regexp^*}\varphi}             			\ind &= \ind \Dfun{\varphi} \AND \Dfun{\BOX{\regexp}\TrueDelta{\DIAM{\regexp^*}\varphi}}\\
+\Dfun{\TrueDelta{\psi}} 			\ind &= \ind \true\\
+\Dfun{\FalseDelta{\psi}} 			\ind &= \ind \false\\
+\end{aligned}					
+\end{align}
