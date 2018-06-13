@@ -32,7 +32,7 @@
 %% LTL
 \newcommand{\Next}{\raisebox{-0.27ex}{\LARGE$\circ$}}
 \newcommand{\Wnext}{\raisebox{-0.27ex}{\LARGE$\bullet$}}
-\newcommand{\Until}{\mathop{\U}}
+\newcommand{\lUntil}{\mathop{\U}}
 \newcommand{\Since}{\mathop{\S}}
 \newcommand{\Release}{\mathop{\R}}
 \newcommand{\Wuntil}{\mathop{\W}}
@@ -41,10 +41,11 @@
 \newcommand{\false}{\mathit{false}}
 \newcommand{\ttrue}{{\mathit{tt}}}
 \newcommand{\ffalse}{\mathit{ff}}
-\newcommand{\Last}{\mathit{last}}
-\newcommand{\Ended}{\mathit{end}}
+\newcommand{\Last}{\mathit{Last}}
+\newcommand{\Ended}{\mathit{End}}
 \newcommand{\length}{\mathit{length}}
-\newcommand{\last}{\mathit{n}}
+\newcommand{\last}{\mathit{last}}
+\newcommand{\End}{\mathit{end}}
 \newcommand{\nnf}{\mathit{nnf}}
 \newcommand{\BOX}[1]{ [#1]}
 \newcommand{\DIAM}[1]{\langle #1 \rangle}
@@ -52,7 +53,6 @@
 
 
 %% Logics
-\newcommand{\FOL}{{\sc fol}\xspace}
 \newcommand{\LT}{{\sc lt}$_f$\xspace}
 \newcommand{\LTi}{{\sc lt}$_i$\xspace}
 \newcommand{\LTL}{{\sc ltl}\xspace}
@@ -61,10 +61,12 @@
 \newcommand{\LDLf}{{\sc ldl}$_f$\xspace}
 \newcommand{\RE}{{\sc re}$_f$\xspace}
 \newcommand{\REGEX}{{\sc re}\xspace}
+\newcommand{\DL}{{\sc dl}\xspace}
 \newcommand{\PDL}{{\sc pdl}\xspace}
 \newcommand{\FOf}{{\sc fo}$_f$\xspace}
 \newcommand{\MSOf}{{\sc mso}$_f$\xspace}
 \newcommand{\FO}{{\sc fo}\xspace}
+\newcommand{\FOL}{{\sc fol}\xspace}
 \newcommand{\MSO}{{\sc mso}\xspace}
 %\newcommand{\ATA}{{\sc ata}\xspace}
 \newcommand{\AFW}{{\sc afw}\xspace}
@@ -138,18 +140,24 @@
 \newcommand{\Kripke}{\K}
 \newcommand{\tm}[1]{\ \text{#1}\ }
 \newcommand{\tiff}{\tm{iff}}
+\newcommand{\DECLARE}{{\sc declare}\xspace}
+
 
 \newcommand{\automaton}{\mathcal{A}}
 \newcommand{\LLf}{\LTLf/\LDLf}
 \newcommand{\DfunSym}{\partial}
 \newcommand{\Dfun}[1]{\DfunSym\lparen #1,\PropInt \rparen}
-\newcommand{\AND}{\wedge}
-\newcommand{\OR}{\vee}
-\newcommand{\NOT}{\lnot}
+\newcommand{\DfunEps}[1]{\DfunSym\lparen #1, \epsilon\rparen}
+\newcommand{\lAND}{\wedge}
+\newcommand{\lOR}{\vee}
+%\newcommand{\NOT}{\lnot}
 \newcommand{\regexp}{\varrho}
 \newcommand{\TrueDelta}[1]{\textit{\textbf{\texttt{T}}}_{#1}}
 \newcommand{\FalseDelta}[1]{\textit{\textbf{\texttt{F}}}_{#1}}
-
+\newcommand{\bOne}{\mathbf{1}}
+\newcommand{\bZero}{\mathbf{0}}
+\newcommand{\LTS}{{\sc lts}\xspace}
+\newcommand{\LDLfToNFA}{{\sc ldl}$_f2$\NFA}
 
 \newcommand{\Sapientino}{{\sc sapientino}\xspace}
 \newcommand{\Breakout}{{\sc breakout}\xspace}
@@ -162,6 +170,10 @@
 \newcommand{\Reals}{\mathbb{R}}
 \newcommand{\defeq}{\coloneqq}
 
+
+%algpseudocode
+\algnewcommand\algInput{\textbf{input}}
+\algnewcommand\algOutput{\textbf{output}}
 
 
 %%% Local Variables:

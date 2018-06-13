@@ -17,7 +17,8 @@
 % to get the bibliography in the toc
 \usepackage[nottoc,notlot,notlof,chapter]{tocbibind}
 
-\newcommand{\thesistitle}{Reward shaping in RL for {\sc LTL}$_f$/{\sc LDL}$_f$ Goals: Theory and Practice}
+%\newcommand{\thesistitle}{Reward shaping in RL for {\sc LTL}$_f$/{\sc LDL}$_f$ Goals: Theory and Practice}
+\newcommand{\thesistitle}{Reinforcement Learning for {\sc LTL}$_f$/{\sc LDL}$_f$ Goals: Theory and Implementations}
 
 \usepackage{index}
 \usepackage{hyperref}
@@ -30,14 +31,20 @@
 
 %\usepackage{qtree}
 % The algorithm packages have to be after hyperref.
-\usepackage{algorithm, algorithmic} %algpseudocode
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+
 \usepackage{mathtools}
 \usepackage{amssymb, amsmath, amsthm}
 \usepackage{xspace, float, graphicx, pstricks}
+\usepackage{subcaption}
 %\usepackage[autostyle]{csquotes}  
 \usepackage{graphicx}
 %\graphicspath{{./images/}}
-
+\usepackage{tikz}
+\usetikzlibrary{automata}
+\usetikzlibrary{positioning}
 
 \hypersetup{
 	hyperfootnotes=true,            
@@ -75,8 +82,7 @@
 \examdate{1}
 \examiner{Prof. ...} \examiner{Prof. ...} \examiner{Prof. ...}  \examiner{Prof. ...}  \examiner{Prof. ...} \examiner{Prof. ...}  \examiner{Prof. ...} 
 
-
-
+\allowdisplaybreaks
 
 \begin{document}
 	\input{macros}

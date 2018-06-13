@@ -1,0 +1,10 @@
+\begin{figure}[h]
+	\centering
+	\caption{The \NFA associated to $\Box A$}\label{fig:nfa-always-a}
+	\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid]
+	\node[state,initial, accepting]   (q_0)                {$\set{\Box A}$};
+	\node[state, accepting]           (q_1) [right=of q_0] {$\set{\Ended}$};
+	\path[->] (q_0) edge node [above] {$A$} (q_1)
+		      edge [loop above]   node  {$A$} ();
+	\end{tikzpicture}
+\end{figure}

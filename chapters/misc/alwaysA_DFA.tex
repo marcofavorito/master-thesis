@@ -1,0 +1,8 @@
+\begin{figure}[h]
+	\centering
+	\caption{The \DFA associated to $\Box A$}\label{fig:dfa-always-a}
+	\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid]
+	\node[state,initial, accepting]   (q_0)                {0};
+	\path[->] (q_0) edge [loop above]   node  {$A$} ();
+	\end{tikzpicture}
+\end{figure}
