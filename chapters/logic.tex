@@ -3,7 +3,7 @@
 %In this chapter we describe the background knowledge required for this work. We introduce Markov Decision Process (MDP) and Non-Markovian Reward Decision Process (NMRDP), common formalisms in the context of Reinforcement Learning. We describe Linear Temporal Logic over finite traces (\LTLf) and Linear Dynamic Logic over finite traces (\LDLf), that we use for define temporal goal in a RL setting. Then, we describe an important result about RL for NMRDP with \LTLf/\LDLf rewards, that is the basis for this work.
 
 In this chapter we introduce the reader to the main important framework for talk about behaviors over time, which gives the foundations for our approach.
-First we talk about the well known Linear time Temporal Logic (\LTL), Propositional Dynamic Logic (\PDL) and their main applications; then we go more in deep by presenting a specific formalism, namely \emph{Linear Temporal Logic over Finite Traces} \LTLf and \emph{Linear Dynamic Logic over Finite Traces} \LDLf.
+First we talk about the well known Linear time Temporal Logic (\LTL), Propositional Dynamic Logic (\PDL) and their main applications; then we go more in deep by presenting a specific formalism, namely \emph{Linear Temporal Logic over Finite Traces} \LTLf and \emph{Linear Dynamic Logic over Finite Traces} \LDLf. Finally, we study the translation from \LLf formulas to Deterministic Finite Automata (\DFA).
 We require the reader to be acquainted with classical logic \citep{sep-logic-classical} and automata theory \citep{Hopcroft:2000:IAT:557657}.
 \section{Linear time Temporal Logic (\LTL)}
 \emph{Temporal Logic} \citep{sep-logic-temporal} is a category of formal languages aimed to talk about properties of a system whose truth value might change over time. This is in contrast with atemporal logics, which can only discuss about statements whose truth value is constant. 
@@ -461,7 +461,7 @@ Now we show several \LDLf examples.
 	\begin{itemize}
 		\item \emph{Safety}: $\BOX{\true^*}\varphi$, equivalent to \LTLf formula $\Box \varphi$
 		\item \emph{Liveness}: $\DIAM{\true^*}\varphi$, equivalent to \LTLf formula $\Diamond \varphi$
-		\item \emph{Strong Fairness}: $\BOX{\true^*}(\varphi_1 \Rightarrow \DIAM{\true^*}\varphi_2)$, equivalent to \LTLf formula $\Box (\varphi_1 \Rightarrow \Diamond \varphi_2)$
+		\item \emph{Conditional Response}: $\BOX{\true^*}(\varphi_1 \Rightarrow \DIAM{\true^*}\varphi_2)$, equivalent to \LTLf formula $\Box (\varphi_1 \Rightarrow \Diamond \varphi_2)$
 		\item \emph{Ordered occurrence}: $\DIAM{\true^*; \varphi_1; \true^*; \varphi_2; \true^*}\Ended$ equivalent to the \RE expression  $\true^*; \varphi_1; \true^*; \varphi_2; \true^*$
 		\item \emph{Alternating occurrence}: $\DIAM{(\psi; \varphi)^*}\Ended$ equivalent to the \RE expression  $(\psi; \varphi)^*$
 	\end{itemize}
@@ -585,7 +585,6 @@ The function $\DfunSym$ used in lines \ref{ldlf2nfa:delta-eps-init}, \ref{ldlf2n
 	
 \end{algorithm}
 
-
 \subsubsection*{How \LDLfToNFA works}
 The \NFA $\automaton_\varphi$ for an \LDLf formula $\varphi$ is built in a forward fashion. Until convergence is reached (i.e. states and transitions do not change), the algorithm visits every state $q$ seen until now, checks for all the possible transitions from that state and collects the results, determining the next state $q'$, the new transition $(q, \PropInt, q')$ and if $q'$ is a final state. Intuitively, the delta function $\DfunSym$ emulates the semantic behavior of every \LLf subformula after seeing $\PropInt$.
 
@@ -599,7 +598,7 @@ The following result holds:
 
 In order to obtain a \DFA, the \NFA $\automaton_\varphi$ can be determinized in exponential time \citep{Rabin:1959:FAD:1661907.1661909}. Thus, we can tranform a \LLf formula into a \DFA of double exponential size.
 
-\begin{example}
+\begin{example}\label{ldl2nfa-example-always}
 	In this example we see a run of the Algorithm \ref{alg:ldl2nfa} with the \LTLf formula $\Box A$ ($A$ atomic).
 	\begin{enumerate}
 		 \setcounter{enumi}{-1}
@@ -608,7 +607,7 @@ In order to obtain a \DFA, the \NFA $\automaton_\varphi$ can be determinized in 
 			 q_0 &= \set{\Box A}		\\
 			 Q &= \set{q_0, \emptyset}  \\
 			 F &= \set{q_0, \emptyset}  \ind \tm{(because $\DfunEps{\Box A}=\true$)}\\
-			 \delta &= \emptyset
+			 \delta &= \set{(\emptyset, \set{}, \emptyset), (\emptyset, \set{A}, \emptyset)}
 		 \end{align*}
 		\item Iteration: analyze $q = \set{\Box A}$
 		\begin{itemize}
@@ -617,16 +616,17 @@ In order to obtain a \DFA, the \NFA $\automaton_\varphi$ can be determinized in 
 				q' &\models \bigwedge_{(\psi\in q)} \Dfun{\psi}\\
 				   &\models \Dfun{\Box A}\\
 				   &\models \Dfun{A} \lAND \Dfun{\Wnext \Box A}\\
-				   &\models \true \lAND (``\Box A" \lOR ``\Ended")
+				   &\models \true \lAND (``\Box A" \lOR ``\Box \false")
 			\end{align*}
-			Notice that $\true \lAND (``\Box A" \lOR ``\Ended")$ is a \emph{propositional formula} with \LTLf formulas as atoms.
-			As a minimal interpretation we have both $q' = \set{``\Box A"}$ and $q' = \set{``\Ended"}$.
+			Notice that $\true \lAND (``\Box A" \lOR ``\Box \false")$ is a \emph{propositional formula} with \LTLf formulas as atoms.
+			As a minimal interpretation we have both $q' = \set{``\Box A"}$ and $q' = \set{``\Box \false"}$.
 			Since in both cases we have that $\DfunEps{\psi}=\true$, at the end of the iteration we have:
 			\begin{align*}
 				q_0 &= \set{\Box A}		\\
-				Q &= \set{q_0, \set{\Ended}, \emptyset}  \\
-				F &= \set{q_0, \set{\Ended}, \emptyset}  \\
-				\delta &= \set{(q_0, \set{A}, q_0), (q_0, \set{A}, \set{\Ended)}}
+				Q &= \set{q_0, \set{\Box \false}, \emptyset}  \\
+				F &= \set{q_0, \set{\Box \false}, \emptyset}  \\
+				\delta &= \set{(\emptyset, \set{}, \emptyset), (\emptyset, \set{A}, \emptyset), \\
+				&\ind (q_0, \set{A}, q_0), (q_0, \set{A}, \set{\Box \false})}
 			\end{align*}
 			
 			\item with $\PropInt = \set{}$ we have 
@@ -634,18 +634,18 @@ In order to obtain a \DFA, the \NFA $\automaton_\varphi$ can be determinized in 
 			q' &\models \bigwedge_{(\psi\in q)} \Dfun{\psi}\\
 			&\models \Dfun{\Box A}\\
 			&\models \Dfun{A} \lAND \Dfun{\Wnext \Box A}\\
-			&\models \false \lAND (``\Box A" \lOR ``\Ended")
+			&\models \false \lAND (``\Box A" \lOR ``\Box \false")
 			\end{align*}
 			Which is always false. Thus we do not change nothing.
 		\end{itemize}
-		\item Iteration: we already analyze $q = \set{\Box A}$, so we analyze $q = \set{\Ended}$
+		\item Iteration: we already analyzed $q = \set{\Box A}$, so we analyze $q = \set{\Box \false}$
 		\begin{itemize}			
 			\item Both with $\PropInt = \set{}$ and $\PropInt = \set{A}$ we have that:
 			\begin{align*}
 			q' &\models \bigwedge_{(\psi\in q)} \Dfun{\psi}\\
 			&\models \Dfun{\Box false}\\
 			&\models \Dfun{false} \lAND \Dfun{\Wnext \Box false}\\
-			&\models \false \lAND (``\Box false" \lOR ``\Ended")
+			&\models \false \lAND (``\Box false" \lOR ``\Box \false")
 			\end{align*}
 			Which is always false. Thus we do not change nothing.
 		\end{itemize}
@@ -653,11 +653,135 @@ In order to obtain a \DFA, the \NFA $\automaton_\varphi$ can be determinized in 
 	
 	The \NFA $\automaton_\varphi = \tup{2^{\set{A}}, Q, q_0, \delta, F}$ is depicted in Figure \ref{fig:nfa-always-a}, whereas the associated \DFA is in Figure \ref{fig:dfa-always-a}.
 	
-	
-	\input{chapters/misc/alwaysA_NFA.tex}
-	\input{chapters/misc/alwaysA_DFA.tex}
+	\begin{figure}[h!]
+		\centering
+		\caption{The \NFA associated to $\Box A$.  $G(A)$ stands for $\Box A$}\label{fig:nfa-always-a}
+		\includegraphics[width=.4\linewidth]{images/ltlf-alwaysA-nfa}
+	\end{figure}
+	\begin{figure}[h!]
+		\centering
+		\caption{The \DFA associated to $\Box A$}\label{fig:dfa-always-a}
+		\includegraphics[width=.2\linewidth]{images/ltlf-alwaysA-dfa}
+	\end{figure}
+
 	
 \end{example}
+\begin{example}\label{ldl2nfa-example-eventually}
+	Analogously to what we did in \ref{ldl2nfa-example-always}, we see a run of the Algorithm \ref{alg:ldl2nfa}, with the \LTLf formula $\Diamond A$ ($A$ atomic).
+	\begin{enumerate}
+		\setcounter{enumi}{-1}
+		\item Set up:
+		\begin{align*}
+		q_0 &= \set{\Diamond A}		\\
+		Q &= \set{q_0, \emptyset}  \\
+		F &= \set{\emptyset}  \ind \tm{(because $\DfunEps{\Diamond A}=\false$)}\\
+		\delta &= \set{(\emptyset, \set{}, \emptyset), (\emptyset, \set{A}, \emptyset)}
+		\end{align*}
+		\item Iteration: analyze $q = \set{\Diamond A}$
+		\begin{itemize}
+			\item with $\PropInt = \set{A}$ we have 
+			\begin{align*}
+			q' &\models \bigwedge_{(\psi\in q)} \Dfun{\psi}\\
+			&\models \Dfun{\Diamond A}\\
+			&\models \Dfun{A} \lOR \Dfun{\Next \Diamond A}\\
+			&\models \true \lOR (``\Diamond A" \lAND ``\Diamond \true")
+			\end{align*}
+			Since the propositional formula is trivially true, as a minimal interpretation we have $q' = \emptyset$.
+			Considering that the empty conjunction is considered as $\true$ (as explained in Section \ref{sect:llf2automata}), at the end of the iteration we have:
+			\begin{align*}
+			q_0 &= \set{\Diamond A}		\\
+			Q &= \set{q_0, \emptyset}  \\
+			F &= \set{\emptyset}  \\
+			\delta &= \set{(\emptyset, \set{}, \emptyset), (\emptyset, \set{A}, \emptyset), (q_0, \set{A}, \emptyset)}
+			\end{align*}
+			
+			\item with $\PropInt = \set{}$ we have 
+			\begin{align*}
+			q' &\models \bigwedge_{(\psi\in q)} \Dfun{\psi}\\
+			&\models \Dfun{\Diamond A}\\
+			&\models \Dfun{A} \lOR \Dfun{\Next \Diamond A}\\
+			&\models \false \lOR (``\Diamond A" \lAND ``\Diamond \true")
+			\end{align*}
+			As a minimal interpretation we have $q' = \set{``\Diamond A" \lAND ``\Diamond \true"}$. Since $\DfunEps{\Diamond A} \lAND \DfunEps{\Diamond \true} = \false \lAND \false \neq \true$, we do not add $q'$ to the accepting states $F$. Thus we have:
+			\begin{align*}
+			q_0 &= \set{\Diamond A}		\\
+			Q &= \set{q_0, \emptyset, \set{\Diamond A \lAND \Diamond \true}}  \\
+			F &= \set{\emptyset}  \\
+			\delta &= \set{(\emptyset, \set{}, \emptyset), (\emptyset, \set{A}, \emptyset),\\
+				&\ind (q_0, \set{A}, \emptyset),\\
+				&\ind (q_0, \set{}, \set{\Diamond A \lAND \Diamond \true})}
+			\end{align*}
+		\end{itemize}
+		
+		\item Iteration: we already analyzed $q = \set{\Diamond A}$, so we analyze $q = \set{\Diamond A \lAND \Diamond \true}$
+		\begin{itemize}			
+			\item with $\PropInt = \set{}$ we have that:
+			\begin{align*}
+			q' &\models \bigwedge_{(\psi\in q)} \Dfun{\psi}\\
+			&\models \Dfun{\Diamond A} \lAND \Dfun{\Diamond \true}\\
+			&\models [\Dfun{A} \lOR \Dfun{\Next \Diamond A}] \lAND [\Dfun{\true} \lOR \Dfun{\Next \Diamond true}]\\
+			&\models [\Dfun{A} \lOR ( ``\Diamond A" \lAND ``\Diamond \true")] \lAND [\true \lOR ( ``\Diamond \true" \lAND ``\Diamond \true")]\\
+			&\models \Dfun{A} \lOR ( ``\Diamond A" \lAND ``\Diamond \true")\\
+			&\models \false \lOR ( ``\Diamond A" \lAND ``\Diamond \true")\\
+			\end{align*}
+			As in the previous iteration, the minimal model is $q' = \set{``\Diamond A" \lAND ``\Diamond \true"}$. Hence we add a new transition $(\set{\Diamond A \lAND \Diamond \true}, \set{}. \set{\Diamond A \lAND \Diamond \true})$.
+
+			\item with $\PropInt = \set{A}$ the delta-expansion is the same, except for the last step, where:
+			\[
+			q' \models \true \lOR ( ``\Diamond A" \lAND ``\Diamond \true")\
+			\]
+			The formula is always true, hence the minimal model is $q'=\emptyset$ and we add a new transition $(\set{\Diamond A \lAND \Diamond \true}, \set{}. \emptyset)$. 
+			
+		\end{itemize}
+	
+	The NFA $\automaton_\varphi$ is then composed by:
+	\begin{align*}
+	q_0 &= \set{\Diamond A}		\\
+	Q &= \set{q_0, \emptyset, \set{\Diamond A \lAND \Diamond \true}}  \\
+	F &= \set{\emptyset}  \\
+	\delta &= \set{(\emptyset, \set{}, \emptyset), (\emptyset, \set{A}, \emptyset),\\
+		&\ind (q_0, \set{A}, \emptyset),\\
+		&\ind (q_0, \set{}, \set{\Diamond A \lAND \Diamond \true})\\
+		&\ind (\set{\Diamond A \lAND \Diamond \true}, \set{}. \set{\Diamond A \lAND \Diamond \true})\\
+		&\ind (\set{\Diamond A \lAND \Diamond \true}, \set{}. \emptyset)}
+	\end{align*}
+	\end{enumerate}
+	
+	The \NFA $\automaton_\varphi = \tup{2^{\set{A}}, Q, q_0, \delta, F}$ is depicted in Figure \ref{fig:nfa-eventually-a}, whereas the associated \DFA is in Figure \ref{fig:dfa-eventually-a}.
+	
+	\begin{figure}[h!]
+		\centering
+		\caption{The \NFA associated to $\Diamond A$. $F(A)$ stands for $\Diamond A$}\label{fig:nfa-eventually-a}
+		\includegraphics[width=.4\linewidth]{images/ltlf-eventuallyA-nfa}
+	\end{figure}
+	\begin{figure}[h!]
+		\centering
+		\caption{The \DFA associated to $\Diamond A$}\label{fig:dfa-eventually-a}
+		\includegraphics[width=.3\linewidth]{images/ltlf-eventuallyA-dfa}
+	\end{figure}
+	
+\end{example}
+
+\begin{example}
+	We list other examples of $\automaton_\varphi$ given a \LLf formula $\varphi$, obtained by Algorithm \ref{alg:ldl2nfa}:
+	\begin{itemize}
+		\item \emph{Conditional Response}: the \LTLf formula $\varphi = \Box (A \Rightarrow \Diamond B)$ or equivalently the \LDLf formula $\varphi = \BOX{\true^*}(\DIAM{A}tt \Rightarrow \DIAM{\true^*}\DIAM{B}tt)$ translates into the automaton depicted in Figure \ref{conditional-response-dfa}.
+		\begin{figure}[h!]
+			\centering
+			\caption{The \DFA associated to $\varphi = \Box (A \Rightarrow \Diamond B)$}\label{conditional-response-dfa}
+			\includegraphics[width=.4\linewidth]{images/conditional-response-dfa}
+		\end{figure}
+		
+		\item \emph{Alternating sequence}: the \LDLf formula $\varphi = \DIAM{(A;B)^*}\Ended$ translates into the automaton depicted in Figure \ref{alternating-sequence-dfa}.
+		\begin{figure}[h!]
+			\centering
+			\caption{The \DFA associated to $\varphi = \DIAM{(A;B)^*}\Ended$}\label{alternating-sequence-dfa}
+			\includegraphics[width=.4\linewidth]{images/alternating-sequence-dfa}
+		\end{figure}
+		
+	\end{itemize}
+\end{example}
+
 
 \subsection{Complexity of \LLf reasoning}
 In this section we study the complexity of \LLf reasoning (i.e. complexity of problems as defined in Definition \ref{ltlf-sat-val-ent}.
