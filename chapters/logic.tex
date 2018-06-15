@@ -5,7 +5,7 @@
 In this chapter we introduce the reader to the main important framework for talk about behaviors over time, which gives the foundations for our approach.
 First we talk about the well known Linear time Temporal Logic (\LTL), Propositional Dynamic Logic (\PDL) and their main applications; then we go more in deep by presenting a specific formalism, namely \emph{Linear Temporal Logic over Finite Traces} \LTLf and \emph{Linear Dynamic Logic over Finite Traces} \LDLf. Finally, we study the translation from \LLf formulas to Deterministic Finite Automata (\DFA).
 We require the reader to be acquainted with classical logic \citep{sep-logic-classical} and automata theory \citep{Hopcroft:2000:IAT:557657}.
-\section{Linear time Temporal Logic (\LTL)}
+\section{Linear time Temporal Logic (\LTL)}\label{sect:ltl}
 \emph{Temporal Logic} \citep{sep-logic-temporal} is a category of formal languages aimed to talk about properties of a system whose truth value might change over time. This is in contrast with atemporal logics, which can only discuss about statements whose truth value is constant. 
 
 \emph{Linear time Temporal Logic} \citep{Pnueli:1977:TLP:1382431.1382534}, or \emph{Linear Temporal Logic} (\LTL) is such a logic. It is the most popular and widely used temporal logic in computer science, especially in formal verification of software/hardware systems, in AI to reasoning about actions and planning, and in the area of Business Process Specification and Verification to specify processes declaratively.
@@ -796,5 +796,8 @@ In this section we study the complexity of \LLf reasoning (i.e. complexity of pr
 		\item For \LLf logical implication $\psi \models \varphi$ we compute the \NFA associated to $\psi \wedge \lnot \varphi$ (which is an exponential step) and then check \NFA for nonemptiness (\NLOGSPACE).
 	\end{itemize}
 \end{proof}
+
+%TODO ON-THE-FLY
+
 \section{Conclusions}
 In this chapter we provided the logical tools to face other topics in later chapters. We introduced several formal languages that allowed us to introduce \LTLf and \LDLf, focusing on their interesting properties. Moreover, we described in detail the procedure for translation from \LLf formulas to \DFAs, which yields an effective way to reasoning about \LLf formulas.

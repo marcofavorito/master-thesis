@@ -5,7 +5,7 @@
 Reinforcement Learning \citep{Sutton:1998:IRL:551283} is a sort of optimization problem where an \emph{agent} interacts with an \emph{environment} and obtains a \emph{reward} for each action he chooses and the new observed state. The task is to maximize a numerical reward signal obtained after each action during the interaction with the environment. The agent does not know a priori how the environment works (i.e. the effects of his actions), but he can make observations in order to know the new state and the reward. Hence, learning is made in a \emph{trial-and-error} fashion. Moreover, it is worth to notice that in many situation reward might not been affected only from the last action but from an indefinite number of previous action. In other words, the reward can be \emph{delayed}, i.e. the agent should be able to foresee the effect of his actions in terms of future expected reward. 
 
 In the next subsections we introduce some of the classical mathematical frameworks for RL: Markov Decision Process (MDP) and Non-Markovian Reward Decision Process (NMRDP).
-\subsection{Markov Decision Process}
+\section{Markov Decision Process (MDP)}
 \label{MDP}
 
 A Markov Decision Process (MDP) $\MDP$ is a tuple $\tup{\States, \Actions, \TrFun, \Reward, \DiscFact}$ containing a set of \emph{states} $\States$, a set of \emph{actions} $\Actions$, a \emph{transition function} $\TrFun: \States \times \Actions \to Prob(\States)$ that returns for every pair state-action a probability distribution over the states, a \emph{reward function} $\Reward: \States \times \Actions \times \States \to \Reals$ that returns the reward received by the agent when he performs action $a$ in $s$ and transitions in $s'$, and a \emph{discount factor} $\DiscFact$, with $0 \le \DiscFact \le 1$, that indicates the present value of future rewards.
@@ -18,20 +18,20 @@ is defined as:
 
 The \emph{value function} of a state $s$, the \emph{state-value function} $\ValFun_\Policy(s)$ is defined as the expected return when starting in $s$ and following policy $\Policy$, i.e.:
 \begin{equation}
-\label{state-value-fun}
+\label{def:state-value-fun}
 \ValFun_\Policy(s) \defeq \mathbb{E}_{\Policy}[\ExpRet_t | \States_t = s], \forall s \in \States
 \end{equation}
 
 Similarly, we define $\qFun_\Policy$, the \emph{action-value function for policy $\Policy$}, as:
 \begin{equation}
-\label{action-value-fun}
+\label{def:action-value-fun}
 \qFun_\Policy(s, a) \defeq \mathbb{E}_{\Policy}[\ExpRet_t | \States_t = s, \Actions_t = a], , \forall s \in \States, \forall a \in \Actions
 \end{equation}
 
-Notice that we can rewrite \ref{state-value-fun} and \ref{action-value-fun} recursively, yielding the \emph{Bellman equations}:
+Notice that we can rewrite \ref{def:state-value-fun} and \ref{def:action-value-fun} recursively, yielding the \emph{Bellman equation}:
 
 \begin{equation}
-\label{bellman-state-value-fun}
+\label{def:bellman-state-value-fun}
 \ValFun_\Policy(s) =  \sum_{s'} P(s' | s,a)[\Reward(s,a,s') + \DiscFact \ValFun(s')] 
 \end{equation}
 
@@ -61,44 +61,216 @@ Notice that with \ref{optimal-state-value-fun} and \ref{optimal-action-value-fun
 We can define a partial order over policies using value functions, i.e. $\forall s\in \States. \Policy \ge \Policy' \iff \ValFun_\Policy(s) \ge \ValFun_{\Policy'}(s)$. An \emph{optimal policy} $\OptPolicy$ is a policy such that $\OptPolicy \ge \Policy$ for all $\Policy$. 
 
 
-\subsection{Temporal Difference Learning}
+\section{Temporal Difference Learning}
+\label{sect:temporal-difference-learning}
+\emph{Temporal difference learning} (TD) \citep{Sutton1988} refers to a class of model-free reinforcement learning methods which learn by bootstrapping from the current estimate of the value function. These methods sample from the environment, like Monte Carlo (MC) methods, and perform updates based on current estimates, like dynamic programming methods (DP) \citep{Bellman:1957}. We do not discuss MC and DP methods here.
 
-\emph{Temporal difference learning} (TD) refers to a class of model-free reinforcement learning methods which learn by bootstrapping from the current estimate of the value function. These methods sample from the environment, like Monte Carlo (MC) methods, and perform updates based on current estimates, like dynamic programming methods (DP). We do not discuss MC and DP methods here.
-
-Q-Learning and Sarsa are such a methods. They updates $\qFunEst(s, a)$, i.e. the estimation of $\qOptFun(s, a)$ at each transition $(s, a) \to (s', r)$. Q-Learning uses the following update rule:
+Q-Learning \citep{watkins1989learning, Watkins1992} and SARSA are such a methods. They update $\qFunEst(s, a)$, i.e. the estimation of $\qOptFun(s, a)$ at each transition $(s, a) \to (s', r)$. The update rule is the following:
+\begin{equation}\label{td-update-rule}
+\qFunEst(s, a) \leftarrow \qFunEst(s, a) + \LRate \delta
+\end{equation}
+where $\delta$ is the \emph{temporal difference}. In SARSA, it is defined as:
 \begin{equation}
-\qFunEst(s, a) \leftarrow \qFunEst(s, a) + \LRate [r + \DiscFact \max_{a'} \qFunEst(s', a') - \qFunEst(s, a)]
+\delta = r + \DiscFact \qFunEst(s', a') - \qFunEst(s, a)
+\end{equation}
+whereas in Q-Learning:
+\begin{equation}
+\delta = r + \DiscFact \max_{a'} \qFunEst(s', a') - \qFunEst(s, a)
 \end{equation}
 
-while Sarsa:
-\begin{equation}
-\qFunEst(s, a) \leftarrow \qFunEst(s, a) + \LRate [r + \DiscFact \qFunEst(s', a') - \qFunEst(s, a)]
+TD$(\lambda)$ is an algorithm which uses \emph{eligibility traces}. The parameter $\lambda$ refers to the use of an eligibility trace. The algorithm generalizes MC methods and TD learning, obtained respectively by setting $\lambda = 1$ and $\lambda = 0$. Intermediate values of $\lambda$ yield methods that are often better of the extreme methods. 
+Q-Learning and SARSA that has been shown before can be rephrased with this new formalism as Q-Learning(0) and SARSA(0), special cases of Watkin's Q$(\lambda)$ and SARSA($\lambda$) respectively.
+In this setting, Equation \ref{td-update-rule} is modified as follows:
+\begin{equation}\label{td-lambda-update-rule}
+\qFunEst(s, a) \leftarrow \qFunEst(s, a) + \LRate \delta e(s, a)
 \end{equation}
 
-TD$(\lambda)$ is an algorithm which uses \emph{eligibility traces}. The parameter $\lambda$ refers to the use of an eligibility trace. The algorithm generalizes MC methods and TD learning, obtained respectively by setting $\lambda = 1$ and $\lambda = 0$. Intermediate values of $\lambda$ yield methods that are often better of the extreme methods. Q-Learning and Sarsa that has been shown before can be rephrased with this new formalism as Q-Learning(0) and Sarsa(0), special cases of Watkin's Q$(\lambda)$ and Sarsa($\lambda$) respectively.
+Where $e(s, a) \in [0, 1]$, the \emph{eligibility of the pair $(s, a)$}, determines how much the temporal difference $\delta$ should be weighted.
+SARSA($\lambda$) is reported in Algorithm \ref{alg:sarsa-lambda}, whereas Watkin's Q($\lambda$) in Algorithm \ref{alg:q-learning-lambda}, both  in the variants using \emph{replacing eligibility traces} (see line \ref{sarsa-lambda-replacing-traces} and line \ref{q-learning-lambda-replacing-traces}, respectively).
+\begin{algorithm}
+	\caption{SARSA($\lambda$) \citep{Singh:1996:RLR:225667.225679}}
+	\label{alg:sarsa-lambda}
+	\begin{algorithmic}[1]
+		\State Initialize $Q(s, a)$ arbitrarily and $e(s, a)=0$ for all $s, a$
+		
+		\Repeat \{for each episode\} 
+			\State initialize $s$
+			\State Choose $a$ from $s$ using policy derived from $Q$ (e.g. $e$-greedy)
+			\Repeat \{for each step of episode\}
+				\State Take action $a$, observe reward $r$ and new state $s'$
+				\State Choose $a'$ from $s'$ using policy derived from $Q$
+				\State $\delta \gets r + \gamma Q(s', a') - Q(s, a)$
+				\State $e(s, a) \gets 1$ \Comment{replacing traces} \label{sarsa-lambda-replacing-traces}
+				\For{$\mathbf{all}\ s, a$}
+					\State $Q(s, a) \gets Q(s, a) + \alpha\delta e(s, a)$
+					\State $e(s, a) \gets \DiscFact\lambda e(s, a)$
+				\EndFor
+				\State $s\gets s'$, $a \gets a'$
+			\Until state $s$ is terminal
+		\Until
+	\end{algorithmic}
+	
+\end{algorithm}
+\begin{algorithm}
+	\caption{Watkin's Q($\lambda$) \citep{watkins1989learning}}
+	\label{alg:q-learning-lambda}
+	\begin{algorithmic}[1]
+		\State Initialize $Q(s, a)$ arbitrarily and $e(s, a)=0$ for all $s, a$
+		\Repeat \{for each episode\} 
+			\State initialize $s$
+			\State Choose $a$ from $s$ using  policy derived from $Q$ (e.g. $e$-greedy)
+			\Repeat \{for each step of episode\}	
+				\State Take action $a$, observe reward $r$ and new state $s'$
+				\State Choose $a'$ from $s'$ using policy derived from $Q$ (e.g. $e$-greedy)
+				\State $a^* \gets \arg\max_a Q(s', a)$ (if $a'$ ties for max, then $a^* \gets a'$)
+				
+				\State $\delta \gets r + \gamma Q(s', a^*) - Q(s, a)$
+				\State $e(s, a) \gets 1$ \Comment{replacing traces}\label{q-learning-lambda-replacing-traces}
+				\For{$\mathbf{all}\ s, a$}
+					\State $Q(s, a) \gets Q(s, a) + \alpha\delta e(s, a)$
+					\If{$a' = a^*$}
+						\State $e(s, a) \gets \DiscFact\lambda e(s, a)$
+					\Else 
+						\State $e(s, a) \gets 0$
+					\EndIf
+					
+					\State $e(s, a) \gets \DiscFact\lambda e(s, a)$
+				\EndFor
+				\State $s\gets s'$, $a \gets a'$
+			\Until state $s$ is terminal
+		\Until
+	\end{algorithmic}
+	
+\end{algorithm}
 
-\section{\LTLf and \LDLf}
-In this section we introduce \LTLf and \LDLf, two formalisms that we will use for define the reward function of a RL task over \emph{sequence of transitions} rather than one transition.
+\section{Non-Markovian Reward Decision Process (NMRDP)}\label{sect:NMRDP}
+For some goals, it might be the case that the Markovian assumption of the reward function $\Reward$ -- that reward depends only on the current state, and not on history -- does not hold. Indeed, for many problems, it is not effective that the reward is limited to depend only on a single transition $(s,a,s')$; instead, it might be extended to depend on \emph{trajectories} (i.e. $\tup{s_0, a_0, s_1, a_1, s_2, \dots, s_n, a_n}$), e.g. when we want to reward the agent for some (temporally  extended) behaviors, opposed to simply reaching certain states. 
+
+This idea of rewarding behaviors has been proposed by \citep{bacchus1996rewarding} where they defined a new mathematical model, namely Non-Markovian Reward Decision Process (NMRDP), and showed how to construct optimal policies in this case.
+
+In the next subsections, we give the main definitions to reason in this new setting. Then we show the solution proposed in \citep{bacchus1996rewarding}.
+
+\subsection{Preliminaries}
+Now follows the definition of NMRDP, which is similiar to the MDP definition given in Section \ref{MDP}.
+
+\begin{definition}\label{def:nmrdp}
+	A Non-Markovian Reward Decision Process (NMRDP) \citep{bacchus1996rewarding} $\NMRDP$ is a tuple $\tup{\States, \Actions, \TrFun, \NMReward, \DiscFact}$ where $\States, \Actions, \TrFun$ and $\DiscFact$ are defined as in the MDP, and $\NMReward : (\States \times \Actions)^* \to \Reals$ is the \emph{non-Markovian reward function}, i.e. is defined over trajectories $\tup{s_0, a_0, \dots, s_n, a_n}$.
+	
+\end{definition}
 
 
-\section{RL for NMRDP with \LTLf/\LDLf rewards}
-In this section we introduce the formalism of Non-Markovian Reward Decision Process \citep{BacchusBG96} 
-\subsection{Non-Markovian Reward Decision Process}
-\label{NMRDP}
-A Non-Markovian Reward Decision Process (NMRDP) $\NMRDP$ is a tuple $\tup{\States, \Actions, \TrFun, \NMReward, \DiscFact}$ where everything is defined as in the MDP but the reward function is defined as $\NMReward : (\States \times \Actions)^* \to \Reals$, i.e. is defined over sequences of states and actions. 	Given a trace $\pi = \tup{s_0, a_0, s_1, a_1, \dots, s_n, a_n}$, the \emph{value of $\pi$} is:
-$$
-v(\pi) = \sum_{i=1}^{|\pi|} \DiscFact^{i-1}\NMReward(\tup{\pi(1), \pi(2), \dots, \pi(i)})
-$$
-where $\pi(i) = (s_i, a_i)$.
+Given a trace $\pi = \tup{s_0, a_0, s_1, a_1, \dots, s_n, a_n}$, the \emph{value of $\trace$} is:
+\begin{equation}
+v(\pi) = \sum_{i=1}^{|\trace|} \DiscFact^{i-1}\NMReward(\tup{\pi(1), \pi(2), \dots, \pi(i)})
+\end{equation}
+where $\trace(i) = (s_i, a_i)$.
 
-The policy $\NMPolicy$ in this setting is defined over sequences of states, i.e. $\NMPolicy: \States^* \to \Actions$. 
+The policy $\NMPolicy$ in this setting is defined over sequences of states and actions, i.e. $\NMPolicy: \States^* \to \Actions$. The \emph{value of $\NMPolicy$} given an initial state $s_0$ is defined as:
 
-The \emph{value of $\NMPolicy$} given an initial state $s_0$ is defined as:
+\begin{equation}
+\ValFun^{\NMPolicy}(s) = \mathbb{E}_{\pi \sim \NMRDP, \NMPolicy, s_0}[v(\pi)]
+\end{equation}
 
-$$
-\ValFun^{\NMPolicy}(s) = \mathbb{E}_{\pi \sim \MDP, \NMPolicy, s_0}[v(\pi)]
-$$
-i.e. the expected value in state $s$ considering the distribution of traces defined by the transition function of $\MDP$, the policy $\NMPolicy$ and the initial state $s_0$.
+i.e. the expected value in state $s$ considering the distribution of traces defined by the transition function of $\NMRDP$, the policy $\NMPolicy$ and the initial state $s_0$.
+
+We are interested in two problems, that we will study in the next sections:
+\begin{itemize}
+	\item Find an optimal (non-Markovian) policy $\NMPolicy$ for an NMRDP $\NMRDP$ (Definition \ref{def:nmrdp});
+	\item Define the non-Markovian reward function for the domain of interest.
+\end{itemize}
+
+\subsection{Find an optimal policy $\NMPolicy$ for NMRDPs}
+The  key  difficulty  with  non-Markovian  rewards  is  that
+standard optimization techniques, most based on Bellman's \citep{Bellman:1957} 
+dynamic  programming  principle,  cannot  be  used. Indeed, this requires one 
+to resort to optimization over a policy space that maps histories
+(rather than states)  into actions, a process that would incur great 
+computational expense. \citep{bacchus1996rewarding} give the definition of 
+a decision  problem \emph{equivalent} to an NMRDP  in  which  the  rewards  are
+Markovian. This construction is the key element to solve our problem,
+i.e. find an optimal policy for an NMRDP.
+
+
+\subsubsection{Equivalent MDP}
+Now we give the definition of \emph{equivalent} MDP of an NMRDP, and state an important result. 
+
+\begin{definition}[\cite{bacchus1996rewarding}]
+	\label{nmrdp-mdp-equivalence}
+	An NMRDP $\NMRDP = \tup{\States, \Actions, \TrFun, \NMReward, \DiscFact}$ is \emph{equivalent} to an extended
+	MDP $\MDP = \tup{\States', \Actions, \TrFun', \Reward', \DiscFact}$ if there exist two functions 
+	$\tau: \States' \to \States$ and $\sigma: \States\to \States'$ such that
+	\begin{enumerate}
+		\item $\forall s \in \States: \tau (\sigma(s)) = s$; \label{nmrdp-mdp-equivalence-cond1}
+		\item $\forall s_1, s_2 \in \States$ and $s_1' \in \States'$: if $\TrFun(s 1 , a, s 2 ) > 0$ and $\tau (s'_1) =
+		s_1$, there exists a unique $s'_2 \in \States'$ such that $\tau (s'_2 ) = s_2$ and
+		$\TrFun'(s'_1 , a, s'_2 ) = \TrFun(s_1, a, s_2 )$;
+		\label{nmrdp-mdp-equivalence-cond2}
+		\item For any feasible trajectory $\tup{s_0, a_0, \dots, s_{n-1}, a_n}$ of $\NMRDP$
+		and $\tup{s'_0, a_0, \dots, s'_{n}, a_n}$ of $\MDP$, such that $\tau(s'_i) = s_i$
+		and $\sigma(s_0) = s'_0$, we have $R(\tup{s_0, a_0, \dots, s_{n}, a_n}) =
+		R'(\tup{s'_0, a_0, \dots, s'_{n}, a_n})$.
+		\label{nmrdp-mdp-equivalence-cond3}	
+	\end{enumerate}
+\end{definition}
+
+Given the Definition \ref{nmrdp-mdp-equivalence}, we give the definition of corresponding policiy:
+\begin{definition}[\cite{bacchus1996rewarding}]\label{nmrdp-mdp-policy-equivalence}
+	Let $\NMRDP$ be an NMRDP and let $\MDP$ be the equivalent MDP as defined in Definition \ref{nmrdp-mdp-equivalence}.
+	Let $\Policy$ be  a  policy  for $\MDP$. The 
+	corresponding policy for $\NMRDP$ is  defined  as 
+	$\NMPolicy(\tup{s_0, \dots, s_n}) = \Policy(s'_n) $,   where for the sequence $\tup{s'_0, \dots, s'_n}$ we have $\tau(s'_i) = s_i\ \forall i$ and $\sigma(s_0)=s'_0$
+\end{definition}
+From definitions \ref{nmrdp-mdp-equivalence} and 
+\ref{nmrdp-mdp-policy-equivalence}, and since that for all 
+policy $\Policy$ of $\MDP$ the corresponding policy 
+$\NMPolicy$ of $\NMRDP$ is such that $ \forall s. \ValFun_\Policy(s) = \ValFun_{\NMPolicy}(\sigma(s))$, the following theorem holds:
+\begin{theorem}[\cite{bacchus1996rewarding}]\label{nmrdp-mdp-equivalence-policy-optimality}
+	Let $\Policy$ be an  optimal policy for MDP $\MDP$. Then the corresponding policy is optimal for NMRDP $\NMRDP$.
+\end{theorem}
+
+The Theorem \ref{nmrdp-mdp-equivalence-policy-optimality} allow us to learn an optimal policy $\NMPolicy$ for NMRDP by learning a policy $\Policy$ over an equivalent MDP, which can be done by resorting on  any off-the-shelf algorithm (e.g. see Section \ref{sect:temporal-difference-learning}). Moreover, obtaining the corresponding policy for the original NMRDP is straightforward, although in practice is not needed, since it is enough to run the policy $\Policy$ over the MDP.
+
+In other words, the problem of finding an optimal policy for an NMRDP reduces to find an optimal policy for an equivalent MDP such that Condition 1, 2 and 3 of Definition \ref{nmrdp-mdp-equivalence} hold.
+
+
+\subsection{Define the non-Markovian reward function $\NMReward$}
+To  reward  agents  for  (temporally  extended)
+behaviors, as opposed to simply reaching certain states, we need a way
+to specify rewards for specific trajectories through the state
+space. 
+Specifying a non-Markovian reward function explicitly is quite hard and unintuitive, impossible if we are in a infinite-horizon setting. 
+Instead, we can define \emph{properties} over trajectories and reward only the ones which satisfy some of them, in contrast to enumerate all the possible trajectories.
+
+Temporal logics presented in Section \ref{sect:ltl} gives an effective way to do this. 
+Indeed, in order to speak about a desired behavior,  i.e. fulfillment of properties that might change over time, we can define a \emph{formula} $\varphi$ (or more formulas) in some suited temporal logic formalism semantically defined over trajectories $\trace$, speaking about a set of properties $\Prop$ such that each state $s\in S$ is associated to a set of propositions ($S\subseteq 2^\Prop$). 
+In this way, a trajectory $\trace = \tup{s_0, a_0, \dots, s_n, a_n}$ is rewarded with $r_i$ iff $\trace \models \varphi_i$, where $r_i$ is the reward value associated to the fulfillment of behaviors signified by $\varphi_i$.
+
+In \citep{bacchus1996rewarding} the temporal logic formalism is \emph{Past Linear Temporal Logic} (\PLTL), which is a past version of \LTL (Section \ref{sect:ltl}).
+As explained before, using the declarativeness of \PLTL, is possible to specify the desired behavior (expressed in terms of the properties $\Prop$) that should be satisfied by the experienced trajectories and reward only them, hence obtaining a non-Markovian reward function. More formally, given a finite set $\Phi$ of \PLTL \emph{reward formulas}, and for each $\phi_i \in \Phi$ a real-valued reward $r_i$, the \emph{temporally extended reward function} $\bar{R}$ is defined as:
+\begin{equation}\label{pltl-temp-extended-reward-fun}
+\NMReward(\tup{s_0, a_0, s_1, a_1\dots, s_n, a_n}) = \sum_{\phi_i \in \Phi : \tup{s_0, s_1, \dots, s_n}\models \phi_i} r_i
+\end{equation}
+
+
+In order to run the actual learning task, \citep{bacchus1996rewarding} proposed a transformation from the NMRDP to an equivalent MDP with the state space \emph{expaneded} which allows to label each state $s\in \States$. The idea is that the labels should 
+keep track in some way the (partial) satisfaction of the temporal formulas $\phi_i \in \Phi$. 
+A state $s$ in the transformed state space is replicated multiple times, marking the difference between different (relevant) histories terminating in state $s$.
+In this way, we obtain a compact representation of the required history-dependent policy
+by considering only relevant history, and can produce this
+policy using computationally-effective MDP algorithms.
+
+\section{NMRDP with \LTLf/\LDLf rewards}
+In this section we explain how to specify non-Markovian rewards with \LTLf/\LDLf  formulas (instead of \PLTL) and how the associated MDP expansion works \citep{Brafman2017SpecifyingNR}, analogously to what we saw with \PLTL (Section \ref{sect:NMRDP}).
+
+The temporally extended reward function $\bar{R}$ is similar to Equation \ref{pltl-temp-extended-reward-fun}, but instead of using \PLTL formula we use \LLf formulas. Formally, given a set of pairs $\set{(\varphi_i, r_i)^m_{i=1}}$ (where $\varphi_i$ denotes the \LLf formula for specifying a desired behavior, and $r_i$ denotes the reward associated to the satisfaction of $\varphi_i$, and given a (partial) trace $\trace = \tup{s_0, a_0, \dots, s_n, a_n}$, we define $\bar{R}$ as:
+\begin{equation}
+\NMReward(\trace) = \sum_{1\le i\le m: \trace \models \varphi_i} r_i
+\end{equation}
+For the sake of clarity, in the following we use $\set{(\varphi_i, r_i)^m_{i=1}}$ to denote $\bar{R}$.
+
+
+
+
 
 
 \section{RL for \LTLf/\LDLf Goals}

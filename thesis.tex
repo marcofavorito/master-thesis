@@ -38,6 +38,15 @@
 \usepackage{mathtools}
 \usepackage{amssymb, amsmath, amsthm}
 \usepackage{xspace, float, graphicx, pstricks}
+
+\usepackage{caption}% http://ctan.org/pkg/caption
+\captionsetup[ruled]{labelsep=period}
+\makeatletter
+\@addtoreset{algorithm}{chapter}% algorithm counter resets every chapter
+\makeatother
+\renewcommand{\thealgorithm}{\thechapter.\arabic{algorithm}}% Algorithm # is <chapter>.<algorithm>
+
+
 \usepackage{subcaption}
 %\usepackage[autostyle]{csquotes}  
 \usepackage{graphicx}
