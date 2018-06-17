@@ -2,14 +2,22 @@
 
 \section{Reinforcement Learning}
 \label{RL}
-Reinforcement Learning \citep{Sutton:1998:IRL:551283} is a sort of optimization problem where an \emph{agent} interacts with an \emph{environment} and obtains a \emph{reward} for each action he chooses and the new observed state. The task is to maximize a numerical reward signal obtained after each action during the interaction with the environment. The agent does not know a priori how the environment works (i.e. the effects of his actions), but he can make observations in order to know the new state and the reward. Hence, learning is made in a \emph{trial-and-error} fashion. Moreover, it is worth to notice that in many situation reward might not been affected only from the last action but from an indefinite number of previous action. In other words, the reward can be \emph{delayed}, i.e. the agent should be able to foresee the effect of his actions in terms of future expected reward. 
+Reinforcement Learning \citep{Sutton:1998:IRL:551283} is a sort of optimization problem where an \emph{agent} interacts with an \emph{environment} and obtains a \emph{reward} for each action he chooses and the new observed state. The task is to maximize a numerical reward signal obtained after each action during the interaction with the environment. The agent does not know a priori how the environment works (i.e. the effects of his actions), but he can make observations in order to know the new state and the reward. Hence, learning is made in a \emph{trial-and-error} fashion. Moreover, it is worth to notice that in many situation reward might not been affected only from the last action but from an indefinite number of previous action. In other words, the reward can be \emph{delayed}, i.e. the agent should be able to foresee the effect of his actions in terms of future expected reward. Figure \ref{fig:agent-environment} represent the interaction between the agent and the environment in this setting.
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=.8\linewidth]{images/agent-environment}
+	\caption{The agent and its interaction with the environment in Reinforcement Learning}\label{fig:agent-environment}
+\end{figure}
 
 In the next subsections we introduce some of the classical mathematical frameworks for RL: Markov Decision Process (MDP) and Non-Markovian Reward Decision Process (NMRDP).
 \section{Markov Decision Process (MDP)}
 \label{MDP}
 
-A Markov Decision Process (MDP) $\MDP$ is a tuple $\tup{\States, \Actions, \TrFun, \Reward, \DiscFact}$ containing a set of \emph{states} $\States$, a set of \emph{actions} $\Actions$, a \emph{transition function} $\TrFun: \States \times \Actions \to Prob(\States)$ that returns for every pair state-action a probability distribution over the states, a \emph{reward function} $\Reward: \States \times \Actions \times \States \to \Reals$ that returns the reward received by the agent when he performs action $a$ in $s$ and transitions in $s'$, and a \emph{discount factor} $\DiscFact$, with $0 \le \DiscFact \le 1$, that indicates the present value of future rewards.
+A Markov Decision Process (MDP) $\MDP$ is a tuple $\tup{\States, \Actions, \TrFun, \Reward, \DiscFact}$ containing a set of \emph{states} $\States$, a set of \emph{actions} $\Actions$, a \emph{transition function} $\TrFun: \States \times \Actions \to Prob(\States)$ that returns for every pair state-action a probability distribution over the states, a \emph{reward function} $\Reward: \States \times \Actions \times \States \to \Reals$ that returns the reward received by the agent when he performs action $a$ in $s$ and transitions in $s'$, and a \emph{discount factor} $\DiscFact$, with $0 \le \DiscFact \le 1$, that indicates the present value of future rewards. With $\TrFun(s, a, s')$ we denote the probability to end in state $s'$ given the action $a$ from $s$.
 
+The discount factor $\DiscFact$ deserves some attention. Its value highly influences the MDP, its solution, and how the agent interprets rewards. Indeed, if $\DiscFact = 0$, we are in the pure \emph{greedy} setting, i.e. the agent is shortsighted and look only at the reward that it might obtain in the next step, by doing a single action. The higher $\DiscFact$, the longer the sight horizon, or the foresight, of the agent: the far rewards are taken into account for the  current action choice. If $\DiscFact < 1$ we are in the \emph{finite horizon} setting: namely, the agent is intrinsically motivated to obtain rewards as fast as possible, depending on how $\DiscFact$ is far from $1$. When $\DiscFact = 1$ we are in the \emph{infinite horizon} setting, which means that the agent considers far rewards as they can be obtained in the next step. In other words, we may think the agent as \emph{immortal}, since the time the agent spend to reach rewards does not matter anymore.
+
+\medskip
 A \emph{policy} $\Policy: \States \to \Actions$ for an MDP $\MDP$ is a mapping from states to actions, and represents a solution for $\MDP$. Given a sequence of rewards $\Reward_{t+1}, \Reward_{t+2}, \dots, \Reward_{T}$, the \emph{expected return} $\ExpRet_t$ at time step $t$
 is defined as: 
 \begin{equation}
@@ -58,8 +66,42 @@ Notice that with \ref{optimal-state-value-fun} and \ref{optimal-action-value-fun
 \end{equation}
 
 
-We can define a partial order over policies using value functions, i.e. $\forall s\in \States. \Policy \ge \Policy' \iff \ValFun_\Policy(s) \ge \ValFun_{\Policy'}(s)$. An \emph{optimal policy} $\OptPolicy$ is a policy such that $\OptPolicy \ge \Policy$ for all $\Policy$. 
+We can define a partial order over policies using value functions, i.e. $\forall s\in \States. \Policy \ge \Policy' \iff \ValFun_\Policy(s) \ge \ValFun_{\Policy'}(s)$. 
+Now we give the definition of optimal policy:
+\begin{definition}\label{def:optimal-policy}
+	An \emph{optimal policy} $\OptPolicy$ is a policy such that $\OptPolicy \ge \Policy$ for all $\Policy$. 
+\end{definition}
 
+Given an MDP $\MDP$, a typical reinforcement learning problem is the following: find an optimal policy for $\MDP$, without knowing $\TrFun$ and $\Reward$. Notice that instead of explicit specification of the transition probabilities and rewards, the transition probabilities are accessed through a simulator that is restarted many times from a fixed or uniformly random initial state $s_0\in\States$. We call this way of structuring the learning process \emph{episodic reinforcement learning}. Usually, in episodic reinforcement learning, we require the presence of one or more \emph{goal states} where the simulation of the MDP ends and the task is considered completed, or a maximum time limit $T$ for the number of action that can be taken by the agent in one single episode, and the overcoming of $T$ determines the end of the episode. Optionally, \emph{failure states} can be also defined, where the episode end similarly to goal states, but the task is considered failed.
+
+\subsubsection{Examples}
+Many dynamic systems can be modeled as Markov Decision Processes. 
+
+\begin{example}[\textbf{Gridworld}] Perhaps the most simple MDP used as a toy example is \emph{Gridworld}, depicted in Figure \ref{fig:gridworld}.
+There are $3\times 4$ cells, i.e. states of the MDP $\States = \set{s_{11}, s_{12}, \dots, s_{34}}\setminus \set{s_{22}}$. The agent can do four actions: $A = \set{Right, Left, Up, Down}$. The initial state is fixed and is $s_0 = s_{11}$ and the agent can move in any of the adjacent and free cells from the current state. Assuming an episodic task, the goal is to reach $s_{34}$, and $s_{24}$ represent a failure state. The state transition function $\TrFun$ can be \emph{deterministic}, i.e. the agent always succeed in performing actions, or non-deterministic, i.e. the effect of an action is determined by the probabilistic distribution returned by $\TrFun(s, a)$. An example of non-deterministic $\TrFun$ is to give $90\%$ of success (the agent moves in the chosen direction) and $10\%$ of fail (the agent moves at either the right or left angle to the intended direction). If the move would make the agent walk into a wall (borders of the grid and $s_{22}$), the agent stays in the same place as before. The reward function $R(s,a,s')$ is defined as $-1$ if $s'=s_{24}$, as $1$ if $s'=s_{34}$, and $-0.01$ otherwise. The small negative reward given at each transition is a popular mean for reward function design: it is called \emph{step reward} and its purpose is to encourage the agent to finish the episode as fast as possible, with a priority proportional to the absolute value of the reward. The discount factor $\DiscFact$ should be strictly higher than 0 because more than one step is needed to reach the goal state.
+	
+\begin{figure}[h]
+	\centering
+	\caption{The Gridworld environment}\label{fig:gridworld}
+	\includegraphics[width=.4\linewidth]{images/gridworld}
+\end{figure}
+
+An example of optimal policy is shown in Figure \ref{gridworld-optimal-policy}. As the reader can notice, the arrows represent the action that should be taken in a certain cell, in order to maximize the expected return. We observe that the optimal action in $s_{13}$, according to the policy, is not the one to take the shortest path to the goal, i.e. the $Up$ action. This is because there is a small probability to ends in $s_{24}$, the failure state, and be punished with a high negative reward. In terms of expected reward, it is better to take the longer path, at the price of collect small negative rewards, but avoiding the risk to fail miserably.
+\begin{figure}
+	\centering
+	\includegraphics[width=.4\linewidth]{images/gridworld-optimal-policy}
+	\caption{An example of optimal policy for the Gridworld environment}\label{gridworld-optimal-policy}. 
+\end{figure}
+
+\end{example}
+
+\begin{example}[\textbf{Breakout}]
+	\begin{figure}
+		\centering
+		\includegraphics[width=.6\linewidth]{images/breakout.jpg}
+		\caption{A screenshot from the videogame \Breakout}\label{breakout}. 
+	\end{figure}
+\end{example}
 
 \section{Temporal Difference Learning}
 \label{sect:temporal-difference-learning}
@@ -379,99 +421,131 @@ the states of $\MDP$.
 In this section we define a particular problem and propose a solution, which is the main theoretical contribution of this work. We call this problem \emph{Reinforcement Learning for \LLf Goals}. 
 
 \subsection{Problem definition}
+
+\subsubsection{the World, the Agent and the Fluents}
 Let $\W$ be a \emph{world} of interest (e.g. a room, an environment, a videogame). Let $W$ be the set of \emph{world states}, i.e. the states of the world $\W$. 
 A \emph{feature} is a function $f_j$ that maps a world state to the
 values of another domain $D_j$, such as reals, finite enumerations,
 booleans, etc., i.e., $f_j : W \rightarrow D_j$.
 %%
-Given a sequence of features $\tup{f_1, \dots, f_d}$, the \emph{feature vector} of a world state $w_h$ is the vector
+Given a set of features $F = \tup{f_1, \dots, f_d}$, the \emph{feature vector} of a world state $w_h$ is the vector
 $\mathbf{f}(w_h) = \langle f_1(w_h), \ldots, f_d(w_h) \rangle$ of
 feature values corresponding to $w_h$.
 %%
 
-Now consider an agent that lives in $\W$. The agent can interact with $\W$ by executing an action $a$ taken from a \emph{set of actions} $\Actions$.
-Moreover, the agent has its own set of features $F_{ag} = \tup{f_1, \dots, f_d}$, which yields its \emph{representation of the world} $\States$, where $\States \subseteq F_{ag}(W)$ and $F_{ag}(W) = \set{\mathbf{f}(w) | w \in W}$. Finally, consider 
+Now consider an agent that lives in $\W$. The agent can interact with $\W$ by executing an action $a$ taken from a \emph{set of actions} $\Actions$. Without loss of generality, we assume that such learning agent has a special action $\Stop$ which deems the end of an episode.
+Moreover, the agent has its own set of features $F_{ag} = \tup{f_1, \dots, f_d}$, which yields its \emph{representation of the world} $\States$, where $\States \subseteq F_{ag}(W)$ and $F_{ag}(W) = \set{\mathbf{f}_{ag}(w) | w \in W}$. Finally, assume that the agent has a \emph{clock} which determines the granularity of its acting. At every clock, the agent can do action $a$ and observe the new state $s$ from the new world state $w'$, namely $s = \mathbf{f}_{ag}(w)$.
+
+We consider arbitrary \LLf formulas $\varphi_i$
+($i=1,\ldots,m$) over a set of fluents $\F$ used for provide a high-level description of the world. We denote by $\L=2^\F$ the set of possible fluents configurations. 
+Given a set of feature $F_{goal}$, a \emph{configuration of fluents} $\ell_h \in \L$ is formed by the components that assign truth values to the fluents according to
+the feature vector $\mathbf{f}_{goal}(w_h)$. At every step, the features for fluents evaluations are observed, obtaining a particular configuration $\ell\in\L$. Notice that in general the features for the fluents and for the agent state space may differ. The formula $\varphi_i$ is
+selecting sequences of fluents configurations $\ell_1,\cdots,\ell_n$,
+with $\ell_k\in \L$, whose relationship with the sequences of states
+$s_1,\ldots, s_n$, with $s_k \in S$ is unknown.
+
+ In other words, a subset of features are used to describe agent states $s_h$ and another  subset (for simplicity, assumed disjoint from the previous one) are used to evaluate the fluents in $\ell_h$.
+ %%
+ Hence, given a sequence $w_1,\ldots,w_n$ of
+ world states we get the corresponding sequence of sequences learning
+ agent states $s_1,\ldots,s_n$ and simultaneously the sequence of fluent
+ configurations $\ell_1,\ldots,\ell_n$.  Notice that we do not have a
+ formalization for $w_1,\ldots,w_n$ but we do have that for $s_1,\ldots,s_n$
+ and for $\ell_1,\ldots,\ell_n$. 
 
 
-\begin{itemize}
-	\item We consider a learning agent constituted by MDP
-	$\MDPagent = \tup{\States, \Actions, \TrFun, \Reward, \DiscFact}$ with transition $\TrFun$  and $\Reward$ unknown and
-	sampled from the environment. The true states of the world are observed and mapped into features that compose the state space $\States$ of the agent, or the agent's \emph{representation of the world}, which is the one used for learning.
-	%(e.g., a learning agent for Breakout).  
-	Without loss of generality, we assume that such learning agent has a special action $\Stop$ which
-	deems the end of an episode.
-	
-	\item We consider arbitrary \LLf formulas $\varphi_i$
-	($i=1,\ldots,m$) over a set of fluents $\F$ used for provide a high-level description of the world. We denote by $\L=2^\F$ the set of possible fluents configurations. At every step, the features for fluents evaluations are observed, obtaining a particular configuration $\ell\in\L$. Notice that in general the features for the fluents and for the agent state space may differ. The formula $\varphi_i$ is
-	selecting sequences of fluents configurations $\ell_1,\cdots,\ell_n$,
-	with $\ell_k\in \L$, whose relationship with the sequences of states
-	$s_1,\ldots, s_n$, with $s_k \in S$ of $\MDPagent$ is unknown.
-	
-	\item We are interested in devising a policy for the learning agent
-	$\MDPagent$ such that at the end of the episode, i.e., when the agent
-	executes \emph{stop}\footnote{Note that the agent is unaware that
-		\emph{stop} ends the episode.}, the \LTLf /\LDLf goal formulas
-	$\varphi_i$ ($i=1,\ldots,m$) are satisfied. More precisely, given
-	rewards $r_i$ to be assigned to (complete) episodes satisfying
-	formula $\varphi_i$ ($i=1,\ldots,m$), we want to learn a
-	(non-Markovian) policy
-	%of the form \[\Policy:S^*\rightarrow A\] 
-	that is optimal wrt the sum of the rewards $r_i$
-	($i=1,\ldots,m$) and $R$ in $\MDPagent$. 
-\end{itemize}
+%\begin{itemize}
+%	\item We consider a learning agent constituted by MDP
+%	$\MDPagent = \tup{\States, \Actions, \TrFun, \Reward, \DiscFact}$ with transition $\TrFun$  and $\Reward$ unknown and
+%	sampled from the environment. The true states of the world are observed and mapped into features that compose the state space $\States$ of the agent, or the agent's \emph{representation of the world}, which is the one used for learning.
+%	%(e.g., a learning agent for Breakout).  
+%	Without loss of generality, we assume that such learning agent has a special action $\Stop$ which
+%	deems the end of an episode.
+%	
+%	\item We consider arbitrary \LLf formulas $\varphi_i$
+%	($i=1,\ldots,m$) over a set of fluents $\F$ used for provide a high-level description of the world. We denote by $\L=2^\F$ the set of possible fluents configurations. At every step, the features for fluents evaluations are observed, obtaining a particular configuration $\ell\in\L$. Notice that in general the features for the fluents and for the agent state space may differ. The formula $\varphi_i$ is
+%	selecting sequences of fluents configurations $\ell_1,\cdots,\ell_n$,
+%	with $\ell_k\in \L$, whose relationship with the sequences of states
+%	$s_1,\ldots, s_n$, with $s_k \in S$ of $\MDPagent$ is unknown.
+%	
+%	\item We are interested in devising a policy for the learning agent
+%	$\MDPagent$ such that at the end of the episode, i.e., when the agent
+%	executes \emph{stop}\footnote{Note that the agent is unaware that
+%		\emph{stop} ends the episode.}, the \LTLf /\LDLf goal formulas
+%	$\varphi_i$ ($i=1,\ldots,m$) are satisfied. More precisely, given
+%	rewards $r_i$ to be assigned to (complete) episodes satisfying
+%	formula $\varphi_i$ ($i=1,\ldots,m$), we want to learn a
+%	(non-Markovian) policy
+%	%of the form \[\Policy:S^*\rightarrow A\] 
+%	that is optimal wrt the sum of the rewards $r_i$
+%	($i=1,\ldots,m$) and $R$ in $\MDPagent$. 
+%\end{itemize}
 
 Oversimplifying, we may say that $S$ is the set of configurations of
-the low-level features for the learning agent $\MDPagent$, while $\L$ is
+the low-level features for the learning agent, while $\L$ is
 the set of configuration of the high-level features needed for
 expressing $\varphi_i$.
 
-Note that both are features in the sense that they are a
-representation of properties of the world but they look at different
-facets of the world itself.
-
-%%
-More precisely, let $W$ be the set of \emph{world states}, i.e., the
-states of the real world.
-%%
-A \emph{feature} is a function $f_j$ that maps a world state to the
-values of another domain $D_j$, such as reals, finite enumerations,
-booleans, etc., i.e., $f_j : W \rightarrow D_j$.
-%%
-The \emph{feature vector} of a world state $w_h$ is the vector
-$\mathbf{f}(w_h) = \langle f_1(w_h), \ldots, f_d(w_h) \rangle$ of
-feature values corresponding to $w_h$.
-%%
-Given a state of the world $w_h$ the corresponding \emph{configuration
-	$s_h$ of the learning agent $\MDPagent$} is formed by the components of
-the feature vector $\mathbf{f}(w_h)$ that produce its state, while the
-corresponding \emph{configuration of fluents} $\ell_h$ is formed by
-the components that assign truth values to the fluents according to
-the feature vector $\mathbf{f}(w_h)$.
-%%
-In other words, a subset of features are used to describe agent states $s_h$ and another  subset (for simplicity, assumed disjoint from the previous one) are used to evaluate the fluents in $\ell_h$.
-%%
-Hence, given a sequence $w_1,\ldots,w_n$ of
-world states we get the corresponding sequence of sequences learning
-agent states $s_1,\ldots,s_n$ and simultaneously the sequence of fluent
-configurations $\ell_1,\ldots,\ell_n$.  Notice that we do not have a
-formalization for $w_1,\ldots,w_n$ but we do have that for $s_1,\ldots,s_n$
-and for $\ell_1,\ldots,\ell_n$. 
-
+%Note that both are features in the sense that they are a
+%representation of properties of the world but they look at different
+%facets of the world itself.
+%
+%%%
+%More precisely, let $W$ be the set of \emph{world states}, i.e., the
+%states of the real world.
+%%%
+%A \emph{feature} is a function $f_j$ that maps a world state to the
+%values of another domain $D_j$, such as reals, finite enumerations,
+%booleans, etc., i.e., $f_j : W \rightarrow D_j$.
+%%%
+%The \emph{feature vector} of a world state $w_h$ is the vector
+%$\mathbf{f}(w_h) = \langle f_1(w_h), \ldots, f_d(w_h) \rangle$ of
+%feature values corresponding to $w_h$.
+%%%
+%Given a state of the world $w_h$ the corresponding \emph{configuration
+%	$s_h$ of the learning agent $\MDPagent$} is formed by the components of
+%the feature vector $\mathbf{f}(w_h)$ that produce its state, while the
+%corresponding \emph{configuration of fluents} $\ell_h$ is formed by
+%the components that assign truth values to the fluents according to
+%the feature vector $\mathbf{f}(w_h)$.
+%%%
+%In other words, a subset of features are used to describe agent states $s_h$ and another  subset (for simplicity, assumed disjoint from the previous one) are used to evaluate the fluents in $\ell_h$.
+%%%
+%Hence, given a sequence $w_1,\ldots,w_n$ of
+%world states we get the corresponding sequence of sequences learning
+%agent states $s_1,\ldots,s_n$ and simultaneously the sequence of fluent
+%configurations $\ell_1,\ldots,\ell_n$.  Notice that we do not have a
+%formalization for $w_1,\ldots,w_n$ but we do have that for $s_1,\ldots,s_n$
+%and for $\ell_1,\ldots,\ell_n$. 
+\subsubsection{Markovian assumption of the state transition function}
 Now we make the following assumption: that is, the agent actions in $A$ induce a transition distribution over the features and
 fluents configuration, i.e.,
-\[\TrFun_{ag}^{g} : S\times \L \times A \rightarrow Prob(S\times \L).\]
+\begin{equation}\label{joint-tr-fun}
+\TrFun_{ag}^{g} : S\times \L \times A \rightarrow Prob(S\times \L)
+\end{equation}
 This means that the state transition function $\TrFunAgentGoal$ is \emph{Markovian}, i.e. the probability to end in the next state $s'$ with the next fluents configuration $\ell'$ depends only from $s, \ell$ and $a$ (the current agent state, the current fluents configuration and the action taken, respectively).
+
+%Such a transition distribution together with the initial values of the
+%fluents $\ell_0$ and of the agent state $s_0$ allow us to describe a
+%probabilistic transition system accounting for the dynamics of the
+%fluents and agent states.  Moreover, when $\TrFun_{ag}^{g}$ is projected on
+%$S$ only, i.e., the $\L$ components are marginalized, we get $\TrFun$ of
+%$\MDPagent$. Obviously, both $\TrFun_{ag}^{g}$ and $\TrFun$ are unknown to the learning agent. 
+%On the other hand, in response to an agent action $a_h$ performed in the current state
+%$w_h$ (in the state $s_h$ of the agent and the
+%configuration $\ell_h$ of the fluents), the world changes into $w_{h+1}$ from which $s_{h+1} $ and $\ell_{h+1}$. This is all we need to proceed.
 
 Such a transition distribution together with the initial values of the
 fluents $\ell_0$ and of the agent state $s_0$ allow us to describe a
 probabilistic transition system accounting for the dynamics of the
-fluents and agent states.  Moreover, when $\TrFun_{ag}^{g}$ is projected on
-$S$ only, i.e., the $\L$ components are marginalized, we get $\TrFun$ of
-$\MDPagent$. Obviously, both $\TrFun_{ag}^{g}$ and $\TrFun$ are unknown to the learning agent. 
-On the other hand, in response to an agent action $a_h$ performed in the current state
+fluents and agent states. 
+In other words, in response to an agent action $a_h$ performed in the current state
 $w_h$ (in the state $s_h$ of the agent and the
 configuration $\ell_h$ of the fluents), the world changes into $w_{h+1}$ from which $s_{h+1} $ and $\ell_{h+1}$. This is all we need to proceed.
 
+Notice that we do not assume nothing about the primitive state transitions function, i.e. the one induced over the agent state space $\States$ and the one over the set of possible fluents configurations $\L$. However, it might be the case that the Markovian assumption of the agent state transition function holds, i.e. the probability distribution for the next state $s'$ is fully determined by the current state $s$ and the action $a$. In that case, the considerations presented in this section still holds, since it is a special case of our general assumptions. We only require that the \emph{joint} transition function in Equation \ref{joint-tr-fun} satisfies the Markov property.
+
+\medskip
 We are interested in devising policies for the learning agent such that
 at the end of the episode, i.e., when the agent executes \emph{stop},
 the \LTLf /\LDLf goal formulas $\varphi_i$ ($i=1,\ldots,m$)  are satisfied.
@@ -490,8 +564,10 @@ Now we can state our problem formally.
 	$r_i$ and $\Reward$.}
 
 Observe that an optimal policy for our problem, although not depending on $\L$, is guaranteed to satisfy the \LTLf /\LDLf goal formulas.
+\subsection{Examples}
+----------------------------------------------TODO
 
-\medskip
+\subsection{Reduction to MDP}
 To devise a solution technique, we start by transforming
 $\MDPagent^{goal}= \tup{\States, \Actions, \TrFunAgentGoal, \Reward, \L,
 \{(\varphi_i,r_i)\}_{i=1}^{m}}$ into an NMRDP $\MDPagent^{nmr} = \langle S\times \L, A, \TrFunAgentGoal, \{(\varphi'_i,r_i)\}_{i=1}^{m} \cup \{(\varphi_s, R(s,a, s'))\}_{s\in S, a\in
@@ -635,7 +711,7 @@ Indeed  we can show the following result.
 	From  Theorem~\ref{th:goal-mdp-ell}, by the following observations. For the sake of brevity, we use $\bqs$ to denote $q_1, \dots, q_m$.
 	Notice also that for all $\ell, \ell'\in\L$, $R'(\bqs,s,\ell, a,\bqs', s', \ell')=R''(\bqs,s,a,\bqs', s')$.
 	
-	We show that the values of $\ValFun_{\Policy, ag}^{goal}(q_1,\ldots,q_m, s,\ell)$ (for simplicity $\ValFun_\Policy$) for some policy $\Policy$ do not depend on $\ell$ or, in other words, it is necessary that $\forall \ell_1, \ell_2.v^\Policy(q_1,\ldots,q_m, s, \ell_1) =v^\Policy(q_1,\ldots,q_m, s, \ell_2)$
+	We show that the values of $\ValFun_{ag}^{\Policy}(q_1,\ldots,q_m, s,\ell)$, i.e. the state value function for $\MDP'_{ag}$(for simplicity $\ValFun^\Policy$, unless otherwise stated), for some policy $\Policy$, do not depend on $\ell$ or, in other words, it is necessary that $\forall \ell_1, \ell_2.v^\Policy(q_1,\ldots,q_m, s, \ell_1) =v^\Policy(q_1,\ldots,q_m, s, \ell_2)$. Finally, we notice that $\forall \ell. \ValFun_{ag}^{\Policy, new} = \ValFun_{ag}^{\Policy}$
 	
 	From Equation \ref{def:bellman-state-value-fun} we have:
 	
@@ -653,23 +729,27 @@ Indeed  we can show the following result.
 	\sum_{\bqs', s', \ell'} P(\bqs', s', \ell' | \bqs, s, a)
 	[\Reward''(\bqs,s, a,\bqs', s') + \DiscFact \ValFun_\Policy(\bqs', s', \ell')]
 	\end{gather}
-	At this point, we see that $\ValFun^\Policy$ does not depend from $\ell$, hence we can safely drop $\ell$ as argument for $\ValFun_\Policy$, obtaining $\ValFun_{\Policy, ag}^{new}$. Indeed, from \ref{proof-step-2:goal-mdp-ell}:
+	At this point, we see that $\ValFun^\Policy$ does not depend from $\ell$, hence we can safely drop $\ell$ as argument for $\ValFun_\Policy$, obtaining $\ValFun_{ag}^{\Policy}$. Indeed, from \ref{proof-step-2:goal-mdp-ell}:
 	\begin{gather}
-		\sum_{\bqs', s'} [\Reward''(\bqs,s, a,\bqs', s') + \DiscFact \ValFun_{\Policy, ag}^{new}(\bqs, s)] \sum_{\ell'} P(\bqs', s', \ell' | \bqs, s, a) \label{proof-step-3:goal-mdp-ell} =\\
-		\sum_{\bqs', s'} P(\bqs', s'| \bqs, s, a)[\Reward''(\bqs,s, a,\bqs', s') + \DiscFact \ValFun_{\Policy, ag}^{new}(\bqs', s')] = \nonumber\\
-		\ValFun_{\Policy, ag}^{new}(\bqs, s)\nonumber
+		\sum_{\bqs', s'} [\Reward''(\bqs,s, a,\bqs', s') + \DiscFact \ValFun_{ag}^{\Policy, new}(\bqs, s)] \sum_{\ell'} P(\bqs', s', \ell' | \bqs, s, a) \label{proof-step-3:goal-mdp-ell} =\\
+		\sum_{\bqs', s'} P(\bqs', s'| \bqs, s, a)[\Reward''(\bqs,s, a,\bqs', s') + \DiscFact \ValFun_{ag}^{\Policy}(\bqs', s')] = \nonumber\\
+		\ValFun_{ag}^{\Policy}(\bqs, s)\nonumber
 	\end{gather}
 	Where in \ref{proof-step-3:goal-mdp-ell} we marginalized the distribution $P(\bqs', s', \ell' | \bqs, s, a)$ over $\ell'$.
-
+	From Definition \ref{def:optimal-policy} of optimal policy, we can reduce an optimal policy $\Policy^{new}_{ag}$ to a policy of the form $\Policy'_{ag}: Q_1 \times \dots \times Q_m \times \States \to \Actions$ that is optimal for $\MDPagent'$ (since the state value function of $\MDPagent^{new}$, after dropping the argument $\ell$, and of $\MDPagent'$ are equivalent). From Theorem \ref{th:goal-mdp-ell} the thesis.
 \end{proof}
 
-In the following we summarize
+It is worth to remark that in the resulting MDP $\MDPagent^{new}$ the \emph{explicit presence of the fluents configuration $\ell$ has been removed}. Rather, the dependency is compiled into the expanded state space $Q_1\times \dots Q_m \times \States$, where $Q_1, \dots, Q_m$ are the automata state spaces associated to the formulas $\varphi_i$.
+
+\subsubsection{Summary}
+----------------------------------------------TODO
+%In the following we summarize
 
 \section{Conclusions}
 In this chapter we introduced the topic of Reinforcement Learning, as well as foundational definitions (MDP, policy $\Policy$, state-value function $\ValFun_\Policy$) and algorithms (Q-Learning, Sarsa). Then we presented the notion of NMRDP and a technique to built an equivalent MDP, by specifying non-Markovian reward function with \LLf formalisms.
 Finally, we defined and studied a new problem, \emph{Reinforcement Learning for \LLf goals}, and proposed a reduction that yields an equivalent MDP which can be used to solve the original problem.
 
-%\endinput
+\endinput
 
 
 
@@ -694,7 +774,7 @@ Finally, we defined and studied a new problem, \emph{Reinforcement Learning for 
 
 
 
-%\bigskip
+\bigskip
 \texttt{old}
 
 As said, we assume available a progression 
