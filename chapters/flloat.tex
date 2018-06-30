@@ -1,10 +1,122 @@
-\chapter{FLLOAT}
+\chapter{FLLOAT}\label{ch:flloat}
+In this chapter we describe \href{https://github.com/MarcoFavorito/flloat.git}{FLLOAT} (From \LLf tO AutomaTa), a software project written in Python. It is a porting of the \href{https://github.com/RiccardoDeMasellis/FLLOAT}{homonym software project} written in Java. It is the implementation of many of the topics described in Chapter \ref{ch:logic}. 
 
-\section{Main features}
- 
+%We'll see the main features, the package structure, and some code examples.
+
+\section{Introduction}
+\paragraph{Main features:} FLLOAT is a Python library that provides support for:
+\begin{itemize}
+	
+	\item Syntax, semantics and parsing of the following logic formalisms:
+	\begin{itemize}
+		\item Propositional Logic;
+		\item Linear Temporal Logic on Finite Traces \LTLf
+		\item Linear Dynamic Logic on Finite Traces \LDLf;
+	\end{itemize}
+	\item Conversion from \LLf formula to \NFA, \DFA and \DFA On-The-Fly
+	
+\end{itemize}
+
+\paragraph{Dependencies:} FLLOAT requires Python>=3.5 and depends on the following packages:
+\begin{itemize}
+	\item \href{http://www.dabeaz.com/ply/ply.html}{PLY}, a pure-Python implementation of the popular compiler construction tools \href{http://dinosaur.compilertools.net/}{Lex and Yacc}. It has been used for the parsing of \PL and \LLf formulas;
+	\item \href{https://github.com/MarcoFavorito/pythomata}{Pythomata}, a Python package which provides support for \NFA, \DFA, determinization and minimization algorithms and reasoning on \DFAs. It has been used for deal with $\automaton_\varphi$, the equivalent automaton of a \LLf formula.
+\end{itemize}
+
+\paragraph{Installation:} You can find the package on \href{https://pypi.org/project/flloat/}{PyPI}, hence you can install it with:
+\begin{lstlisting}[language=bash]
+pip install flloat
+\end{lstlisting}
+Please go \href{https://github.com/MarcoFavorito/flloat#install}{here} for further details.
+
+
 \section{Package structure}
- 
+The package is structured as follows:
+\begin{itemize}
+	\item \texttt{flloat.py}: the main module, it contains the implementation of the translation from \LLf formulas to automata. The functions implemented here are called from methods of \LLf formulas.
+	\item \texttt{base}: contains the abstract definitions used in other modules. The main modules are:
+	\begin{itemize}
+		\item \texttt{Symbol.py} and \texttt{Symbols.py}, where have been defined the class \texttt{Symbol} to represent the atomic propositional symbols and the operator symbols;
+		\item \texttt{Alphabet.py}, which is an abstraction for manage a set of \texttt{Symbol};
+		\item \texttt{Interpretation.py}, an abstract class denoting the semantics used for truth evaluation. E.g. for \PL the corresponding interpretation is \texttt{PLInterpretation} (a set of \texttt{Symbol}), whereas for \LLf we have \texttt{FiniteTrace}, which is a list of \texttt{PLInterpretation}.
+		\item \texttt{Formula.py}, the module containing the base class \texttt{Formula}. Every formula class extends \texttt{Formula}. In this module are defined also \texttt{AtomicFormula}, \texttt{Operator}, \texttt{BinaryOperator} etc., and how to build a syntactic tree. 
+		\item \texttt{truths.py} and \texttt{nnf.py} that provide abstract implementations for truth evaluations of formulas and negation normal form operations.
+		\item other abstraction definitions that are implemented for each extending subclass.
+	\end{itemize}
+	\item \texttt{syntax}: modules for each formalism (i.e. \texttt{pl.py}, \texttt{ltlf.py} and \texttt{ldlf.py}). In those modules are declared all the classes for representing formulas, implementing their truth evaluation procedure  taking into account their correlation (e.g. \texttt{And} is the negative dual of \texttt{Or}, you can define \texttt{Implies} in terms of \texttt{Not} and \texttt{Or} etc.);
+	\item \texttt{semantics}: modules providing implementations for the semantics. E.g. you can find \texttt{PLInterpretation} and \texttt{FiniteTrace} cited before;
+	\item \texttt{parser}: modules where are defined the parsers of formulas in \PL and \LLf. They depends on PLY.
+\end{itemize}
+
 \section{Code examples}
+
+
+Parse a \LDLf formula:
+
+\begin{lstlisting}[language=Python, style=Python]
+from flloat.parser.ldlf import LDLfParser
+
+parser = LDLfParser()
+formula = "<true*; A & B>tt"
+# returns a LDLfFormula
+parsed_formula = parser(formula)        
+
+# prints "<((true)* ; (A & B))>(tt)"
+print(parsed_formula)                   
+# prints {A, B}
+print(parsed_formula.find_labels())
+     
+\end{lstlisting}
+Evaluate it over finite traces:
+
+\begin{lstlisting}[language=Python, style=Python]
+from flloat.semantics.ldlf import FiniteTrace
+
+t1 = FiniteTrace.fromStringSets([
+{},
+{"A"},
+{"A"},
+{"A", "B"},
+{}
+])
+parsed_formula.truth(t1, 0)  # True
+\end{lstlisting}
+Transform it into an automaton (pythomata.DFA object):
+
+\begin{lstlisting}[language=Python, style=Python]
+dfa = parsed_formula.to_automaton(determinize=True)
+
+# print the automaton
+dfa.to_dot("./automaton.DFA")
+\end{lstlisting}
+
+Notice: \texttt{to\_dot} requires Graphviz. For info about how to use a pythomata.DFA please look at the docs.
+
+The same for a \LTLf formula:
+
+\begin{lstlisting}[language=Python, style=Python]
+from flloat.parser.ltlf import LTLfParser
+from flloat.base.Symbol import Symbol
+from flloat.semantics.ldlf import FiniteTrace
+
+# parse the formula
+parser = LTLfParser()
+formula = "F(A & !B)"
+parsed_formula = parser(formula)
+
+# evaluate over finite traces
+t1 = FiniteTrace.fromStringSets([
+{},
+{"A"},
+{"A"},
+{"A", "B"}
+])
+assert parsed_formula.truth(t1, 0)
+
+# from LTLf formula to DFA
+dfa = parsed_formula.to_automaton(determinize=True)
+assert dfa.word_acceptance(t1.trace)
+\end{lstlisting}
  
 \section{License}
- 
+The software is released under \href{https://github.com/MarcoFavorito/flloat/blob/master/LICENSE}{MIT license}.

@@ -1,10 +1,40 @@
-\chapter{RLTG}
+\chapter{RLTG}\label{ch:rltg}
+In this chapter we describe \href{https://github.com/MarcoFavorito/rltg.git}{RLTG} (Reinforcement Learning for Temporal Goals), a software project written in Python.  It is the reference implementation of many of the topics described in Chapter \ref{ch:rl}. 
 
-\section{Main features}
- 
+%We'll see the main features, the package structure, and some code examples.
+
+\section{Introduction}
+\paragraph{Main features:} FLLOAT is a Python library that provides support for:
+\begin{itemize}
+	
+	\item Syntax, semantics and parsing of the following logic formalisms:
+	\begin{itemize}
+		\item Propositional Logic;
+		\item Linear Temporal Logic on Finite Traces \LTLf
+		\item Linear Dynamic Logic on Finite Traces \LDLf;
+	\end{itemize}
+	\item Conversion from \LLf formula to \NFA, \DFA and \DFA On-The-Fly
+	
+\end{itemize}
+
+\paragraph{Dependencies:} FLLOAT requires Python>=3.5 and depends on the following packages:
+\begin{itemize}
+	\item \href{https://github.com/MarcoFavorito/flloat.git}{FLLOAT}, described in Chapter \ref{ch:flloat};
+	\item \href{https://gym.openai.com/}{Gym OpenAI}, a toolkit for developing and comparing reinforcement learning algorithms. It offers a useful abstraction of reinforcement learning environments.
+\end{itemize}
+
+\paragraph{Installation:} You can find the package on \href{https://pypi.org/project/rltg/}{PyPI}, hence you can install it with:
+\begin{lstlisting}[language=bash]
+pip install rltg
+\end{lstlisting}
+
 \section{Package structure}
- 
+The package is structured as follows:
+%\begin{itemize}
+%	\item \texttt{flloat.py}: the main module, it contains the implementation of the translation from \LLf formulas to automata. The functions implemented here are called from methods of \LLf formulas.
+%	\item \texttt{base}: contains the abstract definitions used in other modules. The main modules are:
+%\end{itemize}
 \section{Code examples}
- 
+
 \section{License}
- 
+The software is released under \href{https://github.com/MarcoFavorito/rltg/blob/master/LICENSE}{MIT license}.

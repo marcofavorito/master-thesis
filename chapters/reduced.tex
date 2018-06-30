@@ -1,5 +1,5 @@
 \chapter{RL for {\sc LTL}$_f$/{\sc LDL}$_f$ Goals}
-
+\label{ch:rl}
 \section{Reinforcement Learning}
 \label{RL}
 Reinforcement Learning \citep{Sutton:1998:IRL:551283} is a sort of optimization problem where an \emph{agent} interacts with an \emph{environment} and obtains a \emph{reward} for each action he chooses and the new observed state. The task is to maximize a numerical reward signal obtained after each action during the interaction with the environment. The agent does not know a priori how the environment works (i.e. the effects of his actions), but he can make observations in order to know the new state and the reward. Hence, learning is made in a \emph{trial-and-error} fashion. Moreover, it is worth to notice that in many situation reward might not been affected only from the last action but from an indefinite number of previous action. In other words, the reward can be \emph{delayed}, i.e. the agent should be able to foresee the effect of his actions in terms of future expected reward. Figure \ref{fig:agent-environment} represent the interaction between the agent and the environment in this setting.
@@ -18,10 +18,10 @@ A Markov Decision Process (MDP) $\MDP$ is a tuple $\tup{\States, \Actions, \TrFu
 The discount factor $\DiscFact$ deserves some attention. Its value highly influences the MDP, its solution, and how the agent interprets rewards. Indeed, if $\DiscFact = 0$, we are in the pure \emph{greedy} setting, i.e. the agent is shortsighted and look only at the reward that it might obtain in the next step, by doing a single action. The higher $\DiscFact$, the longer the sight horizon, or the foresight, of the agent: the far rewards are taken into account for the  current action choice. If $\DiscFact < 1$ we are in the \emph{finite horizon} setting: namely, the agent is intrinsically motivated to obtain rewards as fast as possible, depending on how $\DiscFact$ is far from $1$. When $\DiscFact = 1$ we are in the \emph{infinite horizon} setting, which means that the agent considers far rewards as they can be obtained in the next step. In other words, we may think the agent as \emph{immortal}, since the time the agent spend to reach rewards does not matter anymore.
 
 \medskip
-A \emph{policy} $\Policy: \States \to \Actions$ for an MDP $\MDP$ is a mapping from states to actions, and represents a solution for $\MDP$. Given a sequence of rewards $\Reward_{t+1}, \Reward_{t+2}, \dots, \Reward_{T}$, the \emph{expected return} $\ExpRet_t$ at time step $t$
+A \emph{policy} $\Policy: \States \to \Actions$ for an MDP $\MDP$ is a mapping from states to actions, and represents a solution for $\MDP$. Given a sequence of rewards $\Reward_{t+1}, \Reward_{t+2}, \dots, \Reward_{T}$, the \emph{expected discounted return} $\ExpRet_t$ at time step $t$
 is defined as: 
-\begin{equation}
-\ExpRet_t \defeq \sum_{t=k+1}^T \DiscFact^{k-t-1}\Reward_k
+\begin{equation}\label{def:expected-discounted-return}
+\ExpRet_t \defeq \sum_{k=t+1}^T \DiscFact^{k-t-1}\Reward_k
 \end{equation} where can be $T = \infty$ and $\DiscFact = 1$ (but not both). 
 
 The \emph{value function} of a state $s$, the \emph{state-value function} $\ValFun_\Policy(s)$ is defined as the expected return when starting in $s$ and following policy $\Policy$, i.e.:
@@ -77,7 +77,7 @@ Given an MDP $\MDP$, a typical reinforcement learning problem is the following: 
 \subsubsection{Examples}
 Many dynamic systems can be modeled as Markov Decision Processes. 
 
-\begin{example}[\textbf{Gridworld}] Perhaps the most simple MDP used as a toy example is \emph{Gridworld}, depicted in Figure \ref{fig:gridworld}.
+\begin{example}[\textbf{Gridworld}]\label{exa:gridworld} Perhaps the most simple MDP used as a toy example is \emph{Gridworld}, depicted in Figure \ref{fig:gridworld}.
 There are $3\times 4$ cells, i.e. states of the MDP $\States = \set{s_{11}, s_{12}, \dots, s_{34}}\setminus \set{s_{22}}$. The agent can do four actions: $A = \set{Right, Left, Up, Down}$. The initial state is fixed and is $s_0 = s_{11}$ and the agent can move in any of the adjacent and free cells from the current state. Assuming an episodic task, the goal is to reach $s_{34}$, and $s_{24}$ represent a failure state. The state transition function $\TrFun$ can be \emph{deterministic}, i.e. the agent always succeed in performing actions, or non-deterministic, i.e. the effect of an action is determined by the probabilistic distribution returned by $\TrFun(s, a)$. An example of non-deterministic $\TrFun$ is to give $90\%$ of success (the agent moves in the chosen direction) and $10\%$ of fail (the agent moves at either the right or left angle to the intended direction). If the move would make the agent walk into a wall (borders of the grid and $s_{22}$), the agent stays in the same place as before. The reward function $R(s,a,s')$ is defined as $-1$ if $s'=s_{24}$, as $1$ if $s'=s_{34}$, and $-0.01$ otherwise. The small negative reward given at each transition is a popular mean for reward function design: it is called \emph{step reward} and its purpose is to encourage the agent to finish the episode as fast as possible, with a priority proportional to the absolute value of the reward. The discount factor $\DiscFact$ should be strictly higher than 0 because more than one step is needed to reach the goal state.
 	
 \begin{figure}[h]
@@ -86,7 +86,7 @@ There are $3\times 4$ cells, i.e. states of the MDP $\States = \set{s_{11}, s_{1
 	\includegraphics[width=.4\linewidth]{images/gridworld}
 \end{figure}
 
-An example of optimal policy is shown in Figure \ref{gridworld-optimal-policy}. As the reader can notice, the arrows represent the action that should be taken in a certain cell, in order to maximize the expected return. We observe that the optimal action in $s_{13}$, according to the policy, is not the one to take the shortest path to the goal, i.e. the $Up$ action. This is because there is a small probability to ends in $s_{24}$, the failure state, and be punished with a high negative reward. In terms of expected reward, it is better to take the longer path, at the price of collect small negative rewards, but avoiding the risk to fail miserably.
+An example of optimal policy is shown in Figure \ref{gridworld-optimal-policy}. As the reader can notice, the arrows represent the action that should be taken in a certain cell, in order to maximize the expected return. We observe that the optimal action in $s_{13}$, according to the policy, is not the one to take the shortest path to the goal, i.e. the $Up$ action	. This is because there is a small probability to ens in $s_{24}$, the failure state, and be punished with a high negative reward. In terms of expected reward, it is better to take the longer path, at the price of collect small negative rewards, but avoiding the risk to fail miserably.
 \begin{figure}
 	\centering
 	\includegraphics[width=.4\linewidth]{images/gridworld-optimal-policy}
@@ -96,11 +96,17 @@ An example of optimal policy is shown in Figure \ref{gridworld-optimal-policy}. 
 \end{example}
 
 \begin{example}[\textbf{Breakout}]
-	\begin{figure}
+	Breakout is a well known arcade videogame developed by Atari. In this work we implemented a clone of the original Breakout. Figure \ref{fig:breakout} shows a screenshot of the game. On the screen there are a paddle at the bottom, many bricks at the top arranged in a grid layout with $n$ rows and $m$ columns (in the figure $3\times 3 = 9$ bricks), and a ball that is free to move across the screen. The ball bounces when it hits a wall, a brick or the paddle. When the ball hits a brick, that brick is broke down and is removed from the screen. The paddle (the agent) can move left, move right or do nothing. The \emph{goal} is to remove all the bricks, while avoiding that the paddle misses the rebound of the ball (\emph{failure}).
+	
+	The relevant features are: position of the paddle $p_x$, position of the ball $b_x, b_y$, speed of the ball $v_x, v_y$ and status of each brick (booleans) $b_{ij}$. This features of the system gives all the needed information to predict the next state from the current state. Hence we can build an MDP where: $\States$ is the set of  all the possible values of the sequence of features $\tup{p_x, b_x, b_y, v_x, v_y, b_{11}, \dots, b_{nm}}$, $\Actions = \set{Right, Left, No\-op}$, transition function $\TrFun$ determined by the rules of the game. We give reward $R(s,a,s')=10$ if a particular brick in $s'$ has been removed for the first time, plus $100$ if that brick was the last (i.e. goal reached).
+	\begin{figure}[h]
 		\centering
 		\includegraphics[width=.6\linewidth]{images/breakout.jpg}
-		\caption{A screenshot from the videogame \Breakout}\label{breakout}. 
+		\caption{A screenshot from the videogame \Breakout}\label{fig:breakout}. 
 	\end{figure}
+	\paragraph{Violation of the Markov property considering a smaller set of features:}
+	Notice that considering a strict subset of the set of features for $\States$ leads to violate the Markov property of $\TrFun$. Indeed, consider the case when we remove $v_x$ and $v_y$ from the set of features. In this setting, we removed the informations about the dynamics of the system. More precisely, we cannot predict, knowing only the current state, the value of the features $b_x$ and $b_y$ for the next step, because we do not know where the ball is going (up-left, down-right and so on). In order to correctly predict the next position of the ball, we should know whether earlier in the episode the ball was coming from the bottom or from the top. But this fact clearly shows that the Markovian assumption is violated. Similar arguments apply in the case where we remove the status of the bricks $b_{11}, \dots, b_{nm}$: indeed, if the ball in the next step is near to a brick, knowing about the status of the brick is determinant to predict if the ball will continue its trajectory (the case when the brick is absent) or it will break down the brick and bounce, changing the direction of its motion (the case when the brick is present).
+	
 \end{example}
 
 \section{Temporal Difference Learning}
@@ -112,7 +118,7 @@ Q-Learning \citep{watkins1989learning, Watkins1992} and SARSA are such a methods
 \qFunEst(s, a) \leftarrow \qFunEst(s, a) + \LRate \delta
 \end{equation}
 where $\delta$ is the \emph{temporal difference}. In SARSA, it is defined as:
-\begin{equation}
+\begin{equation}\label{def:temporal-difference}
 \delta = r + \DiscFact \qFunEst(s', a') - \qFunEst(s, a)
 \end{equation}
 whereas in Q-Learning:
@@ -307,7 +313,7 @@ in such a way that corresponding states yield
 same transition probabilities and corresponding traces have same rewards.
 
 \section{NMRDP with \LTLf/\LDLf rewards}\label{sect:nmrdp-llf-rewards}
-In this section we explain how to specify non-Markovian rewards with \LTLf/\LDLf  formulas (instead of \PLTL) and how the associated MDP expansion works \citep{Brafman2017SpecifyingNR}, analogously to what we saw with \PLTL (Section \ref{sect:using-pltl}).
+In this section we explain how to specify non-Markovian rewards with \LTLf/\LDLf  formulas (instead of \PLTL) and how the associated MDP expansion works \citep{AAAI1817342}, analogously to what we saw with \PLTL (Section \ref{sect:using-pltl}).
 
 The temporally extended reward function $\bar{R}$ is similar to Equation \ref{pltl-temp-extended-reward-fun}, but instead of using \PLTL formula we use \LLf formulas. Formally, given a set of pairs $\set{(\varphi_i, r_i)^m_{i=1}}$ (where $\varphi_i$ denotes the \LLf formula for specifying a desired behavior, and $r_i$ denotes the reward associated to the satisfaction of $\varphi_i$, and given a (partial) trace $\trace = \projtraj$, we define $\bar{R}$ as:
 \begin{equation}
@@ -315,7 +321,7 @@ The temporally extended reward function $\bar{R}$ is similar to Equation \ref{pl
 \end{equation}
 For the sake of clarity, in the following we use $\set{(\varphi_i, r_i)^m_{i=1}}$ to denote $\bar{R}$.
 
-Now we describe the MDP expansion for doing learning in this setting, as proposed in \citep{Brafman2017SpecifyingNR}. 
+Now we describe the MDP expansion for doing learning in this setting, as proposed in \citep{AAAI1817342}. 
 Without loss of generality, we assume that every NMRDP $\NMRDP$ is reduced into another NMRDP $\NMRDP'=\tup{\States', \Actions', \TrFun', \Reward', \DiscFact}$:
 
 
@@ -330,15 +336,13 @@ Without loss of generality, we assume that every NMRDP $\NMRDP$ is reduced into 
 		\end{cases}\\
 	\Reward'(\tup{s_{init}, s_0, \dots, s_n}) &= \Reward(\projtraj)
 	\end{split}
-	\label{nmrdp-adapted}
+	\label{def:nmrdp-with-dummy-initial-state}
 \end{gather}
-
-
 
 and $s_{init}$ is the new initial state. In other words, we prefix to every feasible trajectory $\NMRDP$ the pair $\tup{s_{init}, start}$, denoting the beginning of the episode. 
 We do this for two reasons: allow to evaluate formulas in $s_0$ and make it compliant with the most general definition of the reward, namely $R(s, a, s')$, also when there is no true action that is done (i.e. empty trace).
 
-\begin{definition}[\cite{Brafman2017SpecifyingNR}]\label{nmrdp-mdp-transformation-brafman}
+\begin{definition}[\cite{AAAI1817342}]\label{nmrdp-mdp-transformation-brafman}
 	Given an NMRDP $\NMRDP = \tup{S, A, \TrFun, \set{(\varphi_i, r_i)^m_{i=1}, \DiscFact}}$ (i.e. with non-Markovian rewards specified by \LLf formulas) it is possible to build an  $\MDP = \tup{\States', \Actions, \TrFun', \Reward', \DiscFact}$ that is \emph{equivalent} (in the sense of Definition \ref{nmrdp-mdp-equivalence}) to $\NMRDP$. Denoting with 
 	$\automaton_{\varphi_i} = \tup{2^\P, Q_i, q_{i0}, \delta_i,F_i}$ (notice that $S\subseteq 2^{\Prop}$ and $\delta_i$ is total) the \DFA associated 
 	with $\varphi_i$ (see Section \ref{sect:llf2automata}), the equivalent MDP $\MDP$ is built as follows:
@@ -367,7 +371,7 @@ We do this for two reasons: allow to evaluate formulas in $s_0$ and make it comp
 \end{definition}
 
 
-\begin{theorem}[\cite{Brafman2017SpecifyingNR}]\label{th:nmrdp-mdp-llf-equivalence}
+\begin{theorem}[\cite{AAAI1817342}]\label{th:nmrdp-mdp-llf-equivalence}
 	The NMRDP $\NMRDP= \tup{\States, \Actions, \TrFun, \{(\varphi_i,r_i)\}_{i=1}^{m}, \DiscFact}$ is equivalent to the  MDP $\MDP= \tup{\States',\Actions,\TrFun',\Reward', \DiscFact}$ defined in Definition \ref{nmrdp-mdp-transformation-brafman}.
 \end{theorem}
 \begin{proof}
@@ -397,7 +401,7 @@ Thus, an optimal policy for $\NMRDP$ can be learnt on $\MDP$.
 Of course, none of these structures is (completely) 
 known to the learning agent, and the above transformation is 
 never done explicitly. Rather, the agent carries out the learning process
-by assuming that the underlying model is $\MDP$ instead of $\NMRDP$ (applying the fix introduced in Definition \ref{nmrdp-adapted}).
+by assuming that the underlying model is $\MDP$ instead of $\NMRDP$ (applying the fix introduced in Definition \ref{def:nmrdp-with-dummy-initial-state}).
 
 
 Observe that the state space of $\MDP'$ is the product of 
@@ -408,7 +412,7 @@ the \LLf formulas $\varphi_i$ used in the
 the states of $\MDP$.
 
 \subsection*{Why should we use \LDLf}
-\LDLf formalism (introduced in Section \ref{sect:ldlf})  has the advantage of \emph{enhanced expressive power} over other proposals, as discussed in \citep{Brafman2017SpecifyingNR}. Indeed, we move from linear-time temporal logics to \LDLf, paying no additional (worst-case) complexity costs. \LDLf can encode in polynomial time \LTLf, regular expressions (\REGEX) and the past \LTL (\PLTL) of \citep{bacchus1996rewarding}.
+\LDLf formalism (introduced in Section \ref{sect:ldlf})  has the advantage of \emph{enhanced expressive power} over other proposals, as discussed in \citep{AAAI1817342}. Indeed, we move from linear-time temporal logics to \LDLf, paying no additional (worst-case) complexity costs. \LDLf can encode in polynomial time \LTLf, regular expressions (\REGEX) and the past \LTL (\PLTL) of \citep{bacchus1996rewarding}.
 %	, and all examples of (Thiébaux et al. 2006). 
 	Moreover, \LDLf can naturally
 	represent "procedural constraints" \citep{Baier:2008:BCP:1620270.1620321}, i.e.,
@@ -417,6 +421,7 @@ the states of $\MDP$.
 
 
 \section{RL for \LTLf/\LDLf Goals}
+\label{sect:rl-for-llf-goals}
 
 In this section we define a particular problem and propose a solution, which is the main theoretical contribution of this work. We call this problem \emph{Reinforcement Learning for \LLf Goals}. 
 
@@ -434,7 +439,13 @@ feature values corresponding to $w_h$.
 %%
 
 Now consider an agent that lives in $\W$. The agent can interact with $\W$ by executing an action $a$ taken from a \emph{set of actions} $\Actions$. Without loss of generality, we assume that such learning agent has a special action $\Stop$ which deems the end of an episode.
-Moreover, the agent has its own set of features $F_{ag} = \tup{f_1, \dots, f_d}$, which yields its \emph{representation of the world} $\States$, where $\States \subseteq F_{ag}(W)$ and $F_{ag}(W) = \set{\mathbf{f}_{ag}(w) | w \in W}$. Finally, assume that the agent has a \emph{clock} which determines the granularity of its acting. At every clock, the agent can do action $a$ and observe the new state $s$ from the new world state $w'$, namely $s = \mathbf{f}_{ag}(w)$.
+Moreover, the agent has its own set of features $F_{ag} = \tup{f_1, \dots, f_d}$, which yields its \emph{representation of the world} $\States$, where $\States \subseteq F_{ag}(W)$ and $F_{ag}(W) = \set{\mathbf{f}_{ag}(w) | w \in W}$. We assume that the agent has a \emph{clock} which determines the granularity of its acting. At every clock, the agent can do action $a$ and observe both the new state $s$ from the new world state $w'$, namely $s = \mathbf{f}_{ag}(w)$, and a real-valued reward $R(s,a,s')$, that depends only from the transition $s\to_a s'$.
+Finally, we assume that the the law that determines the possible next state $s'$ given the history of a trajectory (i.e. the state transition function $\TrFun$) is Markovian, hence it depends only from the current state $s$ and the taken action $a$. 
+In other words, we can define an MDP $\MDPagent = \tup{\States, \Actions, \TrFun, \Reward, \DiscFact}$.
+
+%TODO: assume MDP or not?
+% and a real-valued reward $R$ given for the transition $s \to^a s'$. 
+%Notice that we do not assume nothing about the transition function $\TrFun$, i.e. in this case, the law that determines  the possible next state given a trajectory.
 
 We consider arbitrary \LLf formulas $\varphi_i$
 ($i=1,\ldots,m$) over a set of fluents $\F$ used for provide a high-level description of the world. We denote by $\L=2^\F$ the set of possible fluents configurations. 
@@ -543,7 +554,12 @@ In other words, in response to an agent action $a_h$ performed in the current st
 $w_h$ (in the state $s_h$ of the agent and the
 configuration $\ell_h$ of the fluents), the world changes into $w_{h+1}$ from which $s_{h+1} $ and $\ell_{h+1}$. This is all we need to proceed.
 
-Notice that we do not assume nothing about the primitive state transitions function, i.e. the one induced over the agent state space $\States$ and the one over the set of possible fluents configurations $\L$. However, it might be the case that the Markovian assumption of the agent state transition function holds, i.e. the probability distribution for the next state $s'$ is fully determined by the current state $s$ and the action $a$. In that case, the considerations presented in this section still holds, since it is a special case of our general assumptions. We only require that the \emph{joint} transition function in Equation \ref{joint-tr-fun} satisfies the Markov property.
+
+%TODO depends on MDP assumption of above
+%Notice that we do not assume nothing about the primitive state transitions function, i.e. the one induced over the agent state space $\States$ and the one over the set of possible fluents configurations $\L$. However, it might be the case that the Markovian assumption of the agent state transition function holds, i.e. the probability distribution for the next state $s'$ is fully determined by the current state $s$ and the action $a$. In that case, the considerations presented in this section still holds, since it is a special case of our general assumptions. We only require that the \emph{joint} transition function in Equation \ref{joint-tr-fun} satisfies the Markov property.
+
+Notice that we do not assume nothing about the primitive state transitions function over fluents, i.e. the one induced over the set of possible fluents configurations $\L$. However, it might be the case that the Markovian assumption of the agent state transition function holds, i.e. the probability distribution for the next state $\ell'$ is fully determined by the current state $\ell$ and the action $a$. In that case, the considerations presented in this section still holds, since it is a special case of our general assumptions. We only require that the \emph{joint} transition function in Equation \ref{joint-tr-fun} satisfies the Markov property.
+
 
 \medskip
 We are interested in devising policies for the learning agent such that
@@ -553,7 +569,8 @@ the \LTLf /\LDLf goal formulas $\varphi_i$ ($i=1,\ldots,m$)  are satisfied.
 Now we can state our problem formally.
 
 \noindent
-\textbf{Problem definition:} \textit{
+\begin{definition}\label{def:rl-for-llf-goals}
+	 \textit{
 	We define \emph{RL for \LTLf /\LDLf goals}, denoted as
 	\[\MDPagent^{goal}= \tup{\States, \Actions, \Reward, \L, \TrFunAgentGoal, \{(\varphi_i,r_i)\}_{i=1}^{m}}\] with $\TrFunAgentGoal$, $\Reward$ and
 	$r_i$ unknown,the following problem: given a learning agent
@@ -562,8 +579,9 @@ Now we can state our problem formally.
 	associated rewards, find a (non-Markovian) policy
 	$\NMPolicy:\States^*\rightarrow A$ that is optimal wrt the sum of the rewards
 	$r_i$ and $\Reward$.}
-
+\end{definition}
 Observe that an optimal policy for our problem, although not depending on $\L$, is guaranteed to satisfy the \LTLf /\LDLf goal formulas.
+
 \subsection{Examples}
 ----------------------------------------------TODO
 
@@ -741,14 +759,48 @@ Indeed  we can show the following result.
 
 It is worth to remark that in the resulting MDP $\MDPagent^{new}$ the \emph{explicit presence of the fluents configuration $\ell$ has been removed}. Rather, the dependency is compiled into the expanded state space $Q_1\times \dots Q_m \times \States$, where $Q_1, \dots, Q_m$ are the automata state spaces associated to the formulas $\varphi_i$.
 
+\subsection{An episodic goal-based view}
+Here we clarify how the actual transition model works in the final MDP $\MDPagent^{new}$. We focus on the episodic view, where the learning process is organized in episodes.
+Recall that the state space of $\MDPagent^{new}$ is $Q_1\times \dots Q_m \times \States$, where $Q_i$ is the set of states of $\automaton_{\varphi_i}$, the automaton associated to the \LLf formula $\varphi_i$ (see Section \ref{sect:llf2automata}). 
+Moreover we consider two cases: when there exists a subset of states $\States_{goal} \subseteq \States$ that we call \emph{goal states}, such that every transition in those state make the task completed and hence the end of the episode; and when there are no goal states, but the task is to maximize the obtained reward, until a maximum number of steps is reached. E.g. in Gridworld presented in Example \ref{exa:gridworld}, we can defined $s_{34}$ as a goal state. However nothing prevent us to set a maximum number of time steps, and let the agent learn how to collect reward as much as possible in a limited amount of time.
+
+Now we give the following definition:
+\begin{definition}
+	Let $\MDPagent^{goal}$ be our problem and $\MDPagent^{new}$ its transformation into and MDP, as defined in Theorem \ref{th:goal-mdp} and let $\mathbf{s}=\tup{q_1, \dots, q_m, s}\in Q_1\times Q_1\times \dots Q_m \times \States$. Given an observation $s'\in\States$ and $\ell'\in\L$, we define the \emph{successor state of} $\mathbf{s}$ as $\mathbf{s'}=\tup{q'_1, \dots, q'_m, s'}$, where $q'_i = \delta_i(q_i, \ell')$.
+\end{definition}
+	
+A reinforcement learning episode in this setting works as follows. Assume that the MDP has a dummy initial state $s_{init}$ and a dummy action $start$, as defined for NMRDPs in \ref{def:nmrdp-with-dummy-initial-state}. In this construction, the dummy initial state in the expanded state space is $(q_{0,0}, q_{1,0}, \dots, q_{m, 0}, s_{init})$. 
+The first action taken by the agent is $start$, which allow the agent to observe the true initial world state $w_0$. 
+From $w_0$, the agent extract the features to determine the state $s_0\in\States$ and the fluents configuration $\ell_0\in \L$
+\footnote{Observe that the first transition is "artificial", and in many cases, both $s_0$ and $\ell_0$ are known to the experimenter. The explanation presented here is aimed to clarify the underlying mathematical construction.}. The successor state is $(q'_{0}, q'_{1}, \dots, q'_{m}, s_0)$. Then the agent might take a new action, observe another world state $w'$, extract $s'\in\States$ and $\ell'\in\L$, and compute the $q_i$ as before. The sequence reiterates until the end of the episode.
+
+Consider a generic state $\mathbf{s}=\tup{q_1, \dots, q_m, s}\in Q_1\times Q_1\times \dots Q_m \times \States$ and a transition to $\mathbf{s'}=\tup{q'_1, \dots, q'_m, s'}$. For each new state $q'_i$ of automaton $\automaton_{\varphi_i}$, the following might happen:
+\begin{enumerate}
+	\item $q'_i = q_i$, i.e. the state is not changed;\label{case-1-nochange}
+	\item $q'_i \neq q_i$, and from $q'_i$ it is still possible to reach a final state;\label{case-2-change}
+	\item $q'_i \neq q_i$, and from $q'_i$ any final state cannot be reached;\label{case-3-failure}
+\end{enumerate}
+If, for some $\automaton_{\varphi_i}$, we are in case \ref{case-3-failure}, then the constraint specified by $\varphi_i$ is violated, hence we call $\mathbf{s'}$ a \emph{failure state}. We say that $\mathbf{s}$ is a \emph{goal state} if $\forall i. q_i \in F_i$, i.e. every current state $q_i$ is in an accepting state of the automaton $\automaton_{\varphi_i}$. Instead, if the underlying MDP is a goal-based one (e.g. $\States_{goal}\neq \emptyset$) then $\mathbf{s}$ is a goal state if $s\in\States_{goal}$.
+
+Let $\mathbf{s}$ the last state of the trace of the current episode. The \emph{stopping condition}, i.e. the condition that determines the end of the episode, depending from $\mathbf{s}$, is:
+$$
+\mathrm{failure\_state}(\mathbf{s}) \vee \mathrm{goal\_state}(\mathbf{s}) \vee \mathrm{exceeded\_time\_limit}
+$$
+
+The reward $R(s,a,s')$ is collected after each taken action, and it is summed with $r_i$ for every satisfied $\varphi_i$ at the last state of the episode.
+
 \subsubsection{Summary}
-----------------------------------------------TODO
-%In the following we summarize
+In the following we summarize the results of this section:
+\begin{itemize}
+	\item We defined a new problem: \emph{Reinforcement Learning for \LLf Goals} $\MDPagent^{goal}$ (Definition \ref{def:rl-for-llf-goals}). In a nutshell, from an existing MDP we introduced temporal goals defined by \LLf formulas about fluents $\L$ observed from the world. A solution for this problem is a (non-Markovian) policy that is optimal in terms of rewards and such that satisfies the \LLf specifications.
+	\item We gave an equivalent formulation of $\MDPagent^{goal}$, the NMRDP $\MDPagent^{nmr}$, and observe that the original problem can be reduced to this formulation (Theorem \ref{th:goal-nmr}).
+	\item We applied the construction shown in Section \ref{sect:nmrdp-llf-rewards}, yielding $\MDP'_{ag}$, and by using Theorem \ref{th:nmrdp-mdp-llf-equivalence} we stated Theorem \ref{th:goal-mdp-ell}, showing that $\MDPagent^{goal}$ can be reduced to $\MDP'_{ag}$
+	\item Finally, by proving Theorem \ref{th:goal-mdp}, we showed that we can do reinforcement learning over the equivalent MDP $\MDP_{ag}^{new}$ by simply dropping the fluents $\ell$ from the state space. The optimal policy for $\MDP_{ag}^{new}$ can be transformed to a solution for the original problem $\MDPagent^{goal}$.
+\end{itemize}
 
 \section{Conclusions}
 In this chapter we introduced the topic of Reinforcement Learning, as well as foundational definitions (MDP, policy $\Policy$, state-value function $\ValFun_\Policy$) and algorithms (Q-Learning, Sarsa). Then we presented the notion of NMRDP and a technique to built an equivalent MDP, by specifying non-Markovian reward function with \LLf formalisms.
-Finally, we defined and studied a new problem, \emph{Reinforcement Learning for \LLf goals}, and proposed a reduction that yields an equivalent MDP which can be used to solve the original problem.
-
+Finally, we defined and studied a new problem, \emph{Reinforcement Learning for \LLf goals}, and proposed a reduction that yields an equivalent MDP which can be used to solve the original problem. An episodic goal-based view of the final MDP is provided.
 \endinput
 
 
