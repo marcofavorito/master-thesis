@@ -1,4 +1,4 @@
-\chapter{Automata-based Reward shaping}
+\chapter{Automata-based Reward shaping}\label{ch:reward-shaping}
 In this chapter we discuss a method to improve exploration of the state space and improve the convergence rate in the setting studied in Section \ref{sect:rl-for-llf-goals}, in particular in the construction $\MDPagent^{new}$. 
 Indeed, the state space of the original MDP $\MDPagent$ is expanded in order to implicitly label the states with relevant histories for the satisfaction of \LLf formulas, which in general makes harder to learn an optimal policy in $\MDPagent^{new}$ wrt $\MDPagent$, due to a bigger state space. 
 Moreover, the introduction of temporal goals makes things harder, because the agent has to find a proper behavior that satisfies all the goals. In general, proper behaviors are harder to find, and require more exploration of the state space.
@@ -149,7 +149,7 @@ The basic intuition about our approach is that \emph{every step toward the satis
 Given a (minimal) automaton $\automaton_{\varphi}$ from a \LLf formula $\varphi$ and its associated reward $r$, Algorithm \ref{alg:static-reward-shaping} shows how the potential function is build from $\automaton_{\varphi}$. This operation is made \emph{off-line}, i.e. before the learning process. Then we associate automatically to the states of the \DFA a potential function $\Phi(q)$ whose value decreases proportionally with the minimum distance between the automaton state $q$ and any accepting state. By construction, potential-based reward shaping with this definition of the potential function gives a positive reward when the agent performs an action leading to a $q'$ that is one step closer to an accepting state, and a negative one in the opposite case. Notice that, by construction, $G(\bar{s}) = G_\Phi(\bar{s})$, where $G_\Phi$ is defined in Equation \ref{eq:reward-shaping-episodic-terminal-state}. Indeed, $\DiscFact^N\Phi(s_N) = 0$ because we take into account the issue explained in Section \ref{sect:PBRS-no-gamma}, and $\Phi(s_0) = 0$ by construction of the Algorithm \ref{alg:static-reward-shaping}.
 
 \begin{algorithm}
-	\caption{Static Reward Shaping over $\automaton_{\varphi}$}
+	\caption{Off-line Reward Shaping over $\automaton_{\varphi}$}
 	\label{alg:static-reward-shaping}
 	\begin{algorithmic}[1]
 		\State $\mathbf{input}$: (minimal) automaton $\automaton_\varphi$, reward $r$
@@ -177,7 +177,7 @@ Given a (minimal) automaton $\automaton_{\varphi}$ from a \LLf formula $\varphi$
 
 In the actual implementation of the Algorithm \ref{alg:static-reward-shaping}, $\Phi(q)$ can be computed  by least-fix point over the automaton $\automaton_\varphi$, i.e. starting from the accepting states and then explore the states from the nearest to the farthest ones.
 
-\section{On-The-Fly Reward shaping }
+\section{On-The-Fly Reward shaping}\label{sect:on-the-fly-reward-shaping}
 Reward shaping can also be used when the \DFAs of the \LTLf /\LDLf formulas are constructed \emph{on-the-fly} \citep{AAAI1817342} so as to avoid to compute the entire automaton off-line. To do so we can rely on dynamic reward shaping (see Section \ref{sect:DPBRS}).
 The idea is to build $\automaton_{\varphi}$ progressively while learning. During the learning process, at every step, the value of the fluents $\ell \in \L$ is observed and the successor state $q'$ of the current state $q$ of the \DFA on-the-fly is computed. 
 Then, the transition and the new state just observed are added into the built automaton at time $t$, $\automaton_{\varphi, t}$, yielding $\automaton_{\varphi, t'}$. The potential function $\Phi$ for $\automaton_{\varphi, t'}$ is recomputed for the new version of the automaton. In this case, the shaping function takes the following form: 

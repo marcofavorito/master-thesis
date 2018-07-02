@@ -34,7 +34,7 @@ Please go \href{https://github.com/MarcoFavorito/flloat#install}{here} for furth
 The package is structured as follows:
 \begin{itemize}
 	\item \texttt{flloat.py}: the main module, it contains the implementation of the translation from \LLf formulas to automata. The functions implemented here are called from methods of \LLf formulas.
-	\item \texttt{base}: contains the abstract definitions used in other modules. The main modules are:
+	\item \texttt{base/}: contains the abstract definitions used in other modules. The main modules are:
 	\begin{itemize}
 		\item \texttt{Symbol.py} and \texttt{Symbols.py}, where have been defined the class \texttt{Symbol} to represent the atomic propositional symbols and the operator symbols;
 		\item \texttt{Alphabet.py}, which is an abstraction for manage a set of \texttt{Symbol};
@@ -43,9 +43,9 @@ The package is structured as follows:
 		\item \texttt{truths.py} and \texttt{nnf.py} that provide abstract implementations for truth evaluations of formulas and negation normal form operations.
 		\item other abstraction definitions that are implemented for each extending subclass.
 	\end{itemize}
-	\item \texttt{syntax}: modules for each formalism (i.e. \texttt{pl.py}, \texttt{ltlf.py} and \texttt{ldlf.py}). In those modules are declared all the classes for representing formulas, implementing their truth evaluation procedure  taking into account their correlation (e.g. \texttt{And} is the negative dual of \texttt{Or}, you can define \texttt{Implies} in terms of \texttt{Not} and \texttt{Or} etc.);
-	\item \texttt{semantics}: modules providing implementations for the semantics. E.g. you can find \texttt{PLInterpretation} and \texttt{FiniteTrace} cited before;
-	\item \texttt{parser}: modules where are defined the parsers of formulas in \PL and \LLf. They depends on PLY.
+	\item \texttt{syntax/}: modules for each formalism (i.e. \texttt{pl.py}, \texttt{ltlf.py} and \texttt{ldlf.py}). In those modules are declared all the classes for representing formulas, implementing their truth evaluation procedure  taking into account their correlation (e.g. \texttt{And} is the negative dual of \texttt{Or}, you can define \texttt{Implies} in terms of \texttt{Not} and \texttt{Or} etc.);
+	\item \texttt{semantics/}: modules providing implementations for the semantics. E.g. you can find \texttt{PLInterpretation} and \texttt{FiniteTrace} cited before;
+	\item \texttt{parser/}: modules where are defined the parsers of formulas in \PL and \LLf. They depends on PLY.
 \end{itemize}
 
 \section{Code examples}

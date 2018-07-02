@@ -1,1 +1,62 @@
 \chapter{Introduction}
+This chapter presents the outline of this thesis and summarizes motivations, goals, and achievements.
+
+\section{Reinforcement Learning}
+Reinforcement learning is an area of Machine Learning where the learning comes from rewards and punishments \citep{Sutton:1998:IRL:551283}. It is concerned in how the learning entity, the \emph{agent}, interacting in an \emph{environment}, should take \emph{actions} so to maximize the observed \emph{reward}. The reward signal is observed after each action taken by the agent. The agent chooses actions depending on the current state of the environment. A solution to the reinforcement learning problem is a \emph{policy} which determines which action should
+be executed in a given state in order to maximize the long term reward. An algorithm that tackles this kind of problem is called \emph{reinforcement learning algorithm}.
+
+\medskip
+The problem, due to its generality, is studied in many other disciplines, such as \emph{game theory}, \emph{control theory}, \emph{operations research}, \emph{multi-agent system}, and many others. Usually, in order to simplify the tractability of the problem, it is assumed that the environment can be modeled as a \emph{Markov Decision Process} (MDP). An environment behaves like an MDP if the Markov property is satified, which means that the state space representation in the algorithm captures enough details so that the optimal decisions can be made when the information about only the current state is available. 
+
+\medskip
+Even if the laws that determines the evolution of the systems and the rewards are unknown a priori, it is still possible to solve an MDP by making several simulations and gathering experiences about the visited states, the actions taken and the observed rewards. However, many challenges arise in this settings:
+\begin{itemize}
+	\item \emph{Exponential state space explosion}: due to the feature selection used for the state space encoding, every added feature yields exponential increase in the number of states, hence reducing the tractability of the problem.
+	\item \emph{Exploration-Exploitation trade-off}: due to the former issue, reinforcement learning algorithm should be designed to avoid exploring irrelevant states in terms of expected reward, while preferring the ones with high expected reward (\emph{exploitation}). Furthermore, the algorithms should be sensitive to the local optima issue, a well-known in statistical learning literature (\emph{exploration}).
+	\item \emph{Temporal credit assignment}: the agent should be able to foresee the effect of his actions (in terms of expected reward), due to the fact that, in many domains, the current reward is influenced by past decisions.
+\end{itemize}
+
+This problems lead to the use of heuristics and approximate solutions. A simple way to do reinforcement learning is to use exploration which is based on the current policy with a certain degree of randomness which deviates from such a policy.
+
+\section{Rewarding behaviors}
+In some domains it could be of interest the study of rewards not depending on a single decision (like in MDPs) but depending on a \emph{sequence} of visited states and actions. For instance, we can reward an agent not only by reaching a goal state, but if the goal is reached while satisfying other properties of interest during the simulation or, in other words, if the agent satisfies some target behavior. It is clear that the the definition of MDP does not fit this problem, since the optimal decision in the current state depends from the \emph{history of states} that leads to the current state.
+
+\medskip
+
+This idea of rewarding behaviors has been proposed in \citep{bacchus1996rewarding}, by defining the \emph{Non-Markovian Reward Decision Process} (NMRDP), a variant of an MDP where the reward does not depend only from one transition of the environment but from a sequence of transitions. In order to specify the desired behaviors that the agent should learn, they defined a temporal logic formalisms called \PLTL (Past \LTL), which is able to speak about a sequence of property configurations over time, that we call \emph{traces}. The classic reinforcement learning algorithms does not work on an NMRDP; however, they propose a transformation from NMRDP into an \emph{expanded} MDP such that the solution of the MDP is also a solution of the original problem. Hence, in order to solve the NMRDP, we can run off-the-shelf RL algorithms over the transformed MDP; the learnt Markovian policy can be easily converted into an optimal policy for the NMRDP.
+
+The trick here is that the transformed MDP is defined over an \emph{expanded state space}, which still contains the original state space but enriches it by labeling every state. The idea is that the labels should keep track in some way the (partial) satisfaction of the temporal formulas. As a result, every state in the transformed state space is replicated multiple times, marking the difference between different (relevant) histories terminating in that state.
+
+\medskip
+A similar transformation has been done in the following works: 
+\citep{ThiebauxGSPK06} and \citep{gretton2014more}, where the temporal logic formalism was respectively \FLTL (a finite \LTL with future formulas) and \FstarLTL (a variant of \FLTL); 
+in \citep{icarte2018teaching}, where they used \emph{Co-Safe} \LTL formulas \citep{Kupferman:2001:MCS:569028.569032, Lacerda:2015:OPG:2832415.2832470};
+in \citep{CamachoCSM17, CamachoCSM17b}, where they used \LTLf (Linear Temporal Logic over finite traces) \citep{de2013linear}.
+In \citep{AAAI1817342} the specification of temporal goals is done by \LTLf or \LDLf (Linear Dynamic Logic over finite traces) formulas.
+
+\section{Topic of the Thesis}\label{sect:topic-thesis}
+In this thesis, we leverage the construction of \citep{AAAI1817342} to define a new problem. Consider a classic reinforcement learning problem defined by an MDP. The agent acts in the state space of the MDP and tries to maximize the reward. We can think of the features of this state space as \emph{low-level features}, e.g. the coordinates of a robot in a room, informations about the limbs etc. 
+
+Now consider that we want to talk about some high-level properties of the environment, e.g. continuing with the example of the robot in the room, we are interested in the status of the window and the door (if they are open or closed). We can define the fluents $open\_window$ and $open\_door$, respectively. We call the features to determine the status of the fluents \emph{high-level features}.
+
+Given this setting, we are interested in:
+\begin{itemize}
+	\item maximize the reward of the original MDP;
+	\item maximize the reward specified by temporal formulas, expressed in \LLf, over the fluents 
+\end{itemize}
+E.g. in the example, a temporal specification could be "eventually open the window, then eventually open the door". 
+
+In this work we specify formally the just defined problem, propose the transformation into an MDP and prove the equivalence of the transformation with the original problem. We propose also a way to apply reward shaping techniques to improve the learning in terms of convergence rate. Moreover, we provide an implementation and give experimental evidence of the goodness of our construction.
+
+\section{Structure of the Thesis}
+The rest of the thesis is structured as follows:
+\begin{itemize}
+	\item In Chapter \ref{ch:logic} we describe the notions about temporal logic formalisms, that will be used for temporal goal specifications. We start from \LTL, \REGEX and then we move towards \LTLf and \LDLf, upon which our method is built on.
+	\item In Chapter \ref{ch:flloat} we describe FLLOAT, a software project that implements the translation from \LLf formulas to equivalent automata. Such translation is an important piece of our approach;
+	\item Chapter \ref{ch:rl} is the core of the thesis. We introduce foundational concepts in reinforcement learning, MDPs and algorithm to find a solution. Then we move to NMRDPs and we formally describe our approach.
+	\item In Chapter \ref{ch:reward-shaping} we apply reward shaping techniques to the setting explained in Chapter \ref{ch:rl}.
+	\item In Chapter \ref{ch:rltg} we present a reinforcement learning framework allowing easy implementation of the construction described in Chapter \ref{ch:rl} and \ref{ch:reward-shaping}.
+	\item Chapter \ref{ch:experiments} describes the conducted experiments, giving evidence that our approach actually works.
+	\item The thesis is concluded in Chapter \ref{ch:conclusions}. This chapter summarizes also the achievements of
+	the thesis and discusses future work.
+\end{itemize}

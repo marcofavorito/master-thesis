@@ -95,7 +95,7 @@ An example of optimal policy is shown in Figure \ref{gridworld-optimal-policy}. 
 
 \end{example}
 
-\begin{example}[\textbf{Breakout}]
+\begin{example}[\textbf{Breakout}]\label{exa:breakout}
 	Breakout is a well known arcade videogame developed by Atari. In this work we implemented a clone of the original Breakout. Figure \ref{fig:breakout} shows a screenshot of the game. On the screen there are a paddle at the bottom, many bricks at the top arranged in a grid layout with $n$ rows and $m$ columns (in the figure $3\times 3 = 9$ bricks), and a ball that is free to move across the screen. The ball bounces when it hits a wall, a brick or the paddle. When the ball hits a brick, that brick is broke down and is removed from the screen. The paddle (the agent) can move left, move right or do nothing. The \emph{goal} is to remove all the bricks, while avoiding that the paddle misses the rebound of the ball (\emph{failure}).
 	
 	The relevant features are: position of the paddle $p_x$, position of the ball $b_x, b_y$, speed of the ball $v_x, v_y$ and status of each brick (booleans) $b_{ij}$. This features of the system gives all the needed information to predict the next state from the current state. Hence we can build an MDP where: $\States$ is the set of  all the possible values of the sequence of features $\tup{p_x, b_x, b_y, v_x, v_y, b_{11}, \dots, b_{nm}}$, $\Actions = \set{Right, Left, No\-op}$, transition function $\TrFun$ determined by the rules of the game. We give reward $R(s,a,s')=10$ if a particular brick in $s'$ has been removed for the first time, plus $100$ if that brick was the last (i.e. goal reached).

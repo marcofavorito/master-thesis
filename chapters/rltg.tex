@@ -1,23 +1,20 @@
 \chapter{RLTG}\label{ch:rltg}
-In this chapter we describe \href{https://github.com/MarcoFavorito/rltg.git}{RLTG} (Reinforcement Learning for Temporal Goals), a software project written in Python.  It is the reference implementation of many of the topics described in Chapter \ref{ch:rl}. 
+In this chapter we describe \href{https://github.com/MarcoFavorito/rltg.git}{RLTG} (Reinforcement Learning for Temporal Goals), a software project written in Python.  It is the reference implementation of many of the topics described in Chapter \ref{ch:rl} and Chapter \ref{ch:reward-shaping}. 
 
 %We'll see the main features, the package structure, and some code examples.
 
 \section{Introduction}
-\paragraph{Main features:} FLLOAT is a Python library that provides support for:
+\paragraph{Main features:} RLTG is a Python framework that allows you to:
 \begin{itemize}
 	
-	\item Syntax, semantics and parsing of the following logic formalisms:
-	\begin{itemize}
-		\item Propositional Logic;
-		\item Linear Temporal Logic on Finite Traces \LTLf
-		\item Linear Dynamic Logic on Finite Traces \LDLf;
-	\end{itemize}
-	\item Conversion from \LLf formula to \NFA, \DFA and \DFA On-The-Fly
+	\item Setup a classic reinforcement learning task by using OpenAI Gym environments.
+	\item Modularization of a reinforcement learning system: definition of \texttt{Environment, Agent, Brain, Policy}, allowing for easy extension;
+	\item Support for Sarsa($\lambda$) and Q($\lambda$) with $\epsilon$-greedy policy.
+	\item Support for \LLf goal specifications, as described in Section \ref{sect:rl-for-llf-goals}.
 	
 \end{itemize}
 
-\paragraph{Dependencies:} FLLOAT requires Python>=3.5 and depends on the following packages:
+\paragraph{Dependencies:} RLTG requires Python>=3.5 and depends on the following packages:
 \begin{itemize}
 	\item \href{https://github.com/MarcoFavorito/flloat.git}{FLLOAT}, described in Chapter \ref{ch:flloat};
 	\item \href{https://gym.openai.com/}{Gym OpenAI}, a toolkit for developing and comparing reinforcement learning algorithms. It offers a useful abstraction of reinforcement learning environments.
@@ -30,11 +27,119 @@ pip install rltg
 
 \section{Package structure}
 The package is structured as follows:
-%\begin{itemize}
-%	\item \texttt{flloat.py}: the main module, it contains the implementation of the translation from \LLf formulas to automata. The functions implemented here are called from methods of \LLf formulas.
-%	\item \texttt{base}: contains the abstract definitions used in other modules. The main modules are:
-%\end{itemize}
-\section{Code examples}
+\begin{itemize}
+	\item \texttt{agents/}: contains multiple packages and modules to build the learning agent.
+	\begin{itemize}
+		\item \texttt{brains/}: it contains \texttt{Brain.py}, the basic abstraction of the reinforcement learning algorithm, as well as \texttt{TDBrain.py}, the implementation of Temporal Difference learning (see Section \ref{sect:temporal-difference-learning});
+		\item \texttt{parameters/} and \texttt{policies/} contain implementations for eligibility traces and $\epsilon$-greedy policy;
+		\item \texttt{feature\_extraction.py}: it contains classes for feature extraction like \texttt{FeatureExtractor}. They leverage the \texttt{Space} abstraction provided by OpenAI Gym. \href{https://github.com/openai/gym/tree/master/gym/spaces}{Here} you can find many types of state space.
+		\item \texttt{Agent.py}, the module that contains the \texttt{Agent} abstraction, defining the abstract methods for interact with the environment (e.g. \texttt{observe} for observing the new environment state, \texttt{step} for choose an action). It needs a \texttt{FeatureExtractor} and a \texttt{Brain}. 
+		\item \texttt{TemporalEvaluator.py}, which implements the temporal goal specified by an \LLf formula.
+	\end{itemize}
+	\item \texttt{logic/}: contains the implementations of reward shaping as described in Section \ref{sect:off-line-reward-shaping} and \ref{sect:on-the-fly-reward-shaping}. The main modules are \texttt{CompleteRewardAutomaton.py}, for the implementation of Off-line Reward Shaping, and \texttt{PartialRewardAutomaton.py}, for the On-the-fly Reward Shaping.
+	\item \texttt{trainers/}: contains the implementation of a highly-customizable training loop, e.g. you can specify under which conditions the training should stop, you can visually render the agent during the learning and you can pause/resume the learning. The \texttt{GenericTrainer} is used for classic reinforcement learning, whereas \texttt{TGTrainer} is used for temporal goal reinforcement learning.
+\end{itemize}
 
+\section{Code examples}
+\subsection{Classic Reinforcement Learning}
+Here we will see an example of reinforcement learning task using RLTG with the OpenAI Gym environment \href{https://gym.openai.com/envs/Taxi-v2/}{\texttt{Taxi-v2}} \citep{Dietterich98themaxq}, available \href{https://github.com/MarcoFavorito/rltg/blob/master/examples/taxi.py}{here}.
+\begin{lstlisting}[style=Python, language=Python, escapechar=£, label={ex:rltg-classic-rl-example}, caption={Classic Reinforcement Learning using RLTG}]
+import gym
+
+from rltg.agents.RLAgent import RLAgent
+from rltg.agents.brains.TDBrain import Sarsa
+from rltg.agents.feature_extraction\
+ import IdentityFeatureExtractor
+from rltg.agents.policies.EGreedy import EGreedy
+from rltg.trainers.GenericTrainer import GenericTrainer
+from rltg.utils.GoalEnvWrapper import GoalEnvWrapper
+from rltg.utils.StoppingCondition\
+ import AvgRewardPercentage
+
+def taxi_goal(*args):
+  reward =args[1]
+  done =args[2]
+  return done and reward == 20
+
+if __name__ == '__main__':
+  env = gym.make("Taxi-v2")£\label{line:env-taxi-1}£ 
+  env = GoalEnvWrapper(env, taxi_goal)£\label{line:env-taxi-2}£
+  
+  observation_space = env.observation_space
+  action_space = env.action_space
+  print(observation_space, action_space)
+  agent = RLAgent( £\label{line:define-rl-agent}£
+    IdentityFeatureExtractor(observation_space),
+    Sarsa(observation_space, action_space, 
+      EGreedy(0.1), alpha=0.1, gamma=0.99, lambda_=0.0)
+  )
+  
+  tr = GenericTrainer(£\label{line:generic-trainer}£
+    env, 
+    agent, 
+    n_episodes=10000
+    stop_conditions=(
+      AvgRewardPercentage(window_size=100, target_mean=9.0)
+    )
+  )
+  tr.main()
+\end{lstlisting}
+Now we analyze some of the APIs provided by RLTG:
+\begin{itemize}
+	\item In line \ref{line:env-taxi-1} we defined the environment by OpenAI Gym APIs. In line and \ref{line:env-taxi-2} we wrapped with a function that make it \emph{goal-based}.
+	\item In line \ref{line:define-rl-agent} we defined our reinforcement learning agent. We had to specify a \texttt{FeatureExtractor}, i.e. which features of the state provided from the environment we consider relevant, and a \texttt{Brain}, i.e. the responsible for the learning of the policy. In particular:
+	\begin{itemize}
+		\item \texttt{IdentityFeatureExtractor} extends \texttt{FeatureExtractor} and it simply get the entire state space from the environment, without modifying it; It requires the observation state space of the environment to do some sanity checks. 
+		\item \texttt{Sarsa} extends \texttt{TDBrain}, and implements Sarsa($\lambda$) (see Section \ref{sect:temporal-difference-learning}). It requires:
+		\begin{itemize}
+			\item the observation space where the algorithm learns (in this case is the same of the one provided by the environment);
+			\item the action space from where actions can be selected;
+			\item the behavior policy (in this case $\epsilon$-greedy policy with $\epsilon = 0.1$.
+			\item the learning rate $\alpha=0.1$, the discount factor $\DiscFact=0.99$, the eligibility trace parameter $\lambda = 0$.
+		\end{itemize}
+		\item In line \ref{line:generic-trainer} we configured the manager of the training task. \texttt{GenericTrainer}, which extends from \texttt{Trainer}, is configured by the environment \texttt{env} and the agent \texttt{agent} defined before, the maximum number of episodes \texttt{n\_episodes} and the stop conditions. \texttt{AvgRewardPercentage} with parameters \texttt{window\_size} = 100 and \texttt{target\_mean} = 9.0 means that we will stop the training if in the last 100 episodes an average reward of 9.0 is observed.
+	\end{itemize}
+\end{itemize}
+
+If you run the script, you will get some statistics for each episode, e.g. the number of explored states, the total reward observed, if the goal has been reached.
+
+\subsection{Temporal goal Reinforcement Learning}
+Now we will see how to use RLTG for a temporal goal specified by a \LLf formula. In particular, we will use the \Breakout environment, presented in Example \ref{exa:breakout} and that we will further describe in Chapter \ref{ch:experiments}. In the next, we show an excerpt of \href{https://github.com/MarcoFavorito/rltg/blob/master/examples/pygames/breakout.py}{this script}:
+
+\begin{lstlisting}[style = Python, language = Python, escapechar = £, label={ex:rltg-temporal-goal-rl-example}, caption={Temporal Goal Reinforcement Learning using RLTG}]
+...
+...
+...
+if __name__ == '__main__':
+  env = GymBreakout(brick_cols=3, brick_rows=3)
+
+  gamma = 0.999
+  on_the_fly = False
+  reward_shaping = False
+
+  agent = TGAgent(£\label{line:tgagent}£
+    BreakoutNRobotFeatureExtractor(env.observation_space),
+    Sarsa(None, env.action_space, policy=EGreedy(0.1),
+      alpha=0.1, gamma=gamma, lambda_=0.99
+    ),
+    [BreakoutCompleteColumnsTemporalEvaluator(£\label{line:list-of-te}£
+      env.observation_space, bricks_rows=env.brick_rows, 
+      bricks_cols=env.brick_cols, left_right=True, 
+      gamma=gamma, on_the_fly=on_the_fly)
+    ],
+    reward_shaping=reward_shaping
+  )
+
+  tr = TGTrainer(env, agent, n_episodes=2000,
+    stop_conditions=(GoalPercentage(100, 0.2),),
+  )
+
+  stats, optimal_stats = tr.main()
+\end{lstlisting}
+Observe that:
+\begin{itemize}
+	\item In Listing \ref{ex:rltg-classic-rl-example} we used \texttt{RLAgent}, while in this case, in line \ref{line:tgagent}, we use \texttt{TGAgent}. The arguments provided in the constructors are the same of the previous example except for an additional argument which is the list of \texttt{TemporalEvaluator} (line \ref{line:list-of-te}). Notice that this definition of \emph{list of temporal goals} is compliant with Definition \ref{def:rl-for-llf-goals}. We do not discuss here details about this particular temporal evaluator, i.e. \texttt{BreakoutCompleteColumnsTemporalEvaluator}. Observe that we can specify if the temporal evaluator should use a off-line automaton or a on-the-fly automaton by the boolean parameter \texttt{on\_the\_fly}. Finally, notice the \texttt{reward\_shaping} flag to toggle automata-based reward shaping (Section \ref{sect:off-line-reward-shaping} and \ref{sect:on-the-fly-reward-shaping}).
+	\item Another difference is in using \texttt{TGTrainer} instead of \texttt{GenericTrainer}. This version is more specialized to deal with the setting explained in Section \ref{sect:rl-for-llf-goals}. The signature of the constructor is the same of \texttt{GenericTrainer}. Notice that in this particular case we used \texttt{GoalPercentage(100, 0.2)}, which means we require the agent have reached the goal at least 20 times in the last 100 episodes.
+\end{itemize}
 \section{License}
 The software is released under \href{https://github.com/MarcoFavorito/rltg/blob/master/LICENSE}{MIT license}.
