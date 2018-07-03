@@ -113,11 +113,11 @@ An example of optimal policy is shown in Figure \ref{gridworld-optimal-policy}. 
 \label{sect:temporal-difference-learning}
 \emph{Temporal difference learning} (TD) \citep{Sutton1988} refers to a class of model-free reinforcement learning methods which learn by bootstrapping from the current estimate of the value function. These methods sample from the environment, like Monte Carlo (MC) methods, and perform updates based on current estimates, like dynamic programming methods (DP) \citep{Bellman:1957}. We do not discuss MC and DP methods here.
 
-Q-Learning \citep{watkins1989learning, Watkins1992} and SARSA are such a methods. They update $\qFunEst(s, a)$, i.e. the estimation of $\qOptFun(s, a)$ at each transition $(s, a) \to (s', r)$. The update rule is the following:
+Q-Learning \citep{watkins1989learning, Watkins1992} and Sarsa are such a methods. They update $\qFunEst(s, a)$, i.e. the estimation of $\qOptFun(s, a)$ at each transition $(s, a) \to (s', r)$. The update rule is the following:
 \begin{equation}\label{td-update-rule}
 \qFunEst(s, a) \leftarrow \qFunEst(s, a) + \LRate \delta
 \end{equation}
-where $\delta$ is the \emph{temporal difference}. In SARSA, it is defined as:
+where $\delta$ is the \emph{temporal difference}. In Sarsa, it is defined as:
 \begin{equation}\label{def:temporal-difference}
 \delta = r + \DiscFact \qFunEst(s', a') - \qFunEst(s, a)
 \end{equation}
@@ -127,16 +127,16 @@ whereas in Q-Learning:
 \end{equation}
 
 TD$(\lambda)$ is an algorithm which uses \emph{eligibility traces}. The parameter $\lambda$ refers to the use of an eligibility trace. The algorithm generalizes MC methods and TD learning, obtained respectively by setting $\lambda = 1$ and $\lambda = 0$. Intermediate values of $\lambda$ yield methods that are often better of the extreme methods. 
-Q-Learning and SARSA that has been shown before can be rephrased with this new formalism as Q-Learning(0) and SARSA(0), special cases of Watkin's Q$(\lambda)$ and SARSA($\lambda$) respectively.
+Q-Learning and Sarsa that has been shown before can be rephrased with this new formalism as Q-Learning(0) and Sarsa(0), special cases of Watkin's Q$(\lambda)$ and Sarsa($\lambda$) respectively.
 In this setting, Equation \ref{td-update-rule} is modified as follows:
 \begin{equation}\label{td-lambda-update-rule}
 \qFunEst(s, a) \leftarrow \qFunEst(s, a) + \LRate \delta e(s, a)
 \end{equation}
 
 Where $e(s, a) \in [0, 1]$, the \emph{eligibility of the pair $(s, a)$}, determines how much the temporal difference $\delta$ should be weighted.
-SARSA($\lambda$) is reported in Algorithm \ref{alg:sarsa-lambda}, whereas Watkin's Q($\lambda$) in Algorithm \ref{alg:q-learning-lambda}, both  in the variants using \emph{replacing eligibility traces} (see line \ref{sarsa-lambda-replacing-traces} and line \ref{q-learning-lambda-replacing-traces}, respectively).
+Sarsa($\lambda$) is reported in Algorithm \ref{alg:sarsa-lambda}, whereas Watkin's Q($\lambda$) in Algorithm \ref{alg:q-learning-lambda}, both  in the variants using \emph{replacing eligibility traces} (see line \ref{sarsa-lambda-replacing-traces} and line \ref{q-learning-lambda-replacing-traces}, respectively).
 \begin{algorithm}
-	\caption{SARSA($\lambda$) \citep{Singh:1996:RLR:225667.225679}}
+	\caption{Sarsa($\lambda$) \citep{Singh:1996:RLR:225667.225679}}
 	\label{alg:sarsa-lambda}
 	\begin{algorithmic}[1]
 		\State Initialize $Q(s, a)$ arbitrarily and $e(s, a)=0$ for all $s, a$
@@ -393,7 +393,7 @@ We do this for two reasons: allow to evaluate formulas in $s_0$ and make it comp
 Let $\Policy'$ be a (Markovian) policy for $\MDP$. It is easy to define an \emph{corresponding} policy on $\NMRDP$, i.e., a policy that guarantees the same rewards, by using $\tau$ and $\sigma$ mappings defined in Theorem \ref{th:nmrdp-mdp-llf-equivalence} and the result shown in Theorem \ref{nmrdp-mdp-policy-equivalence}.
 
 Obviously, typical learning techniques, such as Q-learning
-or SARSA,  are applicable on the expanded
+or Sarsa,  are applicable on the expanded
 $\MDP$ and
 so we can learn an optimal policy $\Policy$ for $\MDP$. 
 %%
@@ -425,7 +425,7 @@ the states of $\MDP$.
 
 In this section we define a particular problem and propose a solution, which is the main theoretical contribution of this work. We call this problem \emph{Reinforcement Learning for \LLf Goals}. 
 
-\subsection{Problem definition}
+\subsection{Problem definition}\label{sect:problem-definition}
 
 \subsubsection{the World, the Agent and the Fluents}
 Let $\W$ be a \emph{world} of interest (e.g. a room, an environment, a videogame). Let $W$ be the set of \emph{world states}, i.e. the states of the world $\W$. 
@@ -788,6 +788,8 @@ $$
 $$
 
 The reward $R(s,a,s')$ is collected after each taken action, and it is summed with $r_i$ for every satisfied $\varphi_i$ at the last state of the episode.
+
+\paragraph{Remark about the stopping condition:} notice that the presence of $\mathrm{failure\_state}(\mathbf{s})$ in the stopping condition is not strictly needed. Indeed, in the general case, the agent still tries to learn an optimal policy in terms of observed rewards, regardless if the temporal goal at some point of the episode cannot be satisfied anymore (i.e. a failure state for some automaton $\automaton_{\varphi_i}$ is reached). However, we can think of $\mathrm{failure\_state}(\mathbf{s})$ as a way to avoid parts of simulations that are not of interest, since the trajectory is "compromised" in terms of satisfaction of \LLf formulas.
 
 \subsubsection{Summary}
 In the following we summarize the results of this section:

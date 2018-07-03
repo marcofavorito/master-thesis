@@ -1,7 +1,31 @@
 \chapter{Conclusion and Future Work}\label{ch:conclusions}
-This chapter summarizes the thesis. 
+This chapter summarizes the thesis. It starts with a brief overview of the problem studied. Then we summarize the main contributions of the thesis. A section is dedicated to future directions of research. The document ends with final remarks.
 \section{Overview}
+This work addresses a particular problem in reinforcement learning. We considered a classical reinforcement learning problem, i.e. an MDP over a set of features of the world, that we called \emph{low-level} features
+\footnote{We say \emph{low-level} features in the sense that these features are only responsible for the basic interaction of the agent with the environment, but still allowing to maximize the reward, or reach the goal in the MDP. Notice that it is only a way to refer about them, and no assumption nor restriction is made over the MDP state space.}.
+We are interested in defining non-Markovian rewards over this MDP about some high-level properties of the environment, that we called the \emph{fluents}, determined by some set of \emph{high-level} features of the world.
+
+We considered the cartesian product between the MDP state space and the fluents configurations, which yields, in general, and unknown transition function. 
+In order to proceed, we made a key assumption: that is, \emph{the new transition function (i.e. defined both over low-level features and fluents configurations) satisfies the Markov property}, i.e. given the current MDP state, the current fluents configuration and the action taken, we have all the informations needed to know the probability of each state to be the next one.
+
+However, due to the non-Markovian property of the additional rewards, we need to transform the new state space in some way such that the learning is actually feasible and such that the learnt policy in this transformed state space is equivalent (in terms of optimality) to the original problem. How this can be effectively achieved is one of the main contribution of this work.
 \section{Summary of Main Contributions}
-\section{Limitations}
+In this section we list the main contribution of the thesis.
+\begin{itemize}
+	\item Formal definition and analysis of the problem, as well as design of the transformation of the state space (strongly inspired by \cite{AAAI1817342}), allowing the off-the-shelf reinforcement learning algorithms to actually learn the non-Markovian goals (Chapter \ref{ch:rl}), specified by \LLf formulas (described in Chapter \ref{ch:logic});
+	\item An automatic way to apply reward shaping in this setting, leveraging the particular structure of the transformation (Chapter \ref{ch:reward-shaping}). The idea is, the transitions in the new state space that make a step over the automaton towards an accepting state (or, equivalently, any progression in the satisfaction of the formula) should be rewarded. We dealt with both when the automaton is known a priori and when it is built on-the-fly;
+	\item Implementation of both the translation algorithm from \LLf formulas to equivalent automata, presented in Chapter \ref{ch:flloat}, and a reinforcement learning framework to set up a RL agent satisfying \LLf formulas, presented in Chapter \ref{ch:rltg};
+	\item Experimental evidence that the approach is actually working (Chapter \ref{ch:experiments}).
+\end{itemize}
+
 \section{Future Works}
+There are many future directions that can be taken, due to the novelty of the work. Some of them are:
+\begin{itemize}
+	\item the Markov assumption of the combined transition function that has been made in Section \ref{sect:problem-definition} is a strong one; however, in many real world cases, the implicit approximation is not enough to effectively model the world. It can be interesting to find an approach that addresses this issues and manages the problem in this harder scenario.
+	\item In this work we prevalently made a theoretical analysis of the problem and we have shown only some application at software level. The proposed framework is more general, and should be validated in many other domains, both simulated and physical ones (e.g. robotics), where there is the need to represent additional high-level knowledge to express complex goals;
+	\item We did not focus our attention over the algorithmic side, but only on how the problem can be properly redefined, and relying on off-the-shelf reinforcement learning algorithms. It might be the case that design of ad-hoc algorithms for this framework yield better performances. For instance, one could think about a better "explicit" exploration policy of the state space, in spite of "implicit" guidance by using reward shaping, and even some adaptation of state-of-the-art techniques, e.g. hierarchical reinforcement learning, curriculum learning, knowledge transfer and so on.
+	\item Finally, it could be of interest to extend this work to the general framework of multi-agent systems and work on the challenges and issues that such extension might lead to.
+\end{itemize}
+
 \section{Final Remarks}
+The topic of this work is of crucial importance: the need to face the dichotomy between the control of low-level features and the ability to reason about higher-level properties of the world is the core issue in many of the fields and applications in artificial intelligence, especially in robotics. This thesis aimed to address this issue in a particular case, by a theoretical analysis, but providing actual implementations as support for the proposed approach.

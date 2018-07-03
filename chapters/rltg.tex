@@ -32,7 +32,7 @@ The package is structured as follows:
 	\begin{itemize}
 		\item \texttt{brains/}: it contains \texttt{Brain.py}, the basic abstraction of the reinforcement learning algorithm, as well as \texttt{TDBrain.py}, the implementation of Temporal Difference learning (see Section \ref{sect:temporal-difference-learning});
 		\item \texttt{parameters/} and \texttt{policies/} contain implementations for eligibility traces and $\epsilon$-greedy policy;
-		\item \texttt{feature\_extraction.py}: it contains classes for feature extraction like \texttt{FeatureExtractor}. They leverage the \texttt{Space} abstraction provided by OpenAI Gym. \href{https://github.com/openai/gym/tree/master/gym/spaces}{Here} you can find many types of state space.
+		\item \texttt{feature\_extraction.py}: it contains classes for feature extraction like \texttt{FeatureExtractor}. They leverage the \texttt{Space} abstraction provided by OpenAI Gym. \href{https://github.com/openai/gym/tree/master/gym/spaces}{Here} you can find many types of state spaces supported.
 		\item \texttt{Agent.py}, the module that contains the \texttt{Agent} abstraction, defining the abstract methods for interact with the environment (e.g. \texttt{observe} for observing the new environment state, \texttt{step} for choose an action). It needs a \texttt{FeatureExtractor} and a \texttt{Brain}. 
 		\item \texttt{TemporalEvaluator.py}, which implements the temporal goal specified by an \LLf formula.
 	\end{itemize}
@@ -142,4 +142,4 @@ Observe that:
 	\item Another difference is in using \texttt{TGTrainer} instead of \texttt{GenericTrainer}. This version is more specialized to deal with the setting explained in Section \ref{sect:rl-for-llf-goals}. The signature of the constructor is the same of \texttt{GenericTrainer}. Notice that in this particular case we used \texttt{GoalPercentage(100, 0.2)}, which means we require the agent have reached the goal at least 20 times in the last 100 episodes.
 \end{itemize}
 \section{License}
-The software is released under \href{https://github.com/MarcoFavorito/rltg/blob/master/LICENSE}{MIT license}.
+The software is open source and is released under \href{https://github.com/MarcoFavorito/rltg/blob/master/LICENSE}{MIT license}.
