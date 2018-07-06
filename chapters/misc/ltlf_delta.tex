@@ -14,9 +14,10 @@
 \Dfun{\varphi_1 \lOR  \varphi_2} 			\ind &= \ind   \Dfun{\varphi_1} \lOR \Dfun{\varphi_2}\\
 \Dfun{\Next \varphi} 	\ind &= \ind   \varphi \lAND \lnot \Ended \equiv \varphi \lAND \Diamond \true\\
 \Dfun{\varphi_1 \lUntil \varphi_2} 	\ind &= \ind   \Dfun{\varphi_2} \lOR (\Dfun{\varphi_1} \lAND\Dfun{\Next(\varphi_1 \lUntil \varphi_2)})\\
-\Dfun{\Diamond \varphi} 	\ind &= \ind   \Dfun{\varphi} \lOR \Dfun{\Next \Diamond \varphi}\\
+%\Dfun{\Diamond \varphi} 	\ind &= \ind   \Dfun{\varphi} \lOR \Dfun{\Next \Diamond \varphi}\\
 \Dfun{\Wnext \varphi} 	\ind &= \ind   \varphi \lOR \Ended \equiv \varphi \lOR \Box \false\\
 \Dfun{\varphi_1 \R \varphi_2} 	\ind &= \ind   \Dfun{\varphi_2} \lAND (\Dfun{\varphi_1} \lOR \Dfun{\Wnext(\varphi_1 \Release \varphi_2)})\\
-\Dfun{\Box \varphi} 	\ind &= \ind   \Dfun{\varphi} \lAND \Dfun{\Wnext \Box \varphi}\label{delta-ltlf}
+%\Dfun{\Box \varphi} 	\ind &= \ind   \Dfun{\varphi} \lAND \Dfun{\Wnext \Box \varphi}
+\label{delta-ltlf}
 \end{aligned}		
 \end{align}

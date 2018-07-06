@@ -1,0 +1,27 @@
+digraph {
+	fake [style=invisible]
+	0 [root=true]
+	1
+	2
+	3
+	4
+	5
+	6
+	7 [shape=doublecircle]
+	fake -> 0 [style=bold]
+	0 -> 1 [label="{red, bip}"]
+	0 -> 0 [label="true"]
+	1 -> 2 [label="{bip, green}"]
+	1 -> 1 [label="true"]
+	2 -> 3 [label="{blue, bip}"]
+	2 -> 2 [label="true"]
+	3 -> 4 [label="{bip, pink}"]
+	3 -> 3 [label="true"]
+	4 -> 4 [label="true"]
+	4 -> 5 [label="{brown, bip}"]
+	5 -> 5 [label="true"]
+	5 -> 6 [label="{gray, bip}"]
+	6 -> 6 [label="true"]
+	6 -> 7 [label="{purple, bip}"]
+	7 -> 7 [label="true"]
+}

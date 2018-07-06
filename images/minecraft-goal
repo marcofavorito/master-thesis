@@ -1,0 +1,18 @@
+digraph {
+	fake [style=invisible]
+	0 [root=true]
+	1
+	2
+	3 [shape=doublecircle]
+	fake -> 0 [style=bold]
+	0 -> 0 [label="!get_iron"]
+	0 -> 1 [label="get_iron"]
+	1 -> 0 [label="!get_iron"]
+	1 -> 1 [label="get_iron"]
+	1 -> 2 [label="get_iron & get_wood"]
+	2 -> 0 [label="!get_iron"]
+	2 -> 1 [label="!get_wood"]
+	2 -> 2 [label="get_iron & get_wood"]
+	2 -> 3 [label="get_iron & use_factory & get_wood"]
+	3 -> 3 [label="true"]
+}

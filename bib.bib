@@ -636,3 +636,23 @@
 	organization={Springer}
 }
 
+
+
+
+
+@InProceedings{pmlr-v70-andreas17a,
+	title = 	 {Modular Multitask Reinforcement Learning with Policy Sketches},
+	author = 	 {Jacob Andreas and Dan Klein and Sergey Levine},
+	booktitle = 	 {Proceedings of the 34th International Conference on Machine Learning},
+	pages = 	 {166--175},
+	year = 	 {2017},
+	editor = 	 {Doina Precup and Yee Whye Teh},
+	volume = 	 {70},
+	series = 	 {Proceedings of Machine Learning Research},
+	address = 	 {International Convention Centre, Sydney, Australia},
+	month = 	 {06--11 Aug},
+	publisher = 	 {PMLR},
+	pdf = 	 {http://proceedings.mlr.press/v70/andreas17a/andreas17a.pdf},
+	url = 	 {http://proceedings.mlr.press/v70/andreas17a.html},
+	abstract = 	 {We describe a framework for multitask deep reinforcement learning guided by policy sketches. Sketches annotate tasks with sequences of named subtasks, providing information about high-level structural relationships among tasks but not how to implement them—specifically not providing the detailed guidance used by much previous work on learning policy abstractions for RL (e.g. intermediate rewards, subtask completion signals, or intrinsic motivations). To learn from sketches, we present a model that associates every subtask with a modular subpolicy, and jointly maximizes reward over full task-specific policies by tying parameters across shared subpolicies. Optimization is accomplished via a decoupled actor–critic training objective that facilitates learning common behaviors from multiple dissimilar reward functions. We evaluate the effectiveness of our approach in three environments featuring both discrete and continuous control, and with sparse rewards that can be obtained only after completing a number of high-level subgoals. Experiments show that using our approach to learn policies guided by sketches gives better performance than existing techniques for learning task-specific or shared policies, while naturally inducing a library of interpretable primitive behaviors that can be recombined to rapidly adapt to new tasks.}
+}
