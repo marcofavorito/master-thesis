@@ -1,0 +1,19 @@
+digraph {
+	fake0 [style=invisible]
+	0 [root=true]
+	1
+	2 [shape=doublecircle]
+	fake0 -> 0 [style=bold]
+	0 -> 1 [label="{A}"]
+	0 -> 2 [label="{B, A}"]
+	0 -> 1 [label="{}"]
+	0 -> 1 [label="{B}"]
+	1 -> 2 [label="{B, A}"]
+	1 -> 1 [label="{A}"]
+	1 -> 1 [label="{}"]
+	1 -> 1 [label="{B}"]
+	2 -> 2 [label="{A}"]
+	2 -> 2 [label="{B, A}"]
+	2 -> 2 [label="{}"]
+	2 -> 2 [label="{B}"]
+}

@@ -1,0 +1,19 @@
+digraph {
+	fake [style=invisible]
+	"frozenset({frozenset({(true U (A & B))})})" [root=true]
+	"frozenset({frozenset()})" [shape=doublecircle]
+	"frozenset({frozenset({(true U true), (true U (A & B))})})"
+	fake -> "frozenset({frozenset({(true U (A & B))})})" [style=bold]
+	"frozenset({frozenset({(true U (A & B))})})" -> "frozenset({frozenset()})" [label="{A, B}"]
+	"frozenset({frozenset({(true U (A & B))})})" -> "frozenset({frozenset({(true U true), (true U (A & B))})})" [label="{}"]
+	"frozenset({frozenset({(true U (A & B))})})" -> "frozenset({frozenset({(true U true), (true U (A & B))})})" [label="{A}"]
+	"frozenset({frozenset({(true U (A & B))})})" -> "frozenset({frozenset({(true U true), (true U (A & B))})})" [label="{B}"]
+	"frozenset({frozenset()})" -> "frozenset({frozenset()})" [label="{A, B}"]
+	"frozenset({frozenset()})" -> "frozenset({frozenset()})" [label="{}"]
+	"frozenset({frozenset()})" -> "frozenset({frozenset()})" [label="{A}"]
+	"frozenset({frozenset()})" -> "frozenset({frozenset()})" [label="{B}"]
+	"frozenset({frozenset({(true U true), (true U (A & B))})})" -> "frozenset({frozenset()})" [label="{A, B}"]
+	"frozenset({frozenset({(true U true), (true U (A & B))})})" -> "frozenset({frozenset({(true U true), (true U (A & B))})})" [label="{}"]
+	"frozenset({frozenset({(true U true), (true U (A & B))})})" -> "frozenset({frozenset({(true U true), (true U (A & B))})})" [label="{A}"]
+	"frozenset({frozenset({(true U true), (true U (A & B))})})" -> "frozenset({frozenset({(true U true), (true U (A & B))})})" [label="{B}"]
+}

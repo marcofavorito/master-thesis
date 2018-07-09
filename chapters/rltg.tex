@@ -25,6 +25,8 @@ In this chapter we describe \href{https://github.com/MarcoFavorito/rltg.git}{RLT
 pip install rltg
 \end{lstlisting}
 
+The software is open source and is released under \href{https://github.com/MarcoFavorito/rltg/blob/master/LICENSE}{MIT license}.
+
 \section{Package structure}
 The package is structured as follows:
 \begin{itemize}
@@ -141,5 +143,3 @@ Observe that:
 	\item In Listing \ref{ex:rltg-classic-rl-example} we used \texttt{RLAgent}, while in this case, in line \ref{line:tgagent}, we use \texttt{TGAgent}. The arguments provided in the constructors are the same of the previous example except for an additional argument which is the list of \texttt{TemporalEvaluator} (line \ref{line:list-of-te}). Notice that this definition of \emph{list of temporal goals} is compliant with Definition \ref{def:rl-for-llf-goals}. We do not discuss here details about this particular temporal evaluator, i.e. \texttt{BreakoutCompleteColumnsTemporalEvaluator}. Observe that we can specify if the temporal evaluator should use a off-line automaton or a on-the-fly automaton by the boolean parameter \texttt{on\_the\_fly}. Finally, notice the \texttt{reward\_shaping} flag to toggle automata-based reward shaping (Section \ref{sect:off-line-reward-shaping} and \ref{sect:on-the-fly-reward-shaping}).
 	\item Another difference is in using \texttt{TGTrainer} instead of \texttt{GenericTrainer}. This version is more specialized to deal with the setting explained in Section \ref{sect:rl-for-llf-goals}. The signature of the constructor is the same of \texttt{GenericTrainer}. Notice that in this particular case we used \texttt{GoalPercentage(100, 0.2)}, which means we require the agent have reached the goal at least 20 times in the last 100 episodes.
 \end{itemize}
-\section{License}
-The software is open source and is released under \href{https://github.com/MarcoFavorito/rltg/blob/master/LICENSE}{MIT license}.

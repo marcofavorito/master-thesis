@@ -18,7 +18,7 @@
 \usepackage[nottoc,notlot,notlof,chapter]{tocbibind}
 
 %\newcommand{\thesistitle}{Reward shaping in RL for {\sc LTL}$_f$/{\sc LDL}$_f$ Goals: Theory and Practice}
-\newcommand{\thesistitle}{Reinforcement Learning for {\sc LTL}$_f$/{\sc LDL}$_f$ Goals: Theory and Implementations}
+\newcommand{\thesistitle}{Reinforcement Learning for {\sc LTL}$_f$/{\sc LDL}$_f$ Goals: Theory and Implementation}
 
 \usepackage{index}
 \usepackage{hyperref}
@@ -51,7 +51,7 @@
 %\usepackage[autostyle]{csquotes}  
 \usepackage{graphicx}
 %\graphicspath{{./images/}}
-
+\usepackage{rotating}
 
 %\usepackage{tikz}
 %\usetikzlibrary{automata}
@@ -66,6 +66,12 @@
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 
+\usepackage{accsupp}    
+\newcommand{\noncopynumber}[1]{
+	\BeginAccSupp{method=escape,ActualText={}}
+	#1
+	\EndAccSupp{}
+}
 \lstdefinestyle{Python}{
 	language        = Python,
 	backgroundcolor=\color{backcolour},
@@ -73,7 +79,8 @@
 	keywordstyle    = \color{deepblue},
 	stringstyle     = \color{deepgreen},
 	commentstyle    = \color{codegray}\ttfamily,
-	numberstyle=\tiny\color{codegray},
+	numberstyle=\tiny\color{codegray}\noncopynumber,
+	columns=flexible,
 	numbers=left,
 	stepnumber=1
 }

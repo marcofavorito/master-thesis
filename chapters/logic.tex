@@ -241,13 +241,14 @@ We use the standard abbreviations for classical logic formulas:
 \end{align*}
 And for temporal formulas:
 \begin{align}
+\varphi_1 \Release \varphi_2 &\doteq \lnot (\lnot \varphi_1 \lUntil \lnot \varphi_2) \label{ltlf-release}\\
 \Diamond\varphi &\doteq \true\lUntil\varphi \label{ltlf-eve}\\
 \Box\varphi &\doteq\lnot\Diamond\lnot\varphi \label{ltlf-alw}\\
 \Wnext \varphi &\doteq \lnot \Next \lnot \varphi \label{ltlf-wn}\\
 \Last &\doteq \Wnext\false \label{ltlf-last}\\
 \Ended &\doteq \Box\false \label{ltlf-ended}
 \end{align}
-As the reader might already noticed, \ref{ltlf-eve} and \ref{ltlf-alw} are defined as in Section \ref{sect:ltl-syntax};  Equation \ref{ltlf-wn} is called \emph{weak next} (notice that on finite traces $\lnot \Next \varphi \not\equiv \Next \lnot \varphi$); \ref{ltlf-last} denotes the end of the trace, while \ref{ltlf-ended} denotes that the trace is ended.
+As the reader might already noticed, \ref{ltlf-eve} and \ref{ltlf-alw} are defined as in Section \ref{sect:ltl-syntax};  Equation \ref{ltlf-release} is called \emph{release}; Equation \ref{ltlf-wn} is called \emph{weak next} (notice that on finite traces $\lnot \Next \varphi \not\equiv \Next \lnot \varphi$); \ref{ltlf-last} denotes the end of the trace, while \ref{ltlf-ended} denotes that the trace is ended.
 \begin{example}\label{ltlf-formula-examples}
 	Here we recall Example \ref{ltl-formula-examples} and we see the impact on \emph{Always}, \emph{Eventually} \emph{Response} and \emph{Persistence} \LTL formulas if interpreted on finite traces (i.e. formulas in \LTLf):
 	\begin{itemize}
@@ -428,10 +429,10 @@ $\BOX{\regexp}\varphi$ states that, from the current step, all executions
 satisfying the \REGEX $\regexp$ are such that their last step
 satisfies $\varphi$.
 %It is worth to notice that this interpretation of $\BOX{\ }$ and $\DIAM{\ }$ is pretty similar to the one shown in Section \ref{pdl-syntax}, as well as the test construct $\varphi?$ are used to insert into the execution path checks for satisfaction of additional \LDLf formulas.
-\subsection{Semantics}
+\subsection{Semantics}\label{sect:ldlf-semantics}
 As we did in the previous sections, we formally give a semantics to \LDLf (interpreted over finite traces, like \LTLf and \REGEX).
 
-\begin{definition}
+\begin{definition}\label{def:ldlf-truth}
 	Given a finite trace $\trace$, we define that a \LDLf formula $\varphi$ is \emph{true} at time $i$ ($0 \le i \le \last$), in symbols $\trace, i \models \varphi$ inductively as follows:
 	\begin{align*}
 	\trace, i &\models \ttrue\nonumber\\
@@ -563,7 +564,7 @@ We give the following definition:
 	\end{align}
 \end{definition}
 Note that $\DfunEps{\varphi}$ is always either $\true$ or $\false$.
-\subsection{The {\sc ldl}$_f2$\NFA algorithm}
+\subsection{The {\sc ldl}$_f2$\NFA algorithm}\label{sect:ldlf2nfa}
  Algorithm \ref{alg:ldl2nfa} (\LDLfToNFA) takes in input a \LDLf/\LTLf formula $\varphi$ and outputs a \NFA $\automaton_\varphi = \tup{2^\Prop, Q, q_0, \delta, F}$ that accepts exactly the traces satisfying $\varphi$. It is a variant of the algorithm presented in \citep{DeGiacomo:2015:SLL:2832415.2832466}, and its correctness relies on the fact that every \LDLf/\LTLf formula $\varphi$ can be associated a polynomial \emph{alternating automaton on words} (\AFW) accepting exactly the traces that satisfy $\varphi$ and that every \AFW can be transformed into an \NFA \citep{de2013linear}.
 The proposed algorithm requires that $\varphi$ is in \emph{negation normal form} (NNF), i.e. with negation symbols occurring only in front of propositions. 
 
@@ -671,13 +672,13 @@ In order to obtain a \DFA, the \NFA $\automaton_\varphi$ can be determinized in 
 	
 	\begin{figure}[h!]
 		\centering
-		\caption{The \NFA associated to $\Box A$.  $G(A)$ stands for $\Box A$}\label{fig:nfa-always-a}
 		\includegraphics[width=.4\linewidth]{images/ltlf-alwaysA-nfa}
+		\caption{The \NFA associated to $\Box A$.  $G(A)$ stands for $\Box A$}\label{fig:nfa-always-a}
 	\end{figure}
 	\begin{figure}[h!]
 		\centering
-		\caption{The \DFA associated to $\Box A$}\label{fig:dfa-always-a}
 		\includegraphics[width=.2\linewidth]{images/ltlf-alwaysA-dfa}
+		\caption{The \DFA associated to $\Box A$}\label{fig:dfa-always-a}
 	\end{figure}
 
 	
@@ -767,13 +768,13 @@ In order to obtain a \DFA, the \NFA $\automaton_\varphi$ can be determinized in 
 	
 	\begin{figure}[h!]
 		\centering
-		\caption{The \NFA associated to $\Diamond A$. $F(A)$ stands for $\Diamond A$}\label{fig:nfa-eventually-a}
 		\includegraphics[width=.4\linewidth]{images/ltlf-eventuallyA-nfa}
+		\caption{The \NFA associated to $\Diamond A$. $F(A)$ stands for $\Diamond A$}\label{fig:nfa-eventually-a}
 	\end{figure}
 	\begin{figure}[h!]
 		\centering
-		\caption{The \DFA associated to $\Diamond A$}\label{fig:dfa-eventually-a}
 		\includegraphics[width=.3\linewidth]{images/ltlf-eventuallyA-dfa}
+		\caption{The \DFA associated to $\Diamond A$}\label{fig:dfa-eventually-a}
 	\end{figure}
 	
 \end{example}
@@ -784,21 +785,24 @@ In order to obtain a \DFA, the \NFA $\automaton_\varphi$ can be determinized in 
 		\item \emph{Conditional Response}: the \LTLf formula $\varphi = \Box (A \Rightarrow \Diamond B)$ or equivalently the \LDLf formula $\varphi = \BOX{\true^*}(\DIAM{A}tt \Rightarrow \DIAM{\true^*}\DIAM{B}tt)$ translates into the automaton depicted in Figure \ref{conditional-response-dfa}.
 		\begin{figure}[h!]
 			\centering
-			\caption{The \DFA associated to $\varphi = \Box (A \Rightarrow \Diamond B)$}\label{conditional-response-dfa}
 			\includegraphics[width=.4\linewidth]{images/conditional-response-dfa}
+			\caption{The \DFA associated to $\varphi = \Box (A \Rightarrow \Diamond B)$}\label{conditional-response-dfa}
 		\end{figure}
 		
 		\item \emph{Alternating sequence}: the \LDLf formula $\varphi = \DIAM{(A;B)^*}\Ended$ translates into the automaton depicted in Figure \ref{alternating-sequence-dfa}.
 		\begin{figure}[h!]
 			\centering
-			\caption{The \DFA associated to $\varphi = \DIAM{(A;B)^*}\Ended$}\label{alternating-sequence-dfa}
 			\includegraphics[width=.4\linewidth]{images/alternating-sequence-dfa}
+			\caption{The \DFA associated to $\varphi = \DIAM{(A;B)^*}\Ended$}\label{alternating-sequence-dfa}
 		\end{figure}
 		
 	\end{itemize}
 \end{example}
 
-\subsection{On-the-fly \DFA}
+\section{On-the-fly \DFA}
+In this section we describe a way to evaluate a \LLf formula without the need to build the entire automaton $\automaton_\varphi$. After that, we devise a new algorithm, a variant of \LDLfToNFA, that avoids the computation of the \NFA, but directly translate the formula into a \DFA. We provide some examples to clarify the presented topics.
+
+\subsection{On-the-fly \LLf evaluation}\label{sect:on-the-fly-dfa}
 In this section we describe an alternative method to evaluate a trace on a \DFA without the need for constructing $\automaton_\varphi$, that we call \emph{on-the-fly} \citep{AAAI1817342}. The idea is, we progress all possible states that the \NFA can be in, after consuming the next trace symbol, and accept the trace iff, once it has been completely read, the set of possible states contains a final state.
 
 More formally, call a set of possible
@@ -830,11 +834,11 @@ Q^\epsilon = \set{\varphi | \varphi = \bigwedge_{\psi\in q_i} \DfunEps{\psi}}
 		\item $\tup{\set{}} \models \varphi$? This time consider the trace $\trace = \tup{\set{}}$ or, equivalently, $\trace = \tup{\lnot A}$. We expect that the on-the-fly evaluation returns $\false$, hence $\trace \not \models \varphi$. In order to answer, we need to progress the automaton on-the-fly for each element of the trace (in this case only one) and check if the last macro state is an accepting state by using the procedure explained in the previous case.
 		The next macro state $Q_1$ by applying Equation \ref{eq:on-the-fly-progression-rule}. Actually, it is computed as we did in Iteration \ref{exa:always-A_it-1_prop-empty} of Example \ref{ldl2nfa-example-always} with $\PropInt = \set{}$. 
 		
-		Since no $q'$ can be found, $Q_1 = \set{}$, which is not an accepting state since $\set{\true} \notin Q_1^\epsilon$. Hence, $\trace \not \models \varphi$.\label{exa:on-the-fly-always-A-trace-empty}
+		Since no $q'$ can be found, $Q_1 = \set{}$, which is not an accepting state since $\set{\true} \notin Q_1^\epsilon$. Hence, $\trace \not \models \varphi$.\label{exa:on-the-fly-always-A-trace-false}
 		
-		\item $\tup{\set{A}} \models \varphi$? Consider the trace $\trace = \tup{\set{}}$ or, equivalently, $\trace = \tup{\lnot A}$. We expect that the on-the-fly evaluation returns $\true$, hence $\trace \models \varphi$. We proceed, as in the previous case, to compute the next macro state $Q_1$ by applying Equation \ref{eq:on-the-fly-progression-rule}. Actually, it is computed as we did in Iteration \ref{exa:always-A_it-1_prop-A} with $\PropInt = \set{A}$. As a minimal interpretation we have both $q' = \set{\Box A}$ and $q' = \set{\Box \false}$. Hence, the new macro state is $Q_1 = \set{\set{\Box A}, \set{\Box \false}}$.
+		\item \label{exa:on-the-fly-always-A-trace-A} $\tup{\set{A}} \models \varphi$? Consider the trace $\trace = \tup{\set{}}$. We expect that the on-the-fly evaluation returns $\true$, hence $\trace \models \varphi$. We proceed, as in the previous case, to compute the next macro state $Q_1$ by applying Equation \ref{eq:on-the-fly-progression-rule}. Actually, it is computed as we did in Iteration \ref{exa:always-A_it-1_prop-A} with $\PropInt = \set{A}$. As a minimal interpretation we have both $q' = \set{\Box A}$ and $q' = \set{\Box \false}$. Hence, the new macro state is $Q_1 = \set{\set{\Box A}, \set{\Box \false}}$.
 		
-		Since there are no other symbols in the trace $\trace$ to be processed, we compute $Q_1^\epsilon = \set{\set{true}, \set{true}} = \set{\set{true}}$. Since $\set{true} \in Q_1^\epsilon$, we can say that $\trace \models \varphi$.\label{exa:on-the-fly-always-A-trace-A}
+		Since there are no other symbols in the trace $\trace$ to be processed, we compute $Q_1^\epsilon = \set{\set{true}, \set{true}} = \set{\set{true}}$. Since $\set{true} \in Q_1^\epsilon$, we can say that $\trace \models \varphi$.
 		
 		\item $\tup{\set{A}, \set{}} \models \varphi$? Consider the trace $\trace = \tup{\set{A}, \set{}}$. We expect that the on-the-fly evaluation returns $\false$, hence $\trace \not\models \varphi$. We proceed, as in the previous case, to compute the next macro states by applying Equation \ref{eq:on-the-fly-progression-rule}. Macro state $Q_1$ is the same as we have seen in Case \ref{exa:on-the-fly-always-A-trace-A}. 
 		We apply again the progression rule of Equation \ref{eq:on-the-fly-progression-rule} with $\PropInt = \trace(2) = \set{}$. 
@@ -842,7 +846,7 @@ Q^\epsilon = \set{\varphi | \varphi = \bigwedge_{\psi\in q_i} \DfunEps{\psi}}
 		
 		Since there are no other symbols in the trace $\trace$ to be processed, we compute $Q_2^\epsilon = \set{}$. Since $\set{true} \not\in Q_2^\epsilon$, we can say that $\trace \not\models \varphi$.
 		
-		\item $\tup{\set{}, \set{A}} \models \varphi$? Consider the trace $\trace = \tup{\set{}, \set{A}}$. We expect that the on-the-fly evaluation returns $\false$, hence $\trace \not\models \varphi$. The macro state $Q_1$ is the same as we have seen in Case \ref{exa:on-the-fly-always-A-trace-empty}, i.e. $Q_1 = \set{}$. 
+		\item $\tup{\set{}, \set{A}} \models \varphi$? Consider the trace $\trace = \tup{\set{}, \set{A}}$. We expect that the on-the-fly evaluation returns $\false$, hence $\trace \not\models \varphi$. The macro state $Q_1$ is the same as we have seen in Case \ref{exa:on-the-fly-always-A-trace-false}, i.e. $Q_1 = \set{}$. 
 		We apply again the progression rule of Equation \ref{eq:on-the-fly-progression-rule} with $\PropInt = \trace(2) = \set{A}$. But this is trivially $Q_2 = \set{}$, by definition of the progression rule.
 		
 		Since there are no other symbols in the trace $\trace$ to be processed, we compute $Q_2^\epsilon = \set{}$. Since $\set{true} \not\in Q_2^\epsilon$, we can say that $\trace \not\models \varphi$.
@@ -869,9 +873,9 @@ Q^\epsilon = \set{\varphi | \varphi = \bigwedge_{\psi\in q_i} \DfunEps{\psi}}
 		The next macro state $Q_1$ by applying Equation \ref{eq:on-the-fly-progression-rule}. Actually, it is computed as we did in Iteration \ref{exa:eventually-A_it-1_prop-empty} of Example \ref{ldl2nfa-example-eventually} with $\PropInt = \set{}$. 
 		 As a minimal interpretation we have $q' = \set{\Diamond A, \Diamond \true}$. Hence, the new macro state is $Q_1 = \set{\set{\Diamond A, \Diamond \true}}$.
 		 
-		Now, $Q_1^\epsilon = \set{\set{\false}}$, which is not an accepting state since $\set{\true} \notin Q_1^\epsilon$. Hence, $\trace \not \models \varphi$.\label{exa:on-the-fly-eventually-A-trace-empty}
+		Now, $Q_1^\epsilon = \set{\set{\false}}$, which is not an accepting state since $\set{\true} \notin Q_1^\epsilon$. Hence, $\trace \not \models \varphi$.\label{exa:on-the-fly-eventually-A-trace-false}
 		
-		\item $\tup{\set{A}} \models \varphi$? Consider the trace $\trace = \tup{\set{}}$ or, equivalently, $\trace = \tup{\lnot A}$. We expect that the on-the-fly evaluation returns $\true$, hence $\trace \models \varphi$. We proceed, as in the previous case, to compute the next macro state $Q_1$ by applying Equation \ref{eq:on-the-fly-progression-rule}. Actually, it is computed as we did in Iteration \ref{exa:eventually-A_it-1_prop-A} with $\PropInt = \set{A}$. As a minimal interpretation we have $q' = \empty$. Hence, the new macro state is $Q_1 = \set{\emptyset}$.
+		\item $\tup{\set{A}} \models \varphi$? Consider the trace $\trace = \tup{\set{}}$. We expect that the on-the-fly evaluation returns $\true$, hence $\trace \models \varphi$. We proceed, as in the previous case, to compute the next macro state $Q_1$ by applying Equation \ref{eq:on-the-fly-progression-rule}. Actually, it is computed as we did in Iteration \ref{exa:eventually-A_it-1_prop-A} with $\PropInt = \set{A}$. As a minimal interpretation we have $q' = \empty$. Hence, the new macro state is $Q_1 = \set{\emptyset}$.
 		
 		Since there are no other symbols in the trace $\trace$ to be processed, we compute $Q_1^\epsilon = \set{\set{true}}$. Since $\set{true} \in Q_1^\epsilon$, we can say that $\trace \models \varphi$.\label{exa:on-the-fly-eventually-A-trace-A}
 		
@@ -880,7 +884,7 @@ Q^\epsilon = \set{\varphi | \varphi = \bigwedge_{\psi\in q_i} \DfunEps{\psi}}
 		
 		Since there are no other symbols in the trace $\trace$ to be processed, we compute $Q_2^\epsilon = \set{\set{\true}}$. Since $\set{true} \in Q_2^\epsilon$, we can say that $\trace \models \varphi$.
 		
-		\item $\tup{\set{}, \set{A}} \models \varphi$? Consider the trace $\trace = \tup{\set{}, \set{A}}$. We expect that the on-the-fly evaluation returns $\true$, hence $\trace \models \varphi$. The macro state $Q_1$ is the same as we have seen in Case \ref{exa:on-the-fly-eventually-A-trace-empty}, i.e. $Q_1 = \set{\set{\Diamond A, \Diamond \true}}$. 
+		\item \label{exa:on-the-fly-eventually-A-trace-false-A}$\tup{\set{}, \set{A}} \models \varphi$? Consider the trace $\trace = \tup{\set{}, \set{A}}$. We expect that the on-the-fly evaluation returns $\true$, hence $\trace \models \varphi$. The macro state $Q_1$ is the same as we have seen in Case \ref{exa:on-the-fly-eventually-A-trace-false}, i.e. $Q_1 = \set{\set{\Diamond A, \Diamond \true}}$. 
 		We apply again the progression rule of Equation \ref{eq:on-the-fly-progression-rule} with $\PropInt = \trace(2) = \set{A}$. But this is trivially $Q_2 = \set{\emptyset}$ (as we've seen in Iteration \ref{exa:eventually-A_it-2} of Example \ref{ldl2nfa-example-eventually}), by definition of the progression rule.
 		
 		Since there are no other symbols in the trace $\trace$ to be processed, we compute $Q_2^\epsilon = \set{\set{\true}}$. Since $\set{\true} \in Q_2^\epsilon$, we can say that $\trace \models \varphi$.
@@ -890,7 +894,7 @@ Q^\epsilon = \set{\varphi | \varphi = \bigwedge_{\psi\in q_i} \DfunEps{\psi}}
 	
 \end{example}
 
-\subsubsection{\LDLfToDFA: a variant of \LDLfToNFA}
+\subsection{\LDLfToDFA: a variant of \LDLfToNFA}\label{sect:llf2dfa}
 
 Example \ref{exa:on-the-fly-always-A} and \ref{exa:on-the-fly-eventually-A} suggest a new way to translate \LLf formulas to automata, that is a variant of \LDLfToNFA (Algorithm \ref{alg:ldl2nfa}). We call it \LDLfToDFA, and directly translates an \LLf formula to a \DFA, instead of first translation into an \NFA and then compute the \DFA by determinization.
 
@@ -902,12 +906,13 @@ Example \ref{exa:on-the-fly-always-A} and \ref{exa:on-the-fly-eventually-A} sugg
 		\State \algOutput\ \DFA $\automaton_\varphi = \tup{2^\Prop, \Q, Q_0, \delta, F}$ \Comment Notice: $\Q$ is a set of macro states.
 		
 		\State $Q_0 \gets \set{\set{\varphi}}$ \Comment the initial state of $\automaton_\varphi$ is the initial macro state
-		\State $F \gets \set{\set{\emptyset}}$
-		\If{$(\set{\true}\in Q_0^\epsilon)$} \label{ldlf2dfa:delta-eps-init}
-		\State $F \gets F \cup \set{Q_0}$
-		\EndIf
-		\State $\Q \gets \set{Q_0, \set{\emptyset}}$
+		\State $F \gets \emptyset$
+		\State $\Q \gets \set{Q_0}$
 		\State $\delta \gets \emptyset$
+		\If{$(\set{\true}\in Q_0^\epsilon)$} \label{ldlf2dfa:delta-eps-init}
+			\State $F \gets F \cup \set{Q_0}$
+		\EndIf
+		
 		\While{$(\Q \tm{or} \delta\ \text{change})$}
 			\For{$(Q\in \Q, \PropInt\in2^\Prop)$}
 				\State $Q' \gets \set{}$
@@ -933,7 +938,143 @@ The idea behind Algorithm \ref{alg:ldlf2dfa} is the following: build the \DFA by
 
 The main advantage over Algorithm \ref{alg:ldl2nfa} is that we avoid the state explosion due to the determinization procedure, since we only process reachable states of the final \DFA. We use this algorithm in the implementations of Chapter \ref{ch:flloat}.
 
-\subsection{Complexity of \LLf reasoning}
+\begin{example}
+	We consider Example \ref{ldl2nfa-example-always} but using Algorithm \ref{alg:ldlf2dfa} for translation of $\varphi = \Box A$ into a \DFA.
+	
+	\begin{enumerate}
+		\setcounter{enumi}{-1}
+		\item Before the main loop, we have:
+			\begin{align*}
+			Q_0 &= \set{\set{\Box A}}\\
+			\Q  &= \set{Q_0}\\
+			\delta &= \emptyset\\
+			F &= \set{Q_0} \ind (\text{because } \set{true}\in Q_0^\epsilon)
+			\end{align*}
+		The \DFA at this stage is depicted in Figure \ref{fig:exa-on-the-fly-always-A-it-0}.
+		
+		\item Iteration: Consider the macro state $Q_0$. Consider the (unique) \NFA state $\set{\Box A}$. 
+		
+		With $\PropInt = \set{A}$ we generate the new macro state $Q' = \set{\set{\Box A}, \set{\Box \false}}$. We add $Q'$ to $\Q$ and $(Q_0, \PropInt, Q')$ to $\delta$. We followed the same steps as we did in Example \ref{exa:on-the-fly-always-A}, Case \ref{exa:on-the-fly-always-A-trace-A}.
+		
+		With $\PropInt = \set{}$ we generate the new macro state $Q' =\emptyset$.  We add $Q'$ to $\Q$ and $(Q_0, \PropInt, Q')$ to $\delta$. Since $\set{\true}\not\in\Q'^\epsilon$, we do not add $Q'$ to $F$. We followed the same steps as we did in Example \ref{exa:on-the-fly-always-A}, Case \ref{exa:on-the-fly-always-A-trace-false}.
+		
+		\medskip
+		
+		The \DFA at this stage is depicted in Figure \ref{fig:exa-on-the-fly-always-A-it-1}.
+		
+		\item Iteration: We already processed $Q=\set{\set{\Box A}}$.
+		
+		Consider the macro state $Q = \emptyset$. Since there exists no $q\in Q$, the for-loop at line \ref{ldlf2dfa:main-for-loop}, we add to $\delta$ all the transitions of the form $(\emptyset, \PropInt, \emptyset)$, for all $\PropInt \in 2^\Prop$.
+ 
+		 Now consider the macro state $Q = \set{\set{\Box A}, \set{\Box \false}}$. 
+		
+		Consider $\PropInt = \set{A}$. For $q = \set{\Box A}$ we generate the sub-macro state $q' = \set{\Box A}$ and $q' = \set{\Box \false}$. For $q = \set{\Box \false}$ we do not generate any sub-macro state.
+		Hence, the resulting macro state is $Q' = \set{\set{\Box A}, \set{\Box \false}}$. Since $Q'\in \Q$, we only add $(Q, \PropInt, Q')$ to $\delta$.
+		
+		Consider $\PropInt = \set{}$. For $q = \set{\Box A}$ we do not generate any sub-macro state. For $q = \set{\Box \false}$ we do not generate any sub-macro state.
+		Hence, the resulting macro state is $Q' = \set{}$. Since $Q'\in \Q$, we only add $(Q, \PropInt, Q')$ to $\delta$.
+		 
+		Since there are no other macro states nor propositional interpretation to process, the algorithm terminates. The final \DFA is depicted in Figure \ref{fig:exa-on-the-fly-always-A-it-complete}.
+		
+	\end{enumerate}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.20\textwidth}
+		\includegraphics[width=\textwidth]{images/on-the-fly-always-A-it-0}
+			 	\caption{Iteration 0}
+			 	\label{fig:exa-on-the-fly-always-A-it-0}
+	\end{subfigure}
+	~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+	%(or a blank line to force the subfigure onto a new line)
+	\begin{subfigure}[b]{0.35\textwidth}
+		\includegraphics[width=\textwidth]{images/on-the-fly-always-A-it-1}
+		\caption{Iteration 1}
+		\label{fig:exa-on-the-fly-always-A-it-1}
+	\end{subfigure}
+	
+	\begin{subfigure}[b]{0.35\textwidth}
+		\includegraphics[width=\textwidth]{images/on-the-fly-always-A-it-complete}
+		\caption{Iteration 2}
+		\label{fig:exa-on-the-fly-always-A-it-complete}
+	\end{subfigure}
+	\caption{The automaton of Example \ref{exa:on-the-fly-always-A}, step by step.}\label{fig:exa-on-the-fly-always-A}
+\end{figure}
+
+It is interesting to observe that the macro state $Q = \set{\set{\Box A}, \set{\Box \false}}$, where we end after reading the symbol $\set{A}$ from the initial state, is the set of \NFA states (Figure \ref{fig:nfa-always-a}) where we could ends after reading the same symbol from the initial state, namely $\set{\Box A}$ and $\set{\Box \false}$. Analogous considerations can be made for other symbols and other macro states.
+
+This observation makes clearer the true meaning of Algorithm \ref{alg:ldlf2dfa} with respect to Algorithm \ref{alg:ldl2nfa}: that is, the macro states keeps track of all the possible evolutions of the \NFA with respect to a trace $\trace$. By reading all the possible symbols from every macro state, we will eventually discover all the relevant states of the \DFA.
+
+Furthermore, the minimization and trimming of the resulting automaton (depicted in Figure \ref{fig:exa-on-the-fly-always-A-it-complete}) yields the one depicted in Figure \ref{fig:dfa-always-a}, as an evidence of the equivalence between the two algorithms.
+\end{example}
+
+\clearpage
+\begin{example}
+	We consider Example \ref{ldl2nfa-example-eventually} but using Algorithm \ref{alg:ldlf2dfa} for translation of $\varphi = \Diamond A$ into a \DFA.
+	
+	\begin{enumerate}
+		\setcounter{enumi}{-1}
+		\item Before the main loop, we have:
+		\begin{align*}
+		Q_0 &= \set{\set{\Diamond A}}\\
+		\Q  &= \set{Q_0, \emptyset}\\
+		\delta &= \emptyset\\
+		F &= \emptyset \ind (\text{because } \set{true}\not\in Q_0^\epsilon)
+		\end{align*}
+		The \DFA at this stage is depicted in Figure \ref{fig:exa-on-the-fly-eventually-A-it-0}.
+		
+		\item Iteration: Consider the macro state $Q_0$. Consider the (unique) \NFA state $\set{\Diamond A}$. 
+		
+		With $\PropInt = \set{A}$ we generate the new macro state $Q' = \set{\emptyset}$. We add $Q'$ to $\Q$ and $(Q_0, \PropInt, Q')$ to $\delta$. Since $\set{\true}\in\Q'^\epsilon$, we add $Q'$ to $F$. We followed the same steps as we did in Example \ref{exa:on-the-fly-eventually-A}, Case \ref{exa:on-the-fly-eventually-A-trace-A}.
+		
+		With $\PropInt = \set{}$ we generate the new macro state $Q' =\set{\set{\Diamond A, \Diamond \true}}$. We add $Q'$ to $\Q$ and $(Q_0, \PropInt, Q')$ to $\delta$. Since $\set{\true}\not\in\Q'^\epsilon$, we do not add $Q'$ to $F$. We followed the same steps as we did in Example \ref{exa:on-the-fly-eventually-A}, Case \ref{exa:on-the-fly-eventually-A-trace-false}.
+		
+		The \DFA at this stage is depicted in Figure \ref{fig:exa-on-the-fly-eventually-A-it-1}.
+		
+		\item Iteration: We already processed $Q=\set{\set{\Box A}}$.
+		
+		Consider the macro state $Q = \set{\emptyset}$. Since 
+		the unique successor state of $q=\emptyset$ is $q'=\emptyset$, the next macro state, for every symbol, is the same. Hence, we add to $\delta$ all the transitions of the form $(\set{\emptyset}, \PropInt, \set{\emptyset})$, for all $\PropInt \in 2^\Prop$.
+		
+		Now consider the macro state $Q = \set{\set{\Diamond A, \Diamond \true}}$. 
+		
+		Consider $\PropInt = \set{A}$. As we've seen in Case \ref{exa:on-the-fly-eventually-A-trace-false-A} of Example \ref{exa:on-the-fly-eventually-A}, the next macro state is $Q'=\set{\emptyset}$, since that for $q = \set{\Diamond A, \Diamond \true}$ the successor state is $q'=\emptyset$. Since $Q'\in \Q$, we only add $(Q, \PropInt, Q')$ to $\delta$.
+		
+		Consider $\PropInt = \set{}$. The successor state of $q = \set{\Diamond A, \Diamond \true}$ is $q' = q$.
+		Hence, the resulting macro state is $Q' = \set{\set{\Diamond A, \Diamond \true}}$. Since $Q'\in \Q$, we only add $(Q, \PropInt, Q')$ to $\delta$. We followed the same steps as we did in Example \ref{ldl2nfa-example-eventually}, Iteration  \ref{exa:eventually-A_it-2}.
+		
+		Since there are no other macro states nor propositional interpretation to process, the algorithm terminates. The final \DFA is depicted in Figure \ref{fig:exa-on-the-fly-eventually-A-it-complete}.
+		
+	\end{enumerate}
+	
+	\begin{figure}[h]
+		\centering
+		\begin{subfigure}[b]{0.17\textwidth}
+			\includegraphics[width=\textwidth]{images/on-the-fly-eventually-A-it-0}
+			\caption{Iteration 0}
+			\label{fig:exa-on-the-fly-eventually-A-it-0}
+		\end{subfigure}
+		~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+		%(or a blank line to force the subfigure onto a new line)
+		\begin{subfigure}[b]{0.50\textwidth}
+			\includegraphics[width=\textwidth]{images/on-the-fly-eventually-A-it-1}
+			\caption{Iteration 1}
+			\label{fig:exa-on-the-fly-eventually-A-it-1}
+		\end{subfigure}
+		
+		\begin{subfigure}[b]{0.5\textwidth}
+			\includegraphics[width=\textwidth]{images/on-the-fly-eventually-A-it-complete}
+			\caption{Iteration 2}
+			\label{fig:exa-on-the-fly-eventually-A-it-complete}
+		\end{subfigure}
+		\caption{The automaton of Example \ref{exa:on-the-fly-eventually-A}, step by step.}\label{fig:exa-on-the-fly-eventually-A}
+	\end{figure}
+	
+	
+\end{example}
+
+
+\section{Reasoning in \LLf}
 In this section we study the complexity of \LLf reasoning (i.e. complexity of problems as defined in Definition \ref{ltlf-sat-val-ent}.
 
 \begin{theorem}[\cite{de2013linear}] Satisfiability, validity, and logical implication for \LDLf formulas are \PSPACE-complete

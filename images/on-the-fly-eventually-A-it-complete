@@ -1,0 +1,13 @@
+digraph {
+	fake [style=invisible]
+	"{{♢A}}" [root=true]
+	"{{♢A, ♢true}}"
+	"{{}}" [shape=doublecircle]
+	fake -> "{{♢A}}" [style=bold]
+	"{{♢A}}" -> "{{}}" [label="{A}"]
+	"{{♢A}}" -> "{{♢A, ♢true}}" [label="{}"]
+	"{{}}" -> "{{}}" [label="{A}"]
+	"{{}}" -> "{{}}" [label="{}"]
+	"{{♢A, ♢true}}" -> "{{}}" [label="{A}"]
+	"{{♢A, ♢true}}" -> "{{♢A, ♢true}}" [label="{}"]
+}

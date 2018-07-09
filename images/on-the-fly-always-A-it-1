@@ -1,0 +1,9 @@
+digraph {
+	fake [style=invisible]
+	"{{☐A}}" [root=true shape=doublecircle]
+	"{{☐A}, {☐false}}" [shape=doublecircle]
+	"{}"
+	fake -> "{{☐A}}" [style=bold]
+	"{{☐A}}" -> "{{☐A}, {☐false}}" [label="{A}"]
+	"{{☐A}}" -> "{}" [label="{}"]
+}

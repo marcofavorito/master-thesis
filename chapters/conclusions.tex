@@ -5,7 +5,7 @@ This work addresses a particular problem in reinforcement learning. We considere
 \footnote{We say \emph{low-level} features in the sense that these features are only responsible for the basic interaction of the agent with the environment, but still allowing to maximize the reward, or reach the goal in the MDP. Notice that it is only a way to refer about them, and no assumption nor restriction is made over the MDP state space.}.
 We are interested in defining non-Markovian rewards over this MDP about some high-level properties of the environment, that we called the \emph{fluents}, determined by some set of \emph{high-level} features of the world.
 
-We considered the cartesian product between the MDP state space and the fluents configurations, which yields, in general, and unknown transition function. 
+We considered the cartesian product between the MDP state space and the fluents configurations, which yields, in general, an unknown transition function. 
 In order to proceed, we made a key assumption: that is, \emph{the new transition function (i.e. defined both over low-level features and fluents configurations) satisfies the Markov property}, i.e. given the current MDP state, the current fluents configuration and the action taken, we have all the informations needed to know the probability of each state to be the next one.
 
 However, due to the non-Markovian property of the additional rewards, we need to transform the new state space in some way such that the learning is actually feasible and such that the learnt policy in this transformed state space is equivalent (in terms of optimality) to the original problem. How this can be effectively achieved is one of the main contribution of this work.
