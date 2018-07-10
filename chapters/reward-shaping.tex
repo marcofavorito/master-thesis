@@ -1,11 +1,13 @@
 \chapter{Automata-based Reward shaping}\label{ch:reward-shaping}
-In this chapter we discuss a method to improve exploration of the state space and improve the convergence rate in the setting studied in Section \ref{sect:rl-for-llf-goals}, in particular in the construction $\MDPagent^{new}$. 
+In this chapter we discuss a method to improve exploration of the state space and improve the convergence rate in the setting studied in Chapters \ref{ch:rl} and \ref{ch:rl-llf-goals}, in particular in the construction $\MDPagent^{new}$. 
 Indeed, the state space of the original MDP $\MDPagent$ is expanded in order to implicitly label the states with relevant histories for the satisfaction of \LLf formulas, which in general makes harder to learn an optimal policy in $\MDPagent^{new}$ wrt $\MDPagent$, due to a bigger state space. 
 Moreover, the introduction of temporal goals makes things harder, because the agent has to find a proper behavior that satisfies all the goals. In general, proper behaviors are harder to find, and require more exploration of the state space.
 
 \emph{Reward Shaping} is a general method, well-known in the literature of Reinforcement Learning, used to deal with big state spaces and \emph{sparse} rewards, and trying to address the temporal
 credit assignment problem, i.e. to determine
-the long-term consequences of actions. It consists in provide additional reward to the learning agent. In this chapter we propose a technique to apply reward shaping in our setting.
+the long-term consequences of actions. It aims to help the agent by giving extra reward signals, beside the ones given by the environment, to guide the agent towards higher environment rewards. It is a way to implicitly include prior knowledge in a reinforcement learning setting, and doing so the state space is explored more efficiently, as well as the convergence rate is sped-up.
+
+In this chapter we propose a technique to apply reward shaping in our setting. In particular, we devise two methods: one where the automaton is known a-priori, that we call \emph{off-line} reward shaping, and the other where the automaton is built from scratch, that we call \emph{on-the-fly} reward shaping.
 
 The chapter is structured as follows: in the first section we explain the reward shaping theory, in particular the requirements for theoretical guarantees of policy invariance under reward transformation. Then we show how apply reward shaping on the automata transitions associated to \LLf formulas $\varphi_i$, both in \emph{off-line} variant (i.e. when the automaton is built \emph{before} the beginning of the learning process)  and \emph{on-the-fly} variant (i.e. when the automaton is built \emph{during} the learning process).
  
@@ -141,7 +143,7 @@ A simple solution to this problem is to require that $\Phi(s_N)=0$ whenever the 
 In the following sections, we will take into account the topics just described in designing a reward shaping strategy for our setting.
 
 \section{Off-line Reward shaping over $\automaton_\varphi$}\label{sect:off-line-reward-shaping}
-In this part we propose an automatic way to apply reward shaping in the setting presented in Section \ref{sect:rl-for-llf-goals}.
+In this part we propose an automatic way to apply reward shaping in the setting presented in Section \ref{sect:rl-goals-reduction-to-mdp}.
 Recall that the state space of $\MDPagent^{new}$ is $Q_1\times \dots Q_m \times \States$, where $Q_i$ is the set of states of $\automaton_{\varphi_i}$, the automaton associated to the \LLf formula $\varphi_i$ (see Section \ref{sect:llf2automata}).
 
 The basic intuition about our approach is that \emph{every step toward the satisfaction of a goal formula $\varphi_i$ should be rewarded}, analogously as it is done in reward shaping for classical goals (see Example \ref{exa:reward-shaping-gridworld}). Hence, for a given temporal specification $\varphi_i$ we should assign to every $q\in Q_i$ a potential function that is, to some extent, inversely proportional to the distance from any final state.

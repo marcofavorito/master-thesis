@@ -222,7 +222,7 @@ Linear-time Temporal Logic over finite traces, \LTLf, is essentially standard
 This apparently trivial difference has big impact: as we will see, some \LTL formula has a different meaning if interpreted over infinite traces or finite ones.
 
 \subsection{Syntax}\label{ltlf-syntax}
-In fact, the syntax of \LTLf is the same of the one showed in Section \ref{ltl-syntax}, i.e. \emph{formulas} of \LTLf are built from a set $\Prop$ of propositional symbols and are closed under the boolean connectives, the unary temporal operator \Next (\emph{next-time}) and the binary operator $\lUntil$ (\emph{until}):
+In fact, the syntax of \LTLf is the same of the one showed in Section \ref{sect:ltl-syntax}, i.e. \emph{formulas} of \LTLf are built from a set $\Prop$ of propositional symbols and are closed under the boolean connectives, the unary temporal operator \Next (\emph{next-time}) and the binary operator $\lUntil$ (\emph{until}):
 
 \[\begin{array}{rcl}
 \varphi &::=& \phi \mid \lnot \varphi \mid \varphi_1\land \varphi_2 \mid \Next\varphi \mid \varphi_1 \lUntil \varphi_2
@@ -1075,7 +1075,7 @@ Furthermore, the minimization and trimming of the resulting automaton (depicted 
 
 
 \section{Reasoning in \LLf}
-In this section we study the complexity of \LLf reasoning (i.e. complexity of problems as defined in Definition \ref{ltlf-sat-val-ent}.
+In this section we study the complexity of \LLf reasoning (i.e. complexity of problems as defined in Definition \ref{ltlf-sat-val-ent}, by leveraging the automata construction described in previous sections.
 
 \begin{theorem}[\cite{de2013linear}] Satisfiability, validity, and logical implication for \LDLf formulas are \PSPACE-complete
 \end{theorem}
