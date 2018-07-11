@@ -1,25 +1,25 @@
 \chapter{RL for {\sc ltl}$_f$/{\sc ldl}$_f$ Rewards}
 \label{ch:rl}
 
-In this chapter we discuss about Reinforcement Learning with non-Markovian rewards specified by \LLf formulas. The main contribution of this chapter is to devise a natural extension of the construction proposed in \citep{AAAI1817342} for a reinforcement learning task. That is, we show that it is possible to do reinforcement learning for non-Markovian rewards, expressed in \LLf formulas, by expanding the state space of the agent from the automata associated to the \LLf reward formulas.
+In this chapter, we discuss Reinforcement Learning with non-Markovian rewards specified by \LLf formulas. The main contribution of this chapter is to devise a natural extension of the construction proposed in \citep{AAAI1817342} for a reinforcement learning task. That is, we show that it is possible to do reinforcement learning for non-Markovian rewards, expressed in \LLf formulas, by expanding the state space of the agent from the automata associated to the \LLf reward formulas.
 
 
 \section{Reinforcement Learning}
 \label{RL}
-Reinforcement Learning \citep{Sutton:1998:IRL:551283} is a sort of optimization problem where an \emph{agent} interacts with an \emph{environment} and obtains a \emph{reward} for each action he chooses and the new observed state. The task is to maximize a numerical reward signal obtained after each action during the interaction with the environment. The agent does not know a priori how the environment works (i.e. the effects of his actions), but he can make observations in order to know the new state and the reward. Hence, learning is made in a \emph{trial-and-error} fashion. Moreover, it is worth to notice that in many situation reward might not been affected only from the last action but from an indefinite number of previous action. In other words, the reward can be \emph{delayed}, i.e. the agent should be able to foresee the effect of his actions in terms of future expected reward. Figure \ref{fig:agent-environment} represent the interaction between the agent and the environment in this setting.
+Reinforcement Learning \citep{Sutton:1998:IRL:551283} is a sort of optimization problem where an \emph{agent} interacts with an \emph{environment} and obtains a \emph{reward} for each action he chooses and the new observed state. The task is to maximize a numerical reward signal obtained after each action during the interaction with the environment. The agent does not know a priori how the environment works (i.e. the effects of his actions), but he can make observations in order to know the new state and the reward. Hence, learning is made in a \emph{trial-and-error} fashion. Moreover, it is worth to notice that in many situation reward might not be affected only from the last action but from an indefinite number of the previous actions. In other words, the reward can be \emph{delayed}, i.e. the agent should be able to foresee the effect of his actions in terms of future expected reward. Figure \ref{fig:agent-environment} represent the interaction between the agent and the environment in this setting.
 \begin{figure}[!h]
 	\centering
 	\includegraphics[width=.8\linewidth]{images/agent-environment}
 	\caption{The agent and its interaction with the environment in Reinforcement Learning}\label{fig:agent-environment}
 \end{figure}
 
-In the next subsections we introduce some of the classical mathematical frameworks for RL: Markov Decision Process (MDP) and Non-Markovian Reward Decision Process (NMRDP).
+In the next subsections, we introduce some of the classical mathematical frameworks for RL: Markov Decision Process (MDP) and Non-Markovian Reward Decision Process (NMRDP).
 \section{Markov Decision Process (MDP)}
 \label{MDP}
 
 A Markov Decision Process (MDP) $\MDP$ is a tuple $\tup{\States, \Actions, \TrFun, \Reward, \DiscFact}$ containing a set of \emph{states} $\States$, a set of \emph{actions} $\Actions$, a \emph{transition function} $\TrFun: \States \times \Actions \to Prob(\States)$ that returns for every pair state-action a probability distribution over the states, a \emph{reward function} $\Reward: \States \times \Actions \times \States \to \Reals$ that returns the reward received by the agent when he performs action $a$ in $s$ and transitions in $s'$, and a \emph{discount factor} $\DiscFact$, with $0 \le \DiscFact \le 1$, that indicates the present value of future rewards. With $\TrFun(s, a, s')$ we denote the probability to end in state $s'$ given the action $a$ from $s$.
 
-The discount factor $\DiscFact$ deserves some attention. Its value highly influences the MDP, its solution, and how the agent interprets rewards. Indeed, if $\DiscFact = 0$, we are in the pure \emph{greedy} setting, i.e. the agent is shortsighted and look only at the reward that it might obtain in the next step, by doing a single action. The higher $\DiscFact$, the longer the sight horizon, or the foresight, of the agent: the far rewards are taken into account for the  current action choice. If $\DiscFact < 1$ we are in the \emph{finite horizon} setting: namely, the agent is intrinsically motivated to obtain rewards as fast as possible, depending on how $\DiscFact$ is far from $1$. When $\DiscFact = 1$ we are in the \emph{infinite horizon} setting, which means that the agent considers far rewards as they can be obtained in the next step. In other words, we may think the agent as \emph{immortal}, since the time the agent spend to reach rewards does not matter anymore.
+The discount factor $\DiscFact$ deserves some attention. Its value highly influences the MDP, its solution, and how the agent interprets rewards. Indeed, if $\DiscFact = 0$, we are in the pure \emph{greedy} setting, i.e. the agent is shortsighted and looks only at the reward that it might obtain in the next step, by doing a single action. The higher $\DiscFact$, the longer the sight horizon, or the foresight, of the agent: the far rewards are taken into account for the current action choice. If $\DiscFact < 1$ we are in the \emph{finite horizon} setting: namely, the agent is intrinsically motivated to obtain rewards as fast as possible, depending on how $\DiscFact$ is far from $1$. When $\DiscFact = 1$ we are in the \emph{infinite horizon} setting, which means that the agent considers far rewards as they can be obtained in the next step. In other words, we may think the agent as \emph{immortal}, since the time the agent spend to reach rewards does not matter anymore.
 
 \medskip
 A \emph{policy} $\Policy: \States \to \Actions$ for an MDP $\MDP$ is a mapping from states to actions, and represents a solution for $\MDP$. Given a sequence of rewards $\Reward_{t+1}, \Reward_{t+2}, \dots, \Reward_{T}$, the \emph{expected discounted return} $\ExpRet_t$ at time step $t$
@@ -76,13 +76,13 @@ Now we give the definition of optimal policy:
 	An \emph{optimal policy} $\OptPolicy$ is a policy such that $\OptPolicy \ge \Policy$ for all $\Policy$. 
 \end{definition}
 
-Given an MDP $\MDP$, a typical reinforcement learning problem is the following: find an optimal policy for $\MDP$, without knowing $\TrFun$ and $\Reward$. Notice that instead of explicit specification of the transition probabilities and rewards, the transition probabilities are accessed through a simulator that is restarted many times from a fixed or uniformly random initial state $s_0\in\States$. We call this way of structuring the learning process \emph{episodic reinforcement learning}. Usually, in episodic reinforcement learning, we require the presence of one or more \emph{goal states} where the simulation of the MDP ends and the task is considered completed, or a maximum time limit $T$ for the number of action that can be taken by the agent in one single episode, and the overcoming of $T$ determines the end of the episode. Optionally, \emph{failure states} can be also defined, where the episode end similarly to goal states, but the task is considered failed.
+Given an MDP $\MDP$, a typical reinforcement learning problem is the following: find an optimal policy for $\MDP$, without knowing $\TrFun$ and $\Reward$. Notice that instead of explicit specification of the transition probabilities and rewards, the transition probabilities are accessed through a simulator that is restarted many times from a fixed or uniformly random initial state $s_0\in\States$. We call this way of structuring the learning process \emph{episodic reinforcement learning}. Usually, in episodic reinforcement learning, we require the presence of one or more \emph{goal states} where the simulation of the MDP ends and the task is considered completed, or a maximum time limit $T$ for the number of actions that can be taken by the agent in one single episode, and the overcoming of $T$ determines the end of the episode. Optionally, \emph{failure states} can be also defined, where the episode ends similarly to goal states, but the task is considered failed.
 
 \subsubsection{Examples}
 Many dynamic systems can be modeled as Markov Decision Processes. 
 
 \begin{example}[\textbf{Gridworld}]\label{exa:gridworld} Perhaps the most simple MDP used as a toy example is \emph{Gridworld}, depicted in Figure \ref{fig:gridworld}.
-There are $3\times 4$ cells, i.e. states of the MDP $\States = \set{s_{11}, s_{12}, \dots, s_{34}}\setminus \set{s_{22}}$. The agent can do four actions: $A = \set{Right, Left, Up, Down}$. The initial state is fixed and is $s_0 = s_{11}$ and the agent can move in any of the adjacent and free cells from the current state. Assuming an episodic task, the goal is to reach $s_{34}$, and $s_{24}$ represent a failure state. The state transition function $\TrFun$ can be \emph{deterministic}, i.e. the agent always succeed in performing actions, or non-deterministic, i.e. the effect of an action is determined by the probabilistic distribution returned by $\TrFun(s, a)$. An example of non-deterministic $\TrFun$ is to give $90\%$ of success (the agent moves in the chosen direction) and $10\%$ of fail (the agent moves at either the right or left angle to the intended direction). If the move would make the agent walk into a wall (borders of the grid and $s_{22}$), the agent stays in the same place as before. The reward function $R(s,a,s')$ is defined as $-1$ if $s'=s_{24}$, as $1$ if $s'=s_{34}$, and $-0.01$ otherwise. The small negative reward given at each transition is a popular mean for reward function design: it is called \emph{step reward} and its purpose is to encourage the agent to finish the episode as fast as possible, with a priority proportional to the absolute value of the reward. The discount factor $\DiscFact$ should be strictly higher than 0 because more than one step is needed to reach the goal state.
+There are $3\times 4$ cells, i.e. states of the MDP $\States = \set{s_{11}, s_{12}, \dots, s_{34}}\setminus \set{s_{22}}$. The agent can do four actions: $A = \set{Right, Left, Up, Down}$. The initial state is fixed and is $s_0 = s_{11}$ and the agent can move in any of the adjacent and free cells from the current state. Assuming an episodic task, the goal is to reach $s_{34}$, and $s_{24}$ represent a failure state. The state transition function $\TrFun$ can be \emph{deterministic}, i.e. the agent always succeeds in performing actions, or non-deterministic, i.e. the effect of an action is determined by the probabilistic distribution returned by $\TrFun(s, a)$. An example of non-deterministic $\TrFun$ is to give $90\%$ of success (the agent moves in the chosen direction) and $10\%$ of fail (the agent moves at either the right or left angle to the intended direction). If the move would make the agent walk into a wall (borders of the grid and $s_{22}$), the agent stays in the same place as before. The reward function $R(s,a,s')$ is defined as $-1$ if $s'=s_{24}$, as $1$ if $s'=s_{34}$, and $-0.01$ otherwise. The small negative reward given at each transition is a popular mean for reward function design: it is called \emph{step reward} and its purpose is to encourage the agent to finish the episode as fast as possible, with a priority proportional to the absolute value of the reward. The discount factor $\DiscFact$ should be strictly higher than 0 because more than one step is needed to reach the goal state.
 	
 \begin{figure}[h]
 	\centering
@@ -90,7 +90,7 @@ There are $3\times 4$ cells, i.e. states of the MDP $\States = \set{s_{11}, s_{1
 	\includegraphics[width=.4\linewidth]{images/gridworld}
 \end{figure}
 
-An example of optimal policy is shown in Figure \ref{gridworld-optimal-policy}. As the reader can notice, the arrows represent the action that should be taken in a certain cell, in order to maximize the expected return. We observe that the optimal action in $s_{13}$, according to the policy, is not the one to take the shortest path to the goal, i.e. the $Up$ action	. This is because there is a small probability to ens in $s_{24}$, the failure state, and be punished with a high negative reward. In terms of expected reward, it is better to take the longer path, at the price of collect small negative rewards, but avoiding the risk to fail miserably.
+An example of an optimal policy is shown in Figure \ref{gridworld-optimal-policy}. As the reader can notice, the arrows represent the action that should be taken in a certain cell, in order to maximize the expected return. We observe that the optimal action in $s_{13}$, according to the policy, is not the one to take the shortest path to the goal, i.e. the $Up$ action	. This is because there is a small probability to ens in $s_{24}$, the failure state, and be punished with a high negative reward. In terms of expected reward, it is better to take the longer path, at the price of collect small negative rewards, but avoiding the risk to fail miserably.
 \begin{figure}
 	\centering
 	\includegraphics[width=.4\linewidth]{images/gridworld-optimal-policy}
@@ -100,16 +100,16 @@ An example of optimal policy is shown in Figure \ref{gridworld-optimal-policy}. 
 \end{example}
 
 \begin{example}[\textbf{Breakout}]\label{exa:breakout}
-	Breakout is a well known arcade videogame developed by Atari. In this work we implemented a clone of the original Breakout. Figure \ref{fig:breakout} shows a screenshot of the game. On the screen there are a paddle at the bottom, many bricks at the top arranged in a grid layout with $n$ rows and $m$ columns (in the figure $3\times 3 = 9$ bricks), and a ball that is free to move across the screen. The ball bounces when it hits a wall, a brick or the paddle. When the ball hits a brick, that brick is broke down and is removed from the screen. The paddle (the agent) can move left, move right or do nothing. The \emph{goal} is to remove all the bricks, while avoiding that the paddle misses the rebound of the ball (\emph{failure}).
+	Breakout is a well-known arcade video game developed by Atari. In this work, we implemented a clone of the original Breakout. Figure \ref{fig:breakout} shows a screenshot of the game. On the screen, there is a paddle at the bottom, many bricks at the top arranged in a grid layout with $n$ rows and $m$ columns (in the figure $3\times 3 = 9$ bricks), and a ball that is free to move across the screen. The ball bounces when it hits a wall, a brick or the paddle. When the ball hits a brick, that brick is broke down and is removed from the screen. The paddle (the agent) can move left, move right or do nothing. The \emph{goal} is to remove all the bricks while avoiding that the paddle misses the rebound of the ball (\emph{failure}).
 	
 	The relevant features are: position of the paddle $p_x$, position of the ball $b_x, b_y$, speed of the ball $v_x, v_y$ and status of each brick (booleans) $b_{ij}$. This features of the system gives all the needed information to predict the next state from the current state. Hence we can build an MDP where: $\States$ is the set of  all the possible values of the sequence of features $\tup{p_x, b_x, b_y, v_x, v_y, b_{11}, \dots, b_{nm}}$, $\Actions = \set{Right, Left, No\-op}$, transition function $\TrFun$ determined by the rules of the game. We give reward $R(s,a,s')=10$ if a particular brick in $s'$ has been removed for the first time, plus $100$ if that brick was the last (i.e. goal reached).
 	\begin{figure}[h]
 		\centering
 		\includegraphics[width=.6\linewidth]{images/breakout.jpg}
-		\caption{A screenshot from the videogame \Breakout}\label{fig:breakout}. 
+		\caption{A screenshot from the video game \Breakout}\label{fig:breakout}. 
 	\end{figure}
 	\paragraph{Violation of the Markov property considering a smaller set of features:}
-	Notice that considering a strict subset of the set of features for $\States$ leads to violate the Markov property of $\TrFun$. Indeed, consider the case when we remove $v_x$ and $v_y$ from the set of features. In this setting, we removed the informations about the dynamics of the system. More precisely, we cannot predict, knowing only the current state, the value of the features $b_x$ and $b_y$ for the next step, because we do not know where the ball is going (up-left, down-right and so on). In order to correctly predict the next position of the ball, we should know whether earlier in the episode the ball was coming from the bottom or from the top. But this fact clearly shows that the Markovian assumption is violated. Similar arguments apply in the case where we remove the status of the bricks $b_{11}, \dots, b_{nm}$: indeed, if the ball in the next step is near to a brick, knowing about the status of the brick is determinant to predict if the ball will continue its trajectory (the case when the brick is absent) or it will break down the brick and bounce, changing the direction of its motion (the case when the brick is present).
+	Notice that considering a strict subset of the set of features for $\States$ leads to violating the Markov property of $\TrFun$. Indeed, consider the case when we remove $v_x$ and $v_y$ from the set of features. In this setting, we removed the pieces of information about the dynamics of the system. More precisely, we cannot predict, knowing only the current state, the value of the features $b_x$ and $b_y$ for the next step, because we do not know where the ball is going (up-left, down-right and so on). In order to correctly predict the next position of the ball, we should know whether earlier in the episode the ball was coming from the bottom or from the top. But this fact clearly shows that the Markovian assumption is violated. Similar arguments apply in the case where we remove the status of the bricks $b_{11}, \dots, b_{nm}$: indeed, if the ball in the next step is near to a brick, knowing about the status of the brick is determinant to predict if the ball will continue its trajectory (the case when the brick is absent) or it will break down the brick and bounce, changing the direction of its motion (the case when the brick is present).
 	
 \end{example}
 
@@ -198,12 +198,12 @@ Sarsa($\lambda$) is reported in Algorithm \ref{alg:sarsa-lambda}, whereas Watkin
 \section{Non-Markovian Reward Decision Process (NMRDP)}\label{sect:NMRDP}
 For some goals, it might be the case that the Markovian assumption of the reward function $\Reward$ -- that reward depends only on the current state, and not on history -- does not hold. Indeed, for many problems, it is not effective that the reward is limited to depend only on a single transition $(s,a,s')$; instead, it might be extended to depend on \emph{trajectories} (i.e. $\traj$), e.g. when we want to reward the agent for some (temporally  extended) behaviors, opposed to simply reaching certain states. 
 
-This idea of rewarding behaviors has been proposed by \citep{bacchus1996rewarding} where they defined a new mathematical model, namely Non-Markovian Reward Decision Process (NMRDP), and showed how to construct optimal policies in this case.
+This idea of rewarding behaviours has been proposed by \citep{bacchus1996rewarding} where they defined a new mathematical model, namely Non-Markovian Reward Decision Process (NMRDP), and showed how to construct optimal policies in this case.
 
 In the next subsections, we give the main definitions to reason in this new setting. Then we show the solution proposed in \citep{bacchus1996rewarding}.
 
 \subsection{Preliminaries}
-Now follows the definition of NMRDP, which is similiar to the MDP definition given in Section \ref{MDP}.
+Now follows the definition of NMRDP, which is similar to the MDP definition given in Section \ref{MDP}.
 
 \begin{definition}\label{def:nmrdp}
 	A Non-Markovian Reward Decision Process (NMRDP) \citep{bacchus1996rewarding} $\NMRDP$ is a tuple $\tup{\States, \Actions, \TrFun, \NMReward, \DiscFact}$ where $\States, \Actions, \TrFun$ and $\DiscFact$ are defined as in the MDP, and $\NMReward : \States^* \to \Reals$ is the \emph{non-Markovian reward function}, where $\States^* = \set{\projtraj_{n\ge0, s_i\in\States}}$ is the set of all the possible traces, i.e. projection of trajectories $\traj$
@@ -231,11 +231,10 @@ We are interested in two problems, that we will study in the next sections:
 \end{itemize}
 
 \subsection{Find an optimal policy $\NMPolicy$ for NMRDPs}\label{nmrdp-find-optimal-policy}
-The  key  difficulty  with  non-Markovian  rewards  is  that
+The  key  difficulty  with  non-Markovian rewards  is  that
 standard optimization techniques, most based on Bellman's \citep{Bellman:1957} 
-dynamic  programming  principle,  cannot  be  used. Indeed, this requires one 
-to resort to optimization over a policy space that maps histories
-(rather than states)  into actions, a process that would incur great 
+dynamic  programming  principle,  cannot be used. Indeed, this requires one to resort to optimization over a policy space that maps histories
+(rather than states)  into actions, a process that would incur a great 
 computational expense. \citep{bacchus1996rewarding} give the definition of 
 a decision  problem \emph{equivalent} to an NMRDP  in  which  the  rewards  are
 Markovian. This construction is the key element to solve our problem,
@@ -276,37 +275,36 @@ From definitions \ref{nmrdp-mdp-equivalence} and
 policy $\Policy$ of $\MDP$ the corresponding policy 
 $\NMPolicy$ of $\NMRDP$ is such that $ \forall s. \ValFun_\Policy(s) = \ValFun_{\NMPolicy}(\sigma(s))$, the following theorem holds:
 \begin{theorem}[\cite{bacchus1996rewarding}]\label{nmrdp-mdp-equivalence-policy-optimality}
-	Let $\Policy$ be an  optimal policy for MDP $\MDP$. Then the corresponding policy is optimal for NMRDP $\NMRDP$.
+	Let $\Policy$ be an optimal policy for MDP $\MDP$. Then the corresponding policy is optimal for NMRDP $\NMRDP$.
 \end{theorem}
 
-The Theorem \ref{nmrdp-mdp-equivalence-policy-optimality} allow us to learn an optimal policy $\NMPolicy$ for NMRDP by learning a policy $\Policy$ over an equivalent MDP, which can be done by resorting on  any off-the-shelf algorithm (e.g. see Section \ref{sect:temporal-difference-learning}). Moreover, obtaining the corresponding policy for the original NMRDP is straightforward, although in practice is not needed, since it is enough to run the policy $\Policy$ over the MDP.
+The Theorem \ref{nmrdp-mdp-equivalence-policy-optimality} allows us to learn an optimal policy $\NMPolicy$ for NMRDP by learning a policy $\Policy$ over an equivalent MDP, which can be done by resorting on any off-the-shelf algorithm (e.g. see Section \ref{sect:temporal-difference-learning}). Moreover, obtaining the corresponding policy for the original NMRDP is straightforward, although in practice is not needed, since it is enough to run the policy $\Policy$ over the MDP.
 
 In other words, the problem of finding an optimal policy for an NMRDP reduces to find an optimal policy for an equivalent MDP such that Condition 1, 2 and 3 of Definition \ref{nmrdp-mdp-equivalence} hold.
 
 
 \subsection{Define the non-Markovian reward function $\NMReward$}
 To  reward  agents  for  (temporally  extended)
-behaviors, as opposed to simply reaching certain states, we need a way
+behaviours, as opposed to simply reaching certain states, we need a way
 to specify rewards for specific trajectories through the state
 space. 
-Specifying a non-Markovian reward function explicitly is quite hard and unintuitive, impossible if we are in a infinite-horizon setting. 
+Specifying a non-Markovian reward function explicitly is quite hard and unintuitive, impossible if we are in an infinite-horizon setting. 
 Instead, we can define \emph{properties} over trajectories and reward only the ones which satisfy some of them, in contrast to enumerate all the possible trajectories.
 
 Temporal logics presented in Section \ref{sect:ltl} gives an effective way to do this. 
 Indeed, in order to speak about a desired behavior,  i.e. fulfillment of properties that might change over time, we can define a \emph{formula} $\varphi$ (or more formulas) in some suited temporal logic formalism semantically defined over trajectories $\trace$, speaking about a set of properties $\Prop$ such that each state $s\in S$ is associated to a set of propositions ($S\subseteq 2^\Prop$). 
-In this way, a trajectory $\trace = \traj$ is rewarded with $r_i$ iff $\trace \models \varphi_i$, where $r_i$ is the reward value associated to the fulfillment of behaviors signified by $\varphi_i$.
+In this way, a trajectory $\trace = \traj$ is rewarded with $r_i$ iff $\trace \models \varphi_i$, where $r_i$ is the reward value associated to the fulfillment of behaviours signified by $\varphi_i$.
 
 \subsection{Using \PLTL}
 \label{sect:using-pltl}
 In \citep{bacchus1996rewarding} the temporal logic formalism is \emph{Past Linear Temporal Logic} (\PLTL), which is a past version of \LTL (Section \ref{sect:ltl}).
-As explained before, using the declarativeness of \PLTL, is possible to specify the desired behavior (expressed in terms of the properties $\Prop$) that should be satisfied by the experienced trajectories and reward only them, hence obtaining a non-Markovian reward function. More formally, given a finite set $\Phi$ of \PLTL \emph{reward formulas}, and for each $\phi_i \in \Phi$ a real-valued reward $r_i$, the \emph{temporally extended reward function} $\bar{R}$ is defined as:
+As explained before, using the declarativeness of \PLTL, is possible to specify the desired behaviour (expressed in terms of the properties $\Prop$) that should be satisfied by the experienced trajectories and reward only them, hence obtaining a non-Markovian reward function. More formally, given a finite set $\Phi$ of \PLTL \emph{reward formulas}, and for each $\phi_i \in \Phi$ a real-valued reward $r_i$, the \emph{temporally extended reward function} $\bar{R}$ is defined as:
 \begin{equation}\label{pltl-temp-extended-reward-fun}
 \NMReward(\projtraj) = \sum_{\phi_i \in \Phi : \tup{s_0, s_1, \dots, s_n}\models \phi_i} r_i
 \end{equation}
 
 
-In order to run the actual learning task, \citep{bacchus1996rewarding} proposed a transformation from the NMRDP to an equivalent MDP with the state space \emph{expaneded} which allows to label each state $s\in \States$. The idea is that the labels should 
-keep track in some way the (partial) satisfaction of the temporal formulas $\phi_i \in \Phi$. 
+In order to run the actual learning task, \citep{bacchus1996rewarding} proposed a transformation from the NMRDP to an equivalent MDP with the state space \emph{expaneded} which allows to label each state $s\in \States$. The idea is that the labels should keep track in some way the (partial) satisfaction of the temporal formulas $\phi_i \in \Phi$. 
 A state $s$ in the transformed state space is replicated multiple times, marking the difference between different (relevant) histories terminating in state $s$.
 
 In this way, they obtained a compact representation of the required history-dependent policy
@@ -318,11 +316,11 @@ same transition probabilities and corresponding traces have same rewards.
 
 
 \section{RL for NMRDP with \LLf Rewards}\label{sect:nmrdp-llf-rewards}
-In this section we explain the main contribution of this chapter and one of the main contribution of the thesis. We devise a natural extension of the construction explained in \citep{AAAI1817342} for a reinforcement learning task. That is, we show that it is possible to do reinforcement learning for non-Markovian rewards, expressed in \LLf formulas, by applying an extension of the state space of the agent $\States$, analogously to the one described in Section \ref{sect:using-pltl}.
-In the first section, we describe the approach proposed by \citep{AAAI1817342}; then, we observe that the expanded MDP can be used for do reinforcement learning to optimize \LLf non-Markovian rewards.
+In this section, we explain the main contribution of this chapter and one of the main contribution of the thesis. We devise a natural extension of the construction explained in \citep{AAAI1817342} for a reinforcement learning task. That is, we show that it is possible to do reinforcement learning for non-Markovian rewards, expressed in \LLf formulas, by applying an extension of the state space of the agent $\States$, analogously to the one described in Section \ref{sect:using-pltl}.
+In the first section, we describe the approach proposed by \citep{AAAI1817342}; then, we observe that the expanded MDP can be used to do reinforcement learning to optimize \LLf non-Markovian rewards.
 
 \subsection{NMRDP with \LTLf/\LDLf rewards}\label{sect:nmrdp-llf-rewards-small}
-In this section we explain how to specify non-Markovian rewards with \LTLf/\LDLf  formulas (instead of \PLTL) and how the associated MDP expansion works \citep{AAAI1817342}, analogously to what we saw with \PLTL (Section \ref{sect:using-pltl}).
+In this section, we explain how to specify non-Markovian rewards with \LTLf/\LDLf  formulas (instead of \PLTL) and how the associated MDP expansion works \citep{AAAI1817342}, analogously to what we saw with \PLTL (Section \ref{sect:using-pltl}).
 
 The temporally extended reward function $\bar{R}$ is similar to Equation \ref{pltl-temp-extended-reward-fun}, but instead of using \PLTL formula we use \LLf formulas. Formally, given a set of pairs $\set{(\varphi_i, r_i)^m_{i=1}}$ (where $\varphi_i$ denotes the \LLf formula for specifying a desired behavior, and $r_i$ denotes the reward associated to the satisfaction of $\varphi_i$, and given a (partial) trace $\trace = \projtraj$, we define $\bar{R}$ as:
 \begin{equation}
@@ -352,7 +350,7 @@ and $s_{init}$ is the new initial state. In other words, we prefix to every feas
 We do this for two reasons: allow to evaluate formulas in $s_0$ and make it compliant with the most general definition of the reward, namely $R(s, a, s')$, also when there is no true action that is done (i.e. empty trace).
 
 \begin{definition}[\cite{AAAI1817342}]\label{nmrdp-mdp-transformation-brafman}
-	Given an NMRDP $\NMRDP = \tup{S, A, \TrFun, \set{(\varphi_i, r_i)^m_{i=1}, \DiscFact}}$ (i.e. with non-Markovian rewards specified by \LLf formulas) it is possible to build an  $\MDP = \tup{\States', \Actions, \TrFun', \Reward', \DiscFact}$ that is \emph{equivalent} (in the sense of Definition \ref{nmrdp-mdp-equivalence}) to $\NMRDP$. Denoting with 
+	Given an NMRDP $\NMRDP = \tup{S, A, \TrFun, \set{(\varphi_i, r_i)^m_{i=1}, \DiscFact}}$ (i.e. with non-Markovian rewards specified by \LLf formulas) it is possible to build an $\MDP = \tup{\States', \Actions, \TrFun', \Reward', \DiscFact}$ that is \emph{equivalent} (in the sense of Definition \ref{nmrdp-mdp-equivalence}) to $\NMRDP$. Denoting with 
 	$\automaton_{\varphi_i} = \tup{2^\P, Q_i, q_{i0}, \delta_i,F_i}$ (notice that $S\subseteq 2^{\Prop}$ and $\delta_i$ is total) the \DFA associated 
 	with $\varphi_i$ (see Section \ref{sect:llf2automata}), the equivalent MDP $\MDP$ is built as follows:
 	\begin{itemize}
@@ -408,8 +406,7 @@ so we can learn an optimal policy $\Policy$ for $\MDP$.
 %%
 Thus, an optimal policy for $\NMRDP$ can be learnt on $\MDP$. 
 Of course, none of these structures is (completely) 
-known to the learning agent, and the above transformation is 
-never done explicitly. Rather, the agent carries out the learning process
+known to the learning agent, and the above transformation is never done explicitly. Rather, the agent carries out the learning process
 by assuming that the underlying model is $\MDP$ instead of $\NMRDP$ (applying the fix introduced in Definition \ref{def:nmrdp-with-dummy-initial-state}).
 
 
@@ -433,9 +430,9 @@ Now we made an important remark that will be used in the next chapter. That is, 
 
 In other words, we can do \emph{reinforcement Learning for the NMRDP $\NMRDP$ with \LLf rewards} by simply reducing the problem to \emph{reinforcement learning over the equivalent MDP $\MDP$}, where $\MDP$ is the result of the transformation applied to $\NMRDP$, as described before. 
 
-The actual learning is done over the expanded state space $\States \times Q_1, \times \dots \times Q_m$, where $Q_i$ are the set of states of the \DFA associated to the formula $\varphi_i$ that define the non-Markovian rewards. An expanded state has the form $\mathbf{s} = \tup{s, q_1, \dots, q_m}$. The $q_1, \dots, q_m$ are the current state of the automaton that actually track the satisfaction of the associated formula $\varphi_i$, in the current episode, in an implicit and compact way. They are determined, during the learning process, by the observed $s \in \States \subseteq 2^\Prop$ (look at how the transition function is defined in Definition \ref{tr-fun-expanded-mdp}).
+The actual learning is done over the expanded state space $\States \times Q_1, \times \dots \times Q_m$, where $Q_i$ are the set of states of the \DFA associated to the formula $\varphi_i$ that define the non-Markovian rewards. An expanded state has the form $\mathbf{s} = \tup{s, q_1, \dots, q_m}$. The $q_1, \dots, q_m$ are the current state of the automaton that actually tracks the satisfaction of the associated formula $\varphi_i$, in the current episode, in an implicit and compact way. They are determined, during the learning process, by the observed $s \in \States \subseteq 2^\Prop$ (look at how the transition function is defined in Definition \ref{tr-fun-expanded-mdp}).
 
-This result has a practical importance, since it does not require the
+This result has a practical importance since it does not require the
 definition of new RL algorithms and thus makes the learning
 process easy and effective.
 
@@ -451,6 +448,6 @@ defined above.
 \end{theorem}
 
 \section{Conclusions}
-In this chapter we introduced the topic of Reinforcement Learning, as well as foundational definitions (MDP, policy $\Policy$, state-value function $\ValFun_\Policy$) and algorithms (Q($\lambda$), Sarsa($\lambda$)). Then we presented the notion of NMRDP and a technique to built an equivalent MDP, by specifying non-Markovian reward function with \LLf formalisms. We end the chapter by remarking that the transformed MDP can be used for reinforcement learning, formalizing the results with a theorem.
+In this chapter, we introduced the topic of Reinforcement Learning, as well as foundational definitions (MDP, policy $\Policy$, state-value function $\ValFun_\Policy$) and algorithms (Q($\lambda$), Sarsa($\lambda$)). Then we presented the notion of NMRDP and a technique to build an equivalent MDP, by specifying non-Markovian reward function with \LLf formalisms. We end the chapter by remarking that the transformed MDP can be used for reinforcement learning, formalizing the results with a theorem.
 \endinput
 
