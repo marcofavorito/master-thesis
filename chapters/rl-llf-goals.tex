@@ -35,14 +35,14 @@ There are many reasons why this might be useful:
 	the features needed to express the goal, thus promoting
 	\emph{separation of concerns} which, in turn, facilitates the design; this separation facilitates also the \emph{reuse} of representations already available, possibility developed for the standard setting.\label{motivation:separation-of-concern}
 	
-	\item A reduced agent's feature space allows for realizing \emph{simpler agents} while preserving the possibly of tackling complex declarative goals which cannot be represented in the agent's feature space. \label{motivation:simpler-agent}
+	\item A reduced agent's feature space allows for realizing \emph{simpler agents} while preserving the possibility of tackling complex declarative goals which cannot be represented in the agent's feature space. \label{motivation:simpler-agent}
 	
 	\item Reducing the agent's feature space may yield a \emph{reduced} state space to be explored by the RL-agent.\label{motivation:reduced-space}
 	
 \end{enumerate}
 
 Clearly, the two separate representations (i.e., the two sets
-of features) need to be somehow correlated in reality. The crucial point, however, is that in order to perform RL effectively, \emph{such a correlation does not need to be formalized}. We let the reinforcement learning agent learn, over its state space (eventually extended), the proper way to use an arbitrary long sequence of low-level actions in order to accomplish the high-level goals.
+of features) need to be somehow correlated in reality. The crucial point, however, is that in order to perform RL effectively, \emph{such a correlation does not need to be formalized}. We let the reinforcement learning agent learn, over its state space (eventually extended), the proper way to use an arbitrarily long sequence of low-level actions in order to accomplish the high-level goals.
 
 \begin{example}
 	Consider the RL environment \Breakout (Example \ref{exa:breakout}). Let the agent's state space be the combination of the paddle position, the ball position and the ball speed. The actions available to the agent are: move to the left, move to the right, and a nop-action. The goal is to remove all the bricks by hitting and directing the ball in a proper way.
@@ -238,7 +238,7 @@ Observe that by restricting $\MDPagent^{nmr}$ policies to $S^*$, in general, we 
 \medskip
 As a second step, we apply the construction of Section \ref{sect:nmrdp-llf-rewards} and obtain a
 new MDP learning agent.  In such construction, however, because of the
-triviality of their automata, we do not need to keep track of state
+triviality of their automata, we do not need to keep track of the state
 $\varphi_s$, but just give the reward $R(s,a,s')$ associated to
 $(s,a,s')$. Instead, we do need to keep track of the state of the \DFAs
 $\automaton_{\varphi_i}$ corresponding to the formulas $\varphi'_i$.
