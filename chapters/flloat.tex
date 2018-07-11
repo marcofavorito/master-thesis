@@ -1,5 +1,5 @@
 \chapter{FLLOAT}\label{ch:flloat}
-In this chapter we describe \href{https://github.com/MarcoFavorito/flloat.git}{FLLOAT} (From \LLf tO AutomaTa), a software project written in Python. It is a porting of the \href{https://github.com/RiccardoDeMasellis/FLLOAT}{homonym software project} written in Java. It is the implementation of many of the topics described in Chapter \ref{ch:logic}. 
+In this chapter, we describe \href{https://github.com/MarcoFavorito/flloat.git}{FLLOAT} (From \LLf tO AutomaTa), a software project written in Python. It is a porting of the \href{https://github.com/RiccardoDeMasellis/FLLOAT}{homonym software project} written in Java. It is the implementation of many of the topics described in Chapter \ref{ch:logic}. 
 
 %We'll see the main features, the package structure, and some code examples.
 
@@ -52,7 +52,7 @@ In the following sections we show typical use cases, describe the used APIs and 
 
 \section{Propositional Logic formulas}\label{sect:flloat-pl}
 
-FLLOAT provides support for Propositional Logic (\PL). In the following we will see both examples and explanation of the code.
+FLLOAT provides support for Propositional Logic (\PL). In the following, we will see both examples and explanation of the code.
 
 \subsection{Specify a \PL formula}\label{sect:flloat-pl-syntax}
 The easiest way to specify a propositional formula is to use a \texttt{PLParser}:
@@ -150,7 +150,7 @@ class Hashable(ABC):
     self._hash = None
 \end{lstlisting}
 
-Its main purpose is to allow memoization of the hash value. This is useful for immutable objects, since their hash value does not change during their life cycle. Furthermore, the mathematical domain of interest requires hash-based data structure such as sets and dictionaries, so it is a good idea to compute the hash only once and retrieve the precomputed value when needed. The \texttt{Hashable} class is inherited from many other classes, since the immutable property is satisfied by many entities. It requires that all the classes that inherits from it implements a \texttt{\_\_members} function, which returns an hashable signature of the object that identify it uniquely. The methods \texttt{\_\_getstate\_\_} and \texttt{\_\_setstate\_\_} simply do not include the precomputed hash value, since it might have a different value among different Python processes, due to hash randomization.
+Its main purpose is to allow memoization of the hash value. This is useful for immutable objects since their hash value does not change during their life cycle. Furthermore, the mathematical domain of interest requires hash-based data structure such as sets and dictionaries, so it is a good idea to compute the hash only once and retrieve the precomputed value when needed. The \texttt{Hashable} class is inherited from many other classes since the immutable property is satisfied by many entities. It requires that all the classes that inherit from it implement a \texttt{\_\_members} function, which returns a hashable signature of the object that identifies it uniquely. The methods \texttt{\_\_getstate\_\_} and \texttt{\_\_setstate\_\_} simply do not include the precomputed hash value, since it might have a different value among different Python processes, due to hash randomization.
 
 
 \subsubsection{The \texttt{Formula} abstract class and other abstraction}
@@ -244,7 +244,7 @@ When constructing a \texttt{BinaryOperator} instance, the list of subformulas is
 
 We remark that,despite the name, \texttt{BinaryOperator} constructor take as input a \emph{list} of formulas and not a \emph{pair} of formulas. The reason, as stated before, is to reduce the depth of the syntax tree when the same binary operator is applied in chain many times.
 
-In Figure \ref{fig:formula-diagram} is depicted a schema to represent the relations between the just described abstractions.
+Figure \ref{fig:formula-diagram} depicts a schema to represent the relations between the just described abstractions.
 
 \begin{figure}
 	\centering
@@ -342,7 +342,7 @@ Every propositional formula extends from \texttt{PLFormula}. It implements the m
 
 Other classes define the possible \PL formulas: \texttt{PLAtomic} is an \texttt{AtomicFormula}, hence its instances just hold a \texttt{Symbol} object; \texttt{PLTrue} and \texttt{PLFalse} are \texttt{PLAtomic} formulas with a fixed symbol that represent, respectively, propositional $\true$ and propositional $\false$; \texttt{PLNot}, \texttt{PLAnd}, \texttt{PLOr} has been already described; \texttt{PLImplies} and \texttt{PLEquivalence} correspond to $\Rightarrow$ and $\Leftrightarrow$ logic operator, respectively.
 
-It is interesting to observe that the implementation of some features such as syntax, semantics and conversion to Negation Normal Form (NNF) is inherited from other classes/interfaces, such as \texttt{Truth} and \texttt{NNF}.The implementation is made generically, i.e. by not assuming that we are talking about \PL formulas. Indeed, the implementation for the same formulas (and, or, not etc.) is used for \PL and \LLf. We will discuss them in the next sections.
+It is interesting to observe that the implementation of some features such as syntax, semantics and conversion to Negation Normal Form (NNF) is inherited from other classes/interfaces, such as \texttt{Truth} and \texttt{NNF}. The implementation is made generically, i.e. by not assuming that we are talking about \PL formulas. Indeed, the implementation of the same formulas (and, or, not etc.) is used for \PL and \LLf. We will discuss them in the next sections.
 
 \subsection{Parsing of \PL formulas}\label{sect:flloat-pl-parsing}
 Here we describe how the parsing of a string, representing a \PL formula. to an instance of \texttt{PLFormula}, works. The implementation of the \PL formula parsing is provided by the class \texttt{PLParser}, declared in the module \href{https://github.com/MarcoFavorito/flloat/blob/0.1.4/flloat/parser/pl.py}{flloat/parser/pl.py}.
@@ -445,19 +445,19 @@ class PLParser(Parser):
   'formula : LPAREN formula RPAREN'
     p[0] = p[2]
 \end{lstlisting}
-This features depends from PLY, which provides utilities for both tokenization and parsing of a string. We do not go into details about how PLY works. 
+This feature depends from PLY, which provides utilities for both tokenization and parsing of a string. We do not go into details about how PLY works. 
 
 For the lexer part, we defied the available tokens for the parsing phase, as well as reserved words/symbols/regular expression for each of them (e.g. look at the regex for the \texttt{ATOM} token at line \ref{code:pl-parser-atom-token-regex}). The symbols used for the operators are defined in the module \href{https://github.com/MarcoFavorito/flloat/blob/0.1.4/flloat/base/Symbols.py}{flloat/base/Symbols.py}.
 
 For the parsing part, we defined how to construct a syntax tree from the list of tokens. For each type of formula, we defined inductively a set of rules that, when activated, create the proper \texttt{PLFormula} object.
 
-For example, consider line \ref{code:pl-parsing-atom}, where has been defined the rule for generate the atomic formulas. Depending on the type of token that activated the rule, we generate a \texttt{PLTrue}, \texttt{PLFalse} or a \texttt{PLAtomic} formula with the symbol provided by the tokenizer. Analogous consideration are made for other types of rules and formulas.
+For example, consider line \ref{code:pl-parsing-atom}, where has been defined the rule to generate the atomic formulas. Depending on the type of token that activated the rule, we generate a \texttt{PLTrue}, \texttt{PLFalse} or a \texttt{PLAtomic} formula with the symbol provided by the tokenizer. Analogous considerations are made for other types of rules and formulas.
 Eventually, when there is no rule to apply, the entire syntax tree has been built. The object that we built "manually" (see Listing \ref{code:pl-syntax-example-manual}) now is built automatically by the parser.
 
 This pattern is the same used for \LLf parsers.
 
 \subsection{\PL formulas evaluation}\label{sect:flloat-pl-semantics}
-In this section we see how to compute the truth value of a  \texttt{PLFormula}, given a propositional interpretation. 
+In this section, we see how to compute the truth value of a  \texttt{PLFormula}, given a propositional interpretation. 
 We represent the propositional interpretation with the class \href{https://github.com/MarcoFavorito/flloat/blob/0.1.4/flloat/semantics/pl.py#L8-L28}{\texttt{PLInterpretation}}, that is trivially a set of \texttt{Symbol}s (the ones that we consider true).
 
 
@@ -476,7 +476,7 @@ print(phi.truth(ACD_true)) #prints True
 
 You can notice that we can easily define a \texttt{PLInterpretation} by using the static method \texttt{fromStrings} and providing a collection of strings corresponding to the propositions that we want to make $true$. The evaluation is made by the method \texttt{truth}, that is implemented by every \texttt{PLFormula}. As stated in Section \ref{sect:flloat-pl-syntax}, the actual implementation of the (trivial) procedures to evaluate the truths of logic operators are defined in \href{https://github.com/MarcoFavorito/flloat/blob/0.1.4/flloat/base/truths.py}{flloat/base/truths.py}, that are inherited by the different \texttt{PLFormula}s. The truth evaluation of atomic formulas such as \texttt{PLAtomic}, \texttt{PLTrue} and \texttt{PLFalse} are, respectively, in lines \ref{code:pl-syntax-truth-PLAtomic}, \ref{code:pl-syntax-truth-PLTrue} and \ref{code:pl-syntax-truth-PLFalse} of Listing \ref{code:syntax-pl.py}.
 
-In Figure \ref{fig:formula-diagram-pl-truths} is depicted the schema representing the relations between the classes used for logic formulas discussed until now. It is worth to notice the separation between the implementation of the syntax and the one of the semantics, from where the propositional formula classes inherits their functionalities. This organization is replicated in both \LTLf and \LDLf implementations.
+In Figure \ref{fig:formula-diagram-pl-truths} is depicted the schema representing the relations between the classes used for logic formulas discussed until now. It is worth to notice the separation between the implementation of the syntax and the one of the semantics, from where the propositional formula classes inherit their functionalities. This organization is replicated in both \LTLf and \LDLf implementations.
 
 \begin{sidewaysfigure}[h]
 	\centering
@@ -499,10 +499,10 @@ In Figure \ref{fig:formula-diagram-pl-truths} is depicted the schema representin
 \section{\LTLf formulas}\label{sect:flloat-ltlf}
 As stated before, the software architecture to support \LLf formulas is pretty the same of the one presented in Section \ref{sect:flloat-pl}. The core syntax functionalities (i.e. how to build the syntax tree of a \LLf formula) are inherited from the classes defined in \href{https://github.com/MarcoFavorito/flloat/blob/0.1.4/flloat/base/Formula.py}{\texttt{flloat/base/Formula.py}}, as described in Section \ref{sect:flloat-pl-syntax}. The semantics functionalities for propositional logic operator (e.g. And, Or, Not) are inherited from \texttt{Truth}s classes declared in \href{https://github.com/MarcoFavorito/flloat/blob/0.1.4/flloat/base/truths.py}{flloat/base/truths.py} (see Section \ref{sect:flloat-pl-semantics}). Other ad-hoc data structures and classes are defined in order to support \LLf formulas.
 
-In this section we describe the \LTLf part analogously to what we did in Section \ref{sect:flloat-pl} for \PL. In the next section we do the same for \LDLf.
+In this section, we describe the \LTLf part analogously to what we did in Section \ref{sect:flloat-pl} for \PL. In the next section, we do the same for \LDLf.
 
 \subsection{Specify \LTLf formulas}\label{sect:flloat-ltlf-syntax}
-In this section we will see how to build \LTLf formulas.
+In this section, we will see how to build \LTLf formulas.
 
 In Listing \ref{code:ltlf-syntax-example} is shown the construction of the main \LTLf formulas.
 
@@ -625,7 +625,7 @@ class LTLfFormula(Formula, LTLfTruth, NNF, Delta):
 \end{lstlisting}
 For the \texttt{delta} function it has been used a LRU caching mechanism, provided from the Python Standard Library \href{https://docs.python.org/3/library/functools.html}{\texttt{functools}}. This is needed in order to speed-up the expensive and repeated computation of the function \texttt{delta}.
 
-At line \ref{code:ltlf-to-ldlf-method} is defined the abstract method \texttt{to\_LDLf}, which transform the current \LTLf formula instance into an \LDLf equivalent formula (by leveraging the equivalences shown in Section \ref{sect:ldlf-semantics}). Every specific \LTLf formula class implements the procedure to transform itself into an equivalent \LDLf formula. In practice, the root formula of the \LTLf syntax tree compute the result by transforming each child into an \LDLf formula, in such a way that the entire syntax tree is properly rewritten.
+At line \ref{code:ltlf-to-ldlf-method} is defined the abstract method \texttt{to\_LDLf}, which transform the current \LTLf formula instance into an \LDLf equivalent formula (by leveraging the equivalences shown in Section \ref{sect:ldlf-semantics}). Every specific \LTLf formula class implements the procedure to transform itself into an equivalent \LDLf formula. In practice, the root formula of the \LTLf syntax tree computes the result by transforming each child into a \LDLf formula, in such a way that the entire syntax tree is properly rewritten.
 
 At line \ref{code:ltlf-to-automaton-method} it is defined the method \texttt{to\_automaton} which transform the \LTLf formula into an equivalent automaton. We discuss it in later sections.
 \subsection{Parsing of \LTLf formulas}\label{sect:flloat-ltlf-parsing}
@@ -776,10 +776,10 @@ eventually_A.truth(t1, 4) #False, beyond the end of the trace
 
 For the \LTLf classic logical operators, the implementation of the semantics is exactly the same of the one used for \PL formulas (see Section \ref{sect:flloat-pl-semantics}).
 
-For the \LTLf temporal operators, the implementation is provided case by case following the definition given in Section \ref{ltlf-semantics}.
+For the \LTLf temporal operators, the implementation is provided case by case following the definition that is given in Section \ref{ltlf-semantics}.
 
 \section{\LDLf formulas}\label{sect:flloat-ldlf}
-In this section we show how FLLOAT supports \LDLf formulas, as we did Section \ref{sect:flloat-pl} and Section \ref{sect:flloat-ltlf}.
+In this section, we show how FLLOAT supports \LDLf formulas, as we did Section \ref{sect:flloat-pl} and Section \ref{sect:flloat-ltlf}.
 \subsection{Specify \LDLf formulas}
 In this part we will see how to build \LDLf formulas.
 
@@ -1035,7 +1035,7 @@ The method to be used is \texttt{to\_automaton}, implemented by every \texttt{LT
 
 FLLOAT uses the Python package \href{https://github.com/MarcoFavorito/pythomata}{Pythomata} for automata support. However, we just explore the basic use cases with the Pythomata APIs.
 
-In this section we explain how to use FLLOAT in the aforementioned cases.
+In this section, we explain how to use FLLOAT in the aforementioned cases.
 
 \subsection{From \LLf formula to \NFA}\label{sect:flloat-llf2nfa}
 In Listing \ref{code:llf2nfa} is shown how to use the APIs to generate a \NFA from a \LLf formula. For simplicity we use \texttt{LTLfFormula} objects, but the same examples hold also for \texttt{LDLfFormula} instances.
@@ -1218,4 +1218,4 @@ Notice how this representation is structurally identical to the one shown in \re
 \end{figure}
 
 \section{Conclusion}
-In this chapter we presented the FLLOAT Python package and its main features. We've seen the package structure, how FLLOAT supports \PL and \LLf formulas, and the conversion to automata from \LLf formulas.
+In this chapter, we presented the FLLOAT Python package and its main features. We've seen the package structure, how FLLOAT supports \PL and \LLf formulas, and the conversion to automata from \LLf formulas.

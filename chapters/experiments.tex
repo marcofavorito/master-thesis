@@ -3,9 +3,9 @@
 
 In this chapter we give experimental evidence of the goodness of our approach, discussed mainly in Chapter \ref{ch:rl} and \ref{ch:reward-shaping}, by using the implementations presented in Chapter \ref{ch:flloat} and \ref{ch:rltg}. For each considered environment, we give a formal description in the framework of MDPs and assign temporal goals to be satisfied, as explained in earlier chapters.
 \section{\Breakout}
-In this section we use the \Breakout environment (already presented in Example \ref{exa:breakout}). We first show how the combination of temporal goals is successfully learnt by the agent. Then, we show a benchmarking between the use of off-line reward shaping, on-the-fly reward shaping and no reward shaping.
+In this section, we use the \Breakout environment (already presented in Example \ref{exa:breakout}). We first show how the combination of temporal goals is successfully learnt by the agent. Then, we show a benchmarking between the use of off-line reward shaping, on-the-fly reward shaping and no reward shaping.
 \paragraph{Description of the Environment:}
-The actions available to the agent are \emph{left}, \emph{right} and \emph{no-action}. The relevant features are: position of the paddle $p_x$, position of the ball $b_x, b_y$, speed of the ball $v_x, v_y$ and status of each brick (booleans) $b_{ij}$. This features of the system gives all the needed information to predict the next state from the current state. Hence we can build an MDP where: $\States$ is the set of  all the possible values of the sequence of features $\tup{p_x, b_x, b_y, v_x, v_y}$, $\Actions = \set{\text{\emph{right, left, no-action}}}$, transition function $\TrFun$ determined by the rules of the game. We give reward $R(s,a,s')=10$ if a particular brick in $s'$ has been removed for the first time, plus $100$ if that brick was the last (i.e. \emph{environment goal} reached).
+The actions available to the agent are \emph{left}, \emph{right} and \emph{no-action}. The relevant features are: position of the paddle $p_x$, position of the ball $b_x, b_y$, speed of the ball $v_x, v_y$ and status of each brick (booleans) $b_{ij}$. These features of the system give all the needed informations to predict the next state from the current state. Hence we can build an MDP where: $\States$ is the set of  all the possible values of the sequence of features $\tup{p_x, b_x, b_y, v_x, v_y}$, $\Actions = \set{\text{\emph{right, left, no-action}}}$, transition function $\TrFun$ determined by the rules of the game. We give reward $R(s,a,s')=10$ if a particular brick in $s'$ has been removed for the first time, plus $100$ if that brick was the last (i.e. \emph{environment goal} reached).
 
 \paragraph{Temporal goal:} The \emph{temporal goal} (specified by a \LLf formula) is to remove lines of bricks in a given order. In other words, all bricks on each line of bricks $i$ must be removed before removing all bricks from line $j > i$.
 In our experiments we considered the following goals (and combinations of them):
@@ -15,7 +15,7 @@ In our experiments we considered the following goals (and combinations of them):
 	\item \textsc{Break-Rows-(BT|TB)}:  remove rows of blocks from (bottom to top | top to bottom).
 \end{itemize}
 
-For each temporal goal we give a reward $r = 10000$ and it is given when the agent fulfilled the temporal goal specified by the formula.
+For each temporal goal, we give a reward $r = 10000$ and it is given when the agent fulfilled the temporal goal specified by the formula.
 The formulas are expressed in \LDLf. For example, in Breakout 3x3 (i.e. three rows and three columns of bricks), the formula which specify the just explained temporal goals is:
 \begin{equation}\label{eq:breakout-temporal-goal}
 \DIAM{(\lnot l_0 \lAND \lnot l_1 \lAND \lnot l_2)^*;(l_0 \lAND \lnot l_1 \lAND \lnot l_2);(l_0 \lAND \lnot l_1 \lAND \lnot l_2)^*;(l_0 \lAND l_1 \lAND \lnot l_2);(l_0 \lAND l_1 \lAND \lnot l_2)^*;(l_0 \lAND l_1 \lAND l_2)}tt
@@ -32,7 +32,7 @@ The automaton associated to the formula in Equation \ref{eq:breakout-temporal-go
 
 The features for fluents evaluation, for every temporal goal, are the status of each brick (present or removed). Recalling the notation used in Example \ref{exa:breakout}: $\tup{b_{11}, \dots, b_{nm}}$.
 
-It is crucial to remark that the evaluation of the fluent from the features is different among the temporal goals above mentioned, despite the formulas are structurally the same (apart from the number of lines to remove). Indeed, thanks to the fluents evaluation phase (i.e. the map from features values to truth of each fluent), the formulas behave differently.
+It is crucial to remark that the evaluation of the fluent from the features is different among the temporal goals above mentioned, despite the formulas are structurally the same (apart from the number of lines to remove). Indeed, thanks to the fluents evaluation phase (i.e. the map from features values to the truth of each fluent), the formulas behave differently.
 
 \paragraph{Configurations:}
 The reinforcement algorithm used is Sarsa$(\lambda)$ (e.g. Sarsa with eligibility traces) with $\epsilon$-greedy policy. The values of the parameters are:
@@ -116,7 +116,7 @@ In Figure \ref{exa:breakout-33-bt} are depicted the highlights of a run of the o
 
 
 \subsubsection{\textsc{Break-Cols-RL-TB}}
-In Figure \ref{exa:breakout-33-rl-tb} are depicted the highlights of a run of the optimal policy for the goal \textsc{Break-Cols-RL-TB}. Notice that, even in the case of multiple temporal goal, the constraints expressed by the formula in Equation \ref{eq:breakout-temporal-goal} are satisfied (i.e. the rows of bricks are broken from the top to the bottom and the columns of bricks are broken from right to left). Furthermore, notice that the formula is the same, but \emph{how the fluents are evaluated from the features}  makes the difference.
+In Figure \ref{exa:breakout-33-rl-tb} are depicted the highlights of a run of the optimal policy for the goal \textsc{Break-Cols-RL-TB}. Notice that, even in the case of multiple temporal goals, the constraints expressed by the formula in Equation \ref{eq:breakout-temporal-goal} are satisfied (i.e. the rows of bricks are broken from the top to the bottom and the columns of bricks are broken from right to left). Furthermore, notice that the formula is the same, but \emph{how the fluents are evaluated from the features}  makes the difference.
 
 
 \begin{figure}[h]
@@ -154,9 +154,9 @@ In Figure \ref{exa:breakout-33-rl-tb} are depicted the highlights of a run of th
 \end{figure}
 
 \subsection{Benchmarking of reward shaping techniques}\label{sect:breakout-benchmarking-rs}
-In this section we report some statistics about the performances of the proposed approach with a focus on automata-based reward shaping.
-For each configuration we collected the observed reward for each episode, over 10 runs. Each run has a time limit of 10000 episodes.
-Then we moving averaged the sequences of rewards with a window of size 100, in order to make the curves more smoothed, and averaged the result across all the runs. The plots show this processed sequences  over the number of episodes. The colored bands represents the 90\% confidence interval taken from bootstrapped re-samples.
+In this section, we report some statistics about the performances of the proposed approach with a focus on automata-based reward shaping.
+For each configuration, we collected the observed reward for each episode, over 10 runs. Each run has a time limit of 10000 episodes.
+Then we moving averaged the sequences of rewards with a window of size 100, in order to make the curves more smoothed, and averaged the result across all the runs. The plots show this processed sequences over the number of episodes. The coloured bands represent the 90\% confidence interval taken from bootstrapped re-samples.
 
 We show our results in two parts:
 \begin{enumerate}
@@ -225,14 +225,13 @@ On the x-axis the number of episodes, on the y-axis the average reward (obtained
 game for 5-8 y.o. children in which a small mobile robot
 has to be programmed in order to visit specific cells in a 5x7
 grid. Cells contain concepts that must be matched by the
-children (e.g., a colored animal, a color, and the initial letter
-of the name of the animal). The robot executes sequences
-of actions given in input by children with a keyboard on the
+children (e.g., a coloured animal, a colour, and the initial letter
+of the name of the animal). The robot executes sequences of actions given in input by children with a keyboard on the
 robot's top side. During execution, the robot moves on the
 grid and executes an action (actually a \emph{bip}) to announce that
 the current cell has been reached (this is called a \emph{visit} of a
-cell). A pair of consecutive visits are correct when they refer to cells containing matching concepts. In this paper, we
-generalize this game as follows. As in the real game, we consider a 5x7 grid with 7 triplets of colored cells, each triplet
+cell). In this paper, we
+generalize this game as follows. As in the real game, we consider a 5x7 grid with 7 triplets of coloured cells, each triplet
 representing three matching concepts (see Figure \ref{fig:sapientino-screenshot} for a screenshot).
 
 \begin{figure}[h]
@@ -242,11 +241,11 @@ representing three matching concepts (see Figure \ref{fig:sapientino-screenshot}
 	\label{fig:sapientino-screenshot}
 \end{figure}
 
-\paragraph{Actions, Features and Fluents:}  The actions available to the agent are: \textsc{up, down, left, right} and \textsc{bip}. The features for the agent space are the position $(x,y)$ of the agent in the grid, namely $f_x$ and $f_y$. The features for evaluate the fluents configurations are: $f_b$ reporting if a \textsc{bip} has just been executed, and $f_c$ denoting the color of the current cell. In our setting, the available fluents are: $$\Prop = \set{bip, red, green, blue, pink, brown, gray, purple}$$ with the obvious meaning that their name indicate (just map features to fluents one-to-one).
+\paragraph{Actions, Features and Fluents:}  The actions available to the agent are: \textsc{up, down, left, right} and \textsc{bip}. The features for the agent space are the position $(x,y)$ of the agent in the grid, namely $f_x$ and $f_y$. The features for evaluating the fluents configurations are: $f_b$ reporting if a \textsc{bip} has just been executed, and $f_c$ denoting the colour of the current cell. In our setting, the available fluents are: $$\Prop = \set{bip, red, green, blue, pink, brown, grey, purple}$$ with the obvious meaning that their name indicates (just map features to fluents one-to-one).
 
-\paragraph{Temporal Goal:} In our experiment, we considered the following temporal behaviors:
+\paragraph{Temporal Goal:} In our experiment, we considered the following temporal behaviours:
 \begin{itemize}
-	\item \textsc{Ordered-Visits}: \emph{visit} each color and do a \emph{bip} in each color in a given order.
+	\item \textsc{Ordered-Visits}: \emph{visit} each colour and do a \emph{bip} in each colour in a given order.
 	\item \textsc{Illegal-Bips}: between each visit, never do a \emph{bip}. 
 \end{itemize}
 
@@ -255,7 +254,7 @@ We identified two temporal goals: one considering that both conditions must be s
 \begin{align}\label{eq:sapientino-temporal-goal}
 \DIAM{&(\lnot bip)^*;red \lAND bip;(\lnot bip)^*;green \lAND bip;& \nonumber\\
 &(\lnot bip)^*;blue \lAND bip;(\lnot bip)^*;pink \lAND bip;& \nonumber\\
-&(\lnot bip)^*;brown \lAND bip;(\lnot bip)^*;gray \lAND bip;&\nonumber\\
+&(\lnot bip)^*;brown \lAND bip;(\lnot bip)^*;grey \lAND bip;&\nonumber\\
 &(\lnot bip)^*;purple \lAND bip}tt
 \end{align}
 
@@ -263,7 +262,7 @@ and:
 \begin{align}\label{eq:sapientino-temporal-goal-relaxed}
 \DIAM{&\true^*;red \lAND bip;\true^*;green \lAND bip;& \nonumber\\
 	&\true^*;blue \lAND bip;\true^*;pink \lAND bip;& \nonumber\\
-	&\true^*;brown \lAND bip;\true^*;gray \lAND bip;&\nonumber\\
+	&\true^*;brown \lAND bip;\true^*;grey \lAND bip;&\nonumber\\
 	&\true^*;purple \lAND bip}tt
 \end{align}
 where Formula \ref{eq:sapientino-temporal-goal-relaxed} is the same of Formula \ref{eq:sapientino-temporal-goal} but replacing every occurrence of  $(\lnot bip)^*$ with $\true^*$. The associated automaton are depicted, respectively, in Figure \ref{fig:sapientino-automaton} and \ref{fig:sapientino-relaxed-automaton}.
@@ -283,7 +282,7 @@ where Formula \ref{eq:sapientino-temporal-goal-relaxed} is the same of Formula \
 
 \end{figure}
 
-Notice that the condition of illegal bips does not affect the optimal policy; on the other hand, it highly affects the exploration phase, since with the \textsc{Illegal-Bips} condition, every time the $\epsilon$-greedy policy chooses $bip$ randomly and "illegally", then that trajectory cannot satisfy the temporal goal anymore.  Moreover, observe that in this case we do not consider any \emph{environment goal}, as we did in \Breakout experiments (i.e. break all the bricks).
+Notice that the condition of illegal bips does not affect the optimal policy; on the other hand, it highly affects the exploration phase, since with the \textsc{Illegal-Bips} condition, every time the $\epsilon$-greedy policy chooses $bip$ randomly and "illegally", then that trajectory cannot satisfy the temporal goal anymore.  Moreover, observe that, in this case, we do not consider any \emph{environment goal}, as we did in \Breakout experiments (i.e. break all the bricks).
 \paragraph{Configurations:}
 The reinforcement algorithm used is Sarsa$(\lambda)$ (e.g. Sarsa with eligibility traces) with $\epsilon$-greedy policy. The values of the parameters are:
 \begin{itemize}
@@ -303,11 +302,11 @@ We show our results in two parts:
 \end{enumerate}
 
 
-We analyze the results of Experiment \ref{sapientino-experiment-configuration-1} and \ref{sapientino-experiment-configuration-2}. As stated before, since the two experiments differ only for the exploration phase, the optimal policy that satisfy the goal is qualitatively the same. You might see the resulting learnt policy at \url{https://www.youtube.com/watch?v=ghBImtYMpVk}.
+We analyze the results of Experiment \ref{sapientino-experiment-configuration-1} and \ref{sapientino-experiment-configuration-2}. As stated before, since the two experiments differ only for the exploration phase, the optimal policy that satisfies the goal is qualitatively the same. You might see the resulting learnt policy at \url{https://www.youtube.com/watch?v=ghBImtYMpVk}.
 
 \subsection{\textsc{Ordered-Visits \& Illegal-Bips}}
 In this experiment, we observed that the agent successfully learned the temporal goal, both in off-line and in on-the-fly reward shaping. The performances are pretty the same. Notice that, without reward shaping, in our simulations (5000 episodes), \emph{the agent never reached the goal}.
-This is due mainly to the long sequence of actions that the agent has to take in order to accomplish the entire goal, considering that an illegal $bip$ lead to a failure of the goal and so the end of the episode. On the other hand, in the case of reward shaping, an illegal bip is punished because the episode ends and the agent collects the negative potential fall. Hence, the agent recognize, earlier than no reward shaping configuration, that the illegal bip is a bad action.
+This is due mainly to the long sequence of actions that the agent has to take in order to accomplish the entire goal, considering that an illegal $bip$ lead to a failure of the goal and so the end of the episode. On the other hand, in the case of reward shaping, an illegal bip is punished because the episode ends and the agent collects the negative potential fall. Hence, the agent recognizes, earlier than no reward shaping configuration, that the illegal bip is a bad action.
 \subsection{\textsc{Ordered-Visits}}
 Also in this case, the agent learned the temporal goal, even in the case where no reward shaping was applied. It is interesting to note that a small change in the formula can affect drastically the learning process, due to exploration phase constraints.
 
@@ -353,7 +352,7 @@ whereas the translation of Formula \ref{minecraft-goal-3-formula} into automaton
 
 Notice that we could "relax" the specified order of $get\_wood$ and $get\_iron$, since it is not relevant to the operation \emph{make a bridge}.
 
-The agent is trained to satisfy all the three tasks in a single episode. To each temporal goal, the reward assigned is $1$.
+The agent is trained to satisfy all the three tasks in a single episode. For each temporal goal, the reward assigned is $1$.
 
 \paragraph{Configurations:}
 The reinforcement algorithm used is Sarsa$(\lambda)$ (e.g. Sarsa with eligibility traces) with $\epsilon$-greedy policy. The values of the parameters are:
@@ -367,9 +366,9 @@ The reinforcement algorithm used is Sarsa$(\lambda)$ (e.g. Sarsa with eligibilit
 \subsection{Results}
 In Figure \ref{fig:minecraft-comparison} is plotted the benchmarking, similarly to the one presented in Section \ref{sect:breakout-benchmarking-rs}. We notice that the policy that satisfies every temporal goal has been found when a reward shaping is applied, whereas in the case of no reward shaping the time limit imposed for the experiment was not enough to allow every run to achieve the goal. You can see one of these found policies at \url{https://youtu.be/IJ3Hr79xfBs}.
 
-Observe that reward shaping, both in off-line and on-the-fly variant, outperform the absence of reward shaping. This is due mainly to the high number of steps that the agent has to make in a precise order in order to achieve the goal: without a guidance in the exploration (e.g. shaping rewards) it is hard to discover the proper sequence that leads to the satisfaction of every formula. Furthermore, observe that off-line reward shaping is slightly better than on-the-fly reward shaping in terms of convergence rate. It is also more stable, as the reader might infer from the shaded regions that represents the variance of the plot: indeed, it is not surprising that on-the-fly reward shaping yields a more noisy learning process, due to the dynamic change of the potential function and so of the shaping rewards.
+Observe that reward shaping, both in off-line and on-the-fly variant, outperform the absence of reward shaping. This is due mainly to the high number of steps that the agent has to make in a precise order in order to achieve the goal: without a guide in the exploration (e.g. shaping rewards) it is hard to discover the proper sequence that leads to the satisfaction of every formula. Furthermore, observe that off-line reward shaping is slightly better than on-the-fly reward shaping in terms of convergence rate. It is also more stable, as the reader might infer from the shaded regions that represent the variance of the plot: indeed, it is not surprising that on-the-fly reward shaping yields a more noisy learning process, due to the dynamic change of the potential function and so of the shaping rewards.
 
-It is worth to notice the particular structure of the environment in our setting. Indeed, when one of the task is completed, the resources that progressed at the same time the other automata/tasks are released; this lead to a regression of the state of those tasks, and so to a negative shaping reward. Hence, the positive shaping reward given for progression is mitigated by the negative shaping reward due to completion of a task and regression of the other task that have some resource in common. The learning agent has to deal with this issue, that at the scaling of the problem it might lead to slow the learning.
+It is worth to notice the particular structure of the environment in our setting. Indeed, when one of the tasks is completed, the resources that progressed at the same time the other automata/tasks are released; this lead to a regression of the state of those tasks, and so to a negative shaping reward. Hence, the positive shaping reward given for progression is mitigated by the negative shaping reward due to completion of a task and regression of the other task that has some resource in common. The learning agent has to deal with this issue, that at the scaling of the problem it might lead to slow the learning.
 
 
 \begin{figure}
@@ -382,4 +381,4 @@ It is worth to notice the particular structure of the environment in our setting
 
 \section{Implementation}
 The experiments are implemented using FLLOAT and RLTG, presented in Chapter \ref{ch:flloat} and Chapter \ref{ch:rltg}.
-The code for run the experiments by yourself with other configurations and plot the statistics is published in \href{https://github.com/MarcoFavorito/rltg-examples}{this repository}. You'll find also the scripts to run the experiments analyzed in this chapter.
+The code for running the experiments by yourself with other configurations and plot the statistics are published in \href{https://github.com/MarcoFavorito/rltg-examples}{this repository}. You'll find also the scripts to run the experiments analyzed in this chapter.

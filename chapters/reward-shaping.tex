@@ -1,18 +1,18 @@
 \chapter{Automata-based Reward shaping}\label{ch:reward-shaping}
-In this chapter we discuss a method to improve exploration of the state space and improve the convergence rate in the setting studied in Chapters \ref{ch:rl} and \ref{ch:rl-llf-goals}, in particular in the construction $\MDPagent^{new}$. 
+In this chapter, we discuss a method to improve exploration of the state space and improve the convergence rate in the setting studied in Chapters \ref{ch:rl} and \ref{ch:rl-llf-goals}, in particular in the construction $\MDPagent^{new}$. 
 Indeed, the state space of the original MDP $\MDPagent$ is expanded in order to implicitly label the states with relevant histories for the satisfaction of \LLf formulas, which in general makes harder to learn an optimal policy in $\MDPagent^{new}$ wrt $\MDPagent$, due to a bigger state space. 
-Moreover, the introduction of temporal goals makes things harder, because the agent has to find a proper behavior that satisfies all the goals. In general, proper behaviors are harder to find, and require more exploration of the state space.
+Moreover, the introduction of temporal goals makes things harder, because the agent has to find a proper behaviour that satisfies all the goals. In general, proper behaviours are harder to find and require more exploration of the state space.
 
 \emph{Reward Shaping} is a general method, well-known in the literature of Reinforcement Learning, used to deal with big state spaces and \emph{sparse} rewards, and trying to address the temporal
 credit assignment problem, i.e. to determine
-the long-term consequences of actions. It aims to help the agent by giving extra reward signals, beside the ones given by the environment, to guide the agent towards higher environment rewards. It is a way to implicitly include prior knowledge in a reinforcement learning setting, and doing so the state space is explored more efficiently, as well as the convergence rate is sped-up.
+the long-term consequences of actions. It aims to help the agent by giving extra reward signals, besides the ones that are given by the environment, to guide the agent towards higher environment rewards. It is a way to implicitly include prior knowledge in a reinforcement learning setting and doing so the state space is explored more efficiently, as well as the convergence rate is sped-up.
 
-In this chapter we propose a technique to apply reward shaping in our setting. In particular, we devise two methods: one where the automaton is known a-priori, that we call \emph{off-line} reward shaping, and the other where the automaton is built from scratch, that we call \emph{on-the-fly} reward shaping.
+In this chapter, we propose a technique to apply reward shaping in our setting. In particular, we devise two methods: one where the automaton is known apriori, that we call \emph{off-line} reward shaping, and the other where the automaton is built from scratch, that we call \emph{on-the-fly} reward shaping.
 
-The chapter is structured as follows: in the first section we explain the reward shaping theory, in particular the requirements for theoretical guarantees of policy invariance under reward transformation. Then we show how apply reward shaping on the automata transitions associated to \LLf formulas $\varphi_i$, both in \emph{off-line} variant (i.e. when the automaton is built \emph{before} the beginning of the learning process)  and \emph{on-the-fly} variant (i.e. when the automaton is built \emph{during} the learning process).
+The chapter is structured as follows: in the first section, we explain the reward shaping theory and, in particular, the requirements for theoretical guarantees of policy invariance under reward transformation. Then we show how to apply reward shaping on the automata transitions associated to \LLf formulas $\varphi_i$, both in \emph{off-line} variant (i.e. when the automaton is built \emph{before} the beginning of the learning process)  and \emph{on-the-fly} variant (i.e. when the automaton is built \emph{during} the learning process).
  
 \section{Reward Shaping Theory}
-Reward shaping is a well-known technique to guide the agent during the learning process and so reduce the time needed to learn. The idea is to supply additional rewards in a proper manner such that the optimal policy is the same of the original MDP.
+Reward shaping is a well-known technique to guide the agent during the learning process and so reduce the time needed to learn. The idea is to supply additional rewards in a proper manner such that the optimal policy is the same as the original MDP.
 
 %The possibility of using reward shaping in the context of RL  for \LTLf /\LDLf rewards has been exploited in \cite{CamachoCSM17b}. 
 %%
@@ -26,7 +26,7 @@ Reward shaping consists in defining the \emph{shaping function} $F(s,a,s')$ and 
 \delta = R(s,a,s') + F(s,a,s') + \DiscFact \qFunEst(s', a') - \qFunEst(s, a)
 \end{equation}
 
-In the following sections we will discuss two way to define $F(s,a,s')$. 
+In the following sections, we will discuss two way to define $F(s,a,s')$. 
 
 \subsection{Potential-Based Reward Shaping}\label{sect:PBRS}
 We give the definition of \emph{potential-based shaping function} (PBRS).
@@ -58,8 +58,7 @@ In poor words, potential-based reward shaping of the form $F(s, a, s') = \gamma\
 % It is not among the purposes of this work to discuss in detail the different ways to design the potential function, for which we refer to \cite{CamachoCSM17b}. Notice that the potential function is not constrained to be \emph{static}, as described above, but can be \emph{dynamic}, i.e. it might change over time during the learning process. To do so one can rely on \emph{dynamic reward shaping} \cite{Devlin:2012:DPR:2343576.2343638}. In this case, the shaping function takes the following form: $$F(q,t, a,q', t') = \gamma\Phi(q', t') - \Phi(q, t)$$ where $\Phi(q, t)$ is the new potential function which depends on automaton state $q$ and time $t$. Optimality and near-optimality guarantees are still preserved as explained in \cite{Devlin:2012:DPR:2343576.2343638}.
 
 \subsection{Dynamic Potential-Based Reward Shaping}\label{sect:DPBRS}
-A limitation of PBRS  is that  the  potential  of  a  state  does  not  change  dynamically
-during the learning.  This assumption often is broken, especially if the reward-shaping function is generated automatically.
+A limitation of PBRS is that the potential of a state does not change dynamically during the learning. This assumption often is broken, especially if the reward-shaping function is generated automatically.
   
 Equation \ref{eq:PBSF} can be extended to include also the time as parameter of the potential function $\Phi$, while guaranteeing policy invariance. Formally:
 \begin{equation}\label{eq:DPBSF}
@@ -179,7 +178,7 @@ Notice that, by construction, $G(\bar{s}) = G_\Phi(\bar{s})$, where $G_\Phi$ is 
 
 \end{algorithm}
 
-In the actual implementation of the Algorithm \ref{alg:static-reward-shaping}, $\Phi(q)$ can be computed  by least-fix point over the automaton $\automaton_\varphi$, i.e. starting from the accepting states and then explore the states from the nearest to the farthest ones.
+In the actual implementation of the Algorithm \ref{alg:static-reward-shaping}, $\Phi(q)$ can be computed by a least-fix point over the automaton $\automaton_\varphi$, i.e. starting from the accepting states and then explore the states from the nearest to the farthest ones.
 
 \section{On-The-Fly Reward shaping}\label{sect:on-the-fly-reward-shaping}
 Reward shaping can also be used when the \DFAs of the \LTLf /\LDLf formulas are constructed \emph{on-the-fly} \citep{AAAI1817342} so as to avoid to compute the entire automaton off-line. To do so we can rely on dynamic reward shaping (see Section \ref{sect:DPBRS}).
@@ -192,15 +191,15 @@ i.e. the dynamic reward shaping in Equation \ref{eq:DPBSF} but taking into accou
 where $\Phi(q, t)$ is a variant of the off-line case, but computed on the automaton $\automaton_{\varphi, t}$. In the following we explain how $\Phi$ in the on-the-fly case differs from the one shown in Section \ref{sect:off-line-reward-shaping}.
 
 \subsubsection{Details about $\Phi(q, t)$}
-There is an important issue which has not yet been pointed out. In the \emph{off-line} variant described in Section \ref{sect:off-line-reward-shaping}, we apply reward shaping at every transition by knowing the full automaton $\automaton_\varphi$; however, in the \emph{on-the-fly variant}, at the beginning of the learning task we have an "empty" automaton, i.e. only the initial state with no transition from it. 
+There is an important issue which has not yet been pointed out. In the \emph{off-line} variant described in Section \ref{sect:off-line-reward-shaping}, we apply reward shaping at every transition by knowing the full automaton $\automaton_\varphi$; however, in the \emph{on-the-fly variant}, at the beginning of the learning task, we have an "empty" automaton, i.e. only the initial state with no transition from it. 
 Let assume that after an action the automaton makes a move from the initial state. How can we assign a positive/negative shaping reward on the transition if we do not know the goodness of the transition?
-And if during a simulation we discover an accepting state, there could be a nearer accepting state that has not yet been discovered, but in order to reach it we should first discover other intermediate states. How to allow the agent to discover it while not fixing on the only known accepting states?
+And if during a simulation we discover an accepting state, there could be a nearer accepting state that has not yet been discovered, but in order to reach it, we should first discover other intermediate states. How to allow the agent to discover it while not fixing on the only known accepting states?
 
-It is clear that, the farther the learning task goes, the more accurate will be the shaping rewards, because every observed transition of the automaton during the activity of the agent is stored and eventually the entire automaton will be explored. However, some paths ending in an accepting state are not fully explored, so how to encourage the agent, in our setting, to explore those paths?
+It is clear that the farther the learning task goes, the more accurate will be the shaping rewards because every observed transition of the automaton during the activity of the agent is stored and eventually the entire automaton will be explored. However, some paths ending in an accepting state are not fully explored, so how to encourage the agent, in our setting, to explore those paths?
 
 In order to determine $\Phi(s, t)$ for a given $A_{\varphi, t}$, we consider the same computations of Algorithm \ref{alg:static-reward-shaping} but \emph{considering the leaves (wrt the initial state) of the automaton as accepting state}. In this way, even if a path does not end in an accepting state, its following is still rewarded. It could be \emph{wrongly rewarded}, since the path might lead to a failure state. However, the dynamic reward shaping theory states that until the potential-based condition is preserved, also the optimal and near-optimal solutions are preserved; moreover, eventually, once the final state of the path is discovered, the reward for that path will assume the right values.
 
-The search for the leaves states is done through Depth-First Search, while the computation is the same of the Algorithm \ref{alg:static-reward-shaping}.
+The search for the leaves states is done through Depth-First Search, while the computation is the same as the Algorithm \ref{alg:static-reward-shaping}.
 
 \medskip
 It is easy to see that:
@@ -214,4 +213,4 @@ It is easy to see that:
 
 
 \section{Conclusion}
-In this chapter, we propose an approach to apply reward shaping in the setting described in Chapter \ref{ch:rl}. We first revised the background of reward shaping theory. Then we describe an automatized way to define $\Phi$, by leveraging the structure of the automaton $\automaton_{\varphi}$ associated to the \LLf goal $\varphi$. We devised a variant in which the automaton is not known a-priori, but it is built from scratch during learning, and the potential function is dynamically updated. Finally, we observe that both the designed reward shaping preserve policy invariance.
+In this chapter, we propose an approach to apply reward shaping in the setting described in Chapter \ref{ch:rl}. We first revised the background of reward shaping theory. Then we describe an automatized way to define $\Phi$, by leveraging the structure of the automaton $\automaton_{\varphi}$ associated to the \LLf goal $\varphi$. We devised a variant in which the automaton is not known apriori, but it is built from scratch during learning, and the potential function is dynamically updated. Finally, we observe that both the designed reward shaping preserve policy invariance.

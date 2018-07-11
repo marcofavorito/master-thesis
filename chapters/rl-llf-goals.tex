@@ -1,10 +1,10 @@
 \chapter{RL for {\sc ltl}$_f$/{\sc ldl}$_f$ Goals}\label{ch:rl-llf-goals}
 
-In this chapter we describe one of the main contribution of the thesis. We define a particular problem, that we call
+In this chapter, we describe one of the main contributions of the thesis. We define a particular problem, that we call
 \emph{Reinforcement Learning for \LLf Goals}, and propose a solution.
 We focus on the case where we have two separate representations of the world: one for the agent, using the \emph{low-level} features available to it, and one for the goal, expressed in terms of \emph{high-level} (human-understandable) fluents.
 
-In the first section we describe the context of the problem and the motivations, whereas in the second section we give a formal definition. In the next section we show how we can reduce this problem to do reinforcement learning on an equivalent MDP. Finally, we give an episodic view of the scenario, which is the one used in the implementation of the experiments.
+In the first section, we describe the context of the problem and the motivations, whereas in the second section we give a formal definition. In the next section, we show how we can reduce this problem to do reinforcement learning on an equivalent MDP. Finally, we give an episodic view of the scenario, which is the one used in the implementation of the experiments.
 
 \section{Introduction and Motivations}
 Let consider to have a
@@ -17,7 +17,7 @@ Our purpose in this work is to use this agent
 to learn one (or simultaneously many) task whose goal (or many goals)
 are expressed in \LLf. Such goals are expressed over
 a representation of the world that is not the one used by the
-agent (oversimplifying, we may say that the agent has a low-level representation), but a convenient high level representation suitable to express declaratively temporally extended goals. In other words, we study the possibility of having \emph{two
+agent (oversimplifying, we may say that the agent has a low-level representation), but a convenient high-level representation suitable to express declaratively temporally extended goals. In other words, we study the possibility of having \emph{two
 separate representations of the world}:
 \begin{itemize}
 	\item one for expressing the dynamics of the RL agent;
@@ -25,47 +25,45 @@ separate representations of the world}:
 \end{itemize}
 
 These two representations use different classes of features
-from the real world: the first includes the features that the
-agent can directly access, while the second includes the features needed to evaluate the \LLf goal.
+from the real world: the first includes the features that the agent can directly access, while the second includes the features needed to evaluate the \LLf goal.
 
-One may ask: why we need two \emph{separated} representation of the world? Why we cannot merge them into an unique representation and reason/learn over this joint model?
+One may ask: why we need two \emph{separated} representation of the world? Why can we not merge them into a unique representation and reason/learn over this joint model?
 
 There are many reasons why this might be useful:
 \begin{enumerate}
 	\item The agent feature space can be designed separately from
 	the features needed to express the goal, thus promoting
-	\emph{separation of concerns} which, in turn, facilitates the design; this separation facilitates also the \emph{reuse} of representations already available, possibly developed for the standard setting.\label{motivation:separation-of-concern}
+	\emph{separation of concerns} which, in turn, facilitates the design; this separation facilitates also the \emph{reuse} of representations already available, possibility developed for the standard setting.\label{motivation:separation-of-concern}
 	
-	\item A reduced agent's feature space allows for realizing \emph{simpler agents} while preserving the possibly of tackling complex declarative goals which cannot be represented in the agent's feature space. \label{motivation:simpler-agent}
+	\item A reduced agent's feature space allows for realizing \emph{simpler agents} while preserving the possibility of tackling complex declarative goals which cannot be represented in the agent's feature space. \label{motivation:simpler-agent}
 	
 	\item Reducing the agent's feature space may yield a \emph{reduced} state space to be explored by the RL-agent.\label{motivation:reduced-space}
 	
 \end{enumerate}
 
 Clearly, the two separate representations (i.e., the two sets
-of features) need to be somehow correlated in reality. The
-crucial point, however, is that in order to perform RL effectively, \emph{such a correlation does not need to be formalized}. We let the reinforcement learning agent to learn, over its state space (eventually extended), the proper way to use an arbitrary long sequence of low-level actions in order to accomplish the high-level goals.
+of features) need to be somehow correlated in reality. The crucial point, however, is that in order to perform RL effectively, \emph{such a correlation does not need to be formalized}. We let the reinforcement learning agent learn, over its state space (eventually extended), the proper way to use an arbitrarily long sequence of low-level actions in order to accomplish the high-level goals.
 
 \begin{example}
 	Consider the RL environment \Breakout (Example \ref{exa:breakout}). Let the agent's state space be the combination of the paddle position, the ball position and the ball speed. The actions available to the agent are: move to the left, move to the right, and a nop-action. The goal is to remove all the bricks by hitting and directing the ball in a proper way.
 	
 	Now suppose that we want to express a \LLf goal, which is a sort refinement of the agent's goal: to break columns of bricks in a precise order (e.g. from left to right). To express this goal we need:
 	\begin{itemize}
-		\item a set of features that allow to detect the status of the bricks;
+		\item a set of features that allow detecting the status of the bricks;
 		\item a mapping of those features to a set of fluents upon which the \LLf formula can be expressed (e.g. the status of each column of bricks).
 	\end{itemize}
-	In this case, the agent's state space represents the \emph{low-level} state space, whereas all the possible configurations of the fluents represents the \emph{high-level} state space.
+	In this case, the agent's state space represents the \emph{low-level} state space, whereas all the possible configurations of the fluents represent the \emph{high-level} state space.
 	
-	Notice that for the satisfaction of the \LLf goal defined above, we don't need to include every possible configurations of the fluents (i.e. status of every brick) into the state space of the learning agent; instead, our intuition suggests that the RL agent, in order to be able to learn the optimal action in a given state, \emph{needs only to keep track at which point of the satisfaction of the goal it is}, such that it is able to learn how to proceed, till the complete satisfaction of the goal.
+	Notice that for the satisfaction of the \LLf goal defined above, we don't need to include every possible configuration of the fluents (i.e. status of every brick) into the state space of the learning agent; instead, our intuition suggests that the RL agent, in order to be able to learn the optimal action in a given state, \emph{needs only to keep track at which point of the satisfaction of the goal it is}, such that it is able to learn how to proceed, until the complete satisfaction of the goal.
 	
-	In our example, the learning agent just needs to know which is the next column of bricks to remove. Hence, beside the agent's state space, the agent needs to know the current target column, up to $n$ different sub-goals, where $n$ is the number of columns. In this way, it can learn how to break the current target column, and inherently the sequence of actions that lead to the removing of every column, one by one, in sequence.
+	In our example, the learning agent just needs to know which is the next column of bricks to remove. Hence, besides the agent's state space, the agent needs to know the current target column, up to $n$ different sub-goals, where $n$ is the number of columns. In this way, it can learn how to break the current target column, and inherently the sequence of actions that lead to the removing of every column, one by one, in sequence.
 	
-	Another question may arise: why one should need the proposed construction (i.e. the extended state space for temporal goals from \LLf specification) instead of a state space composed by ad-hoc features set for specify the desired temporal goal?
+	Another question may arise: why one should need the proposed construction (i.e. the extended state space for temporal goals from the  \LLf specification) instead of a state space composed by ad-hoc features set for specifying the desired temporal goal?
 	
 	The last considerations and the following ones should convince the reader about the main advantages of our approach:
 	\begin{itemize} 
 		\item \emph{Reduced state space} (motivation \ref{motivation:reduced-space}). Let $\States$ be the agent's state space. The minimum size of the learning state space needed to the agent is $|\States| \cdot n$, where the $n$-fold increase of $\States$  allow to discern a state $s\in\States$ in different partial satisfaction of the goal (i.e. the last column removed). Hence, we do not need to include directly the status of each brick, which would return a feature space of size $|\States| \cdot 2^{mn}$ ($n$ i the number of columns of bricks and $m$ is the number of rows). Notice that the latter state space is \emph{exponentially} bigger than the minimal one, which is only linear in the number of columns. 
-		\item \emph{Easier feature design} (motivation \ref{motivation:separation-of-concern}). Even if, with traditional feature engineering, it is possible to build a composed state space that includes the needed informations for learning temporally extended goal, the result is a hard-coded model, rigid to modifications. On the other hand, our approach is more flexible and open to modifications, both on features/fluents level and on \LLf goal level (just add/modify \LLf formulas).
+		\item \emph{Easier feature design} (motivation \ref{motivation:separation-of-concern}). Even if, with traditional feature engineering, it is possible to build a composed state space that includes the needed pieces of information for learning temporally extended goal, the result is a hard-coded model, rigid to modifications. On the other hand, our approach is more flexible and open to modifications, both on features/fluents level and on \LLf goal level (just add/modify \LLf formulas).
 		\item \emph{Declarativeness}: specifying by hand how the state components that track the temporal goal should evolve could be very hard and unintuitive. Instead, \LLf formalisms allow to easily express a wide range of temporal goals about how fluents should change over time.
 	\end{itemize}
 	
@@ -78,16 +76,16 @@ How the learning state space (i.e. the state space over where the agent actually
 In order to proceed with a formal definition of the problem, we made the following working assumption:
 \begin{itemize}
 	\item The agent's model of the world is an MDP; in particular, the transitions from a state to another state, given an action, satisfies the Markov property;
-	\item The granularity of the state representations is enough to accomplish the \LLf goals. It might be the case that the high-level or the low-level representation of the world is somehow inadequate to capture the relevant changes of the world;
+	\item The granularity of the state representations is enough to accomplish the \LLf goals. It might be the case that the high-level or the low-level representation of the world is somehow inadequate to capture the relevant changes in the world;
 	\item Notice that, in our setting, from the agent's point of view, the changes of the agent's state space and the ones of the fluents are \emph{synchronous}, and depends from a \emph{clock}, implicit in the model definition. Hence, we assume that this synchrony, as well as the granularity resulting from the clock, still allow the agent to learn to properly optimize the rewards.
 \end{itemize}
 
 
 \section{Problem definition}
 \label{sect:problem-definition}
-In this section we describe more formally the scenario. We first give an overall picture of the model. then, we make important observation about the transition function of the joint world representations. Finally, we define the mathematical model that will be used in the next section.
+In this section, we describe more formally the scenario. We first give an overall picture of the model. then, we make an important observation about the transition function of the joint world representations. Finally, we define the mathematical model that will be used in the next section.
 \subsection{The World, the Agent and the Fluents}
-Let $\W$ be a \emph{world} of interest (e.g. a room, an environment, a videogame). Let $W$ be the set of \emph{world states}, i.e. the states of the world $\W$. 
+Let $\W$ be a \emph{world} of interest (e.g. a room, an environment, a video game). Let $W$ be the set of \emph{world states}, i.e. the states of the world $\W$. 
 A \emph{feature} is a function $f_j$ that maps a world state to the
 values of another domain $D_j$, such as reals, finite enumerations,
 booleans, etc., i.e., $f_j : W \rightarrow D_j$.
@@ -97,13 +95,13 @@ $\mathbf{f}(w_h) = \langle f_1(w_h), \ldots, f_d(w_h) \rangle$ of
 feature values corresponding to $w_h$.
 %%
 
-Now consider an agent that lives in $\W$. The agent can interact with $\W$ by executing an action $a$ taken from a \emph{set of actions} $\Actions$. Without loss of generality, we assume that such learning agent has a special action $\Stop$ which deems the end of an episode.
+Now consider an agent that lives in $\W$. The agent can interact with $\W$ by executing an action $a$ taken from a \emph{set of actions} $\Actions$. Without loss of generality, we assume that such a learning agent has a special action $\Stop$ which deems the end of an episode.
 Moreover, the agent has its own set of features $F_{ag} = \tup{f_1, \dots, f_d}$, which yields its \emph{representation of the world} $\States$, where $\States \subseteq F_{ag}(W)$ and $F_{ag}(W) = \set{\mathbf{f}_{ag}(w) | w \in W}$. We assume that the agent has a \emph{clock} which determines the granularity of its acting. At every clock, the agent can do action $a$ and observe both the new state $s$ from the new world state $w'$, namely $s = \mathbf{f}_{ag}(w)$, and a real-valued reward $R(s,a,s')$, that depends only from the transition $s\to_a s'$.
-Finally, we assume that the the law that determines the possible next state $s'$ given the history of a trajectory (i.e. the state transition function $\TrFun$) is Markovian, hence it depends only from the current state $s$ and the taken action $a$. 
+Finally, we assume that the law that determines the possible next state $s'$ given the history of a trajectory (i.e. the state transition function $\TrFun$) is Markovian, hence it depends only from the current state $s$ and the taken action $a$. 
 In other words, we can define an MDP $\MDPagent = \tup{\States, \Actions, \TrFun, \Reward, \DiscFact}$.
 
-We consider arbitrary \LLf formulas $\varphi_i$
-($i=1,\ldots,m$) over a set of fluents $\F$ used for provide a high-level description of the world. We denote by $\L=2^\F$ the set of possible fluents configurations. 
+We consider arbitrarily \LLf formulas $\varphi_i$
+($i=1,\ldots,m$) over a set of fluents $\F$ used to provide a high-level description of the world. We denote by $\L=2^\F$ the set of possible fluents configurations. 
 Given a set of features $F_{goal}$, a \emph{configuration of fluents} $\ell_h \in \L$ is formed by the components that assign truth values to the fluents according to
 the feature vector $\mathbf{f}_{goal}(w_h)$. At every step, the features for fluents evaluations are observed, obtaining a particular configuration $\ell\in\L$. Notice that in general the features for the fluents and for the agent state space may differ. The formula $\varphi_i$ is
 selecting sequences of fluents configurations $\ell_1,\cdots,\ell_n$,
@@ -192,7 +190,7 @@ $\MDPagent^{goal}= \tup{\States, \Actions, \TrFunAgentGoal, \Reward, \L,
 Formulas $\varphi'_i$ simply require to evaluate the corresponding
 goal formula $\varphi_i$ after having done the action $stop$, which
 sets the fluent $Done$ to true and ends the episode. Hence it gives
-the reward associated to the goal at the end of the episode.
+the reward associated with the goal at the end of the episode.
 %%
 The formulas $\Diamond(s\land a\land \Next(Last \land s'))$, one per
 $(s,a,s')$, requires both states $s$ and action $a$ are followed by
@@ -235,14 +233,14 @@ We can now state the following result.
 	restricting policies to be learned to have the form $S^*\rightarrow A$.
 \end{theorem}
 
-Observe that by restricting $\MDPagent^{nmr}$ policies to $S^*$ in general we may discard policies that have a better reward but depend on $\L$. On the other hand, these policies need to change the learning agent in order to allow it to observe $\L$ as well. As mentioned in the introduction, we are interested in keeping the learning agent as it is, apart for additional memory.
+Observe that by restricting $\MDPagent^{nmr}$ policies to $S^*$, in general, we may discard policies that have a better reward but depend on $\L$. On the other hand, these policies need to change the learning agent in order to allow it to observe $\L$ as well. As mentioned in the introduction, we are interested in keeping the learning agent as it is, apart from additional memory.
 
 \medskip
 As a second step, we apply the construction of Section \ref{sect:nmrdp-llf-rewards} and obtain a
 new MDP learning agent.  In such construction, however, because of the
-triviality of their automata, we do not need to keep track of state
+triviality of their automata, we do not need to keep track of the state
 $\varphi_s$, but just give the reward $R(s,a,s')$ associated to
-$(s,a,s')$. Instead we do need to keep track of state of the \DFAs
+$(s,a,s')$. Instead, we do need to keep track of the state of the \DFAs
 $\automaton_{\varphi_i}$ corresponding to the formulas $\varphi'_i$.
 Hence, from $\MDPagent^{nmr}$, we get an MDP $\MDPagent'=\langle S',A',Tr'_{ag},R'\rangle$ where:
 \begin{itemize}\itemsep=0mm
@@ -307,7 +305,7 @@ $\MDPagent^{new}=\langle Q_1\times\cdots\times Q_m \times S,A,\TrFun''_{ag},R''\
 	\item States $q_i$ of \DFAs $\automaton_{\varphi_i}$ are progressed correctly by the environment.
 \end{itemize}
 
-Indeed  we can show the following result.
+Indeed, we can show the following result.
 
 \begin{theorem}\label{th:goal-mdp}
 	RL for \LTLf /\LDLf goals
@@ -354,7 +352,7 @@ It is worth to remark that in the resulting MDP $\MDPagent^{new}$ the \emph{expl
 \section{An episodic goal-based view}
 Here we clarify how the actual transition model works in the final MDP $\MDPagent^{new}$. We focus on the episodic view, where the learning process is organized in episodes.
 Recall that the state space of $\MDPagent^{new}$ is $Q_1\times \dots Q_m \times \States$, where $Q_i$ is the set of states of $\automaton_{\varphi_i}$, the automaton associated to the \LLf formula $\varphi_i$ (see Section \ref{sect:llf2automata}). 
-Moreover we consider two cases: when there exists a subset of states $\States_{goal} \subseteq \States$ that we call \emph{goal states}, such that every transition in those state make the task completed and hence the end of the episode; and when there are no goal states, but the task is to maximize the obtained reward, until a maximum number of steps is reached. E.g. in Gridworld presented in Example \ref{exa:gridworld}, we can defined $s_{34}$ as a goal state. However nothing prevent us to set a maximum number of time steps, and let the agent learn how to collect reward as much as possible in a limited amount of time.
+Moreover we consider two cases: when there exists a subset of states $\States_{goal} \subseteq \States$ that we call \emph{goal states}, such that every transition in those state make the task completed and hence the end of the episode; and when there are no goal states, but the task is to maximize the obtained reward, until a maximum number of steps is reached. E.g. in Gridworld presented in Example \ref{exa:gridworld}, we can defined $s_{34}$ as a goal state. However, nothing prevents us to set a maximum number of time steps, and let the agent learn how to collect reward as much as possible in a limited amount of time.
 
 Now we give the following definition:
 \begin{definition}
@@ -381,7 +379,7 @@ $$
 
 The reward $R(s,a,s')$ is collected after each taken action, and it is summed with $r_i$ for every satisfied $\varphi_i$ at the last state of the episode.
 
-\paragraph{Remark about the stopping condition:} notice that the presence of $\mathrm{failure\_state}(\mathbf{s})$ in the stopping condition is not strictly needed. Indeed, in the general case, the agent still tries to learn an optimal policy in terms of observed rewards, regardless if the temporal goal at some point of the episode cannot be satisfied anymore (i.e. a failure state for some automaton $\automaton_{\varphi_i}$ is reached). However, we can think of $\mathrm{failure\_state}(\mathbf{s})$ as a way to avoid parts of simulations that are not of interest, since the trajectory is "compromised" in terms of satisfaction of \LLf formulas.
+\paragraph{Remark about the stopping condition:} notice that the presence of $\mathrm{failure\_state}(\mathbf{s})$ in the stopping condition is not strictly needed. Indeed, in the general case, the agent still tries to learn an optimal policy in terms of observed rewards, regardless of the temporal goal at some point of the episode cannot be satisfied anymore (i.e. a failure state for some automaton $\automaton_{\varphi_i}$ is reached). However, we can think of $\mathrm{failure\_state}(\mathbf{s})$ as a way to avoid parts of simulations that are not of interest, since the trajectory is "compromised" in terms of satisfaction of \LLf formulas.
 
 \subsubsection{Summary}
 In the following we summarize the results of this Chapter:
@@ -393,4 +391,4 @@ In the following we summarize the results of this Chapter:
 \end{itemize}
 
 \section{Conclusions}
-In this chapter we defined and studied a new problem, \emph{Reinforcement Learning for \LLf goals}, and proposed a reduction that yields an equivalent MDP which can be used to solve the original problem. We first informally introduced the novelty and the motivations of our construction. Then we defined the problem more formally. After that, we described the technical details of the reduction, by leveraging results and concepts from Chapter \ref{ch:rl}. Finally, we gave some details for specify an episodic reinforcement learning view of the built model. 
+In this chapter, we defined and studied a new problem, \emph{Reinforcement Learning for \LLf goals}, and proposed a reduction that yields an equivalent MDP which can be used to solve the original problem. We first informally introduced the novelty and the motivations of our construction. Then we defined the problem more formally. After that, we described the technical details of the reduction, by leveraging results and concepts from Chapter \ref{ch:rl}. Finally, we gave some details to specify an episodic reinforcement learning view of the built model. 
