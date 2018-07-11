@@ -295,19 +295,20 @@ The reinforcement algorithm used is Sarsa$(\lambda)$ (e.g. Sarsa with eligibilit
 
 \medskip
 
+
 We show our results in two parts:
 \begin{enumerate}
 	\item Comparison of \emph{No Reward Shaping}, \emph{Off-line Reward Shaping} and \emph{On-the-fly Reward Shaping} in \Sapientino with the "full" temporal goal, i.e. \textsc{Ordered-Visits \& Illegal-Bips}\label{sapientino-experiment-configuration-1};
 	\item Comparison of \emph{No Reward Shaping}, \emph{Off-line Reward Shaping} and \emph{On-the-fly Reward Shaping} in \Sapientino with the "relaxed" temporal goal, i.e. only \textsc{Ordered-Visits} \label{sapientino-experiment-configuration-2};
 \end{enumerate}
 
-\subsection{Results}
-In this part we analyze the results of Experiment \ref{sapientino-experiment-configuration-1} and \ref{sapientino-experiment-configuration-2}. As stated before, since the two experiments differ only for the exploration phase, the optimal policy that satisfy the goal is qualitatively the same. You might see the resulting learnt policy at \url{https://www.youtube.com/watch?v=ghBImtYMpVk}.
 
-\subsubsection{\textsc{Ordered-Visits \& Illegal-Bips}}
+We analyze the results of Experiment \ref{sapientino-experiment-configuration-1} and \ref{sapientino-experiment-configuration-2}. As stated before, since the two experiments differ only for the exploration phase, the optimal policy that satisfy the goal is qualitatively the same. You might see the resulting learnt policy at \url{https://www.youtube.com/watch?v=ghBImtYMpVk}.
+
+\subsection{\textsc{Ordered-Visits \& Illegal-Bips}}
 In this experiment, we observed that the agent successfully learned the temporal goal, both in off-line and in on-the-fly reward shaping. The performances are pretty the same. Notice that, without reward shaping, in our simulations (5000 episodes), \emph{the agent never reached the goal}.
 This is due mainly to the long sequence of actions that the agent has to take in order to accomplish the entire goal, considering that an illegal $bip$ lead to a failure of the goal and so the end of the episode. On the other hand, in the case of reward shaping, an illegal bip is punished because the episode ends and the agent collects the negative potential fall. Hence, the agent recognize, earlier than no reward shaping configuration, that the illegal bip is a bad action.
-\subsubsection{\textsc{Ordered-Visits}}
+\subsection{\textsc{Ordered-Visits}}
 Also in this case, the agent learned the temporal goal, even in the case where no reward shaping was applied. It is interesting to note that a small change in the formula can affect drastically the learning process, due to exploration phase constraints.
 
 \section{\Minecraft}
@@ -369,7 +370,7 @@ In Figure \ref{fig:minecraft-comparison} is plotted the benchmarking, similarly 
 Observe that reward shaping, both in off-line and on-the-fly variant, outperform the absence of reward shaping. This is due mainly to the high number of steps that the agent has to make in a precise order in order to achieve the goal: without a guidance in the exploration (e.g. shaping rewards) it is hard to discover the proper sequence that leads to the satisfaction of every formula. Furthermore, observe that off-line reward shaping is slightly better than on-the-fly reward shaping in terms of convergence rate. It is also more stable, as the reader might infer from the shaded regions that represents the variance of the plot: indeed, it is not surprising that on-the-fly reward shaping yields a more noisy learning process, due to the dynamic change of the potential function and so of the shaping rewards.
 
 It is worth to notice the particular structure of the environment in our setting. Indeed, when one of the task is completed, the resources that progressed at the same time the other automata/tasks are released; this lead to a regression of the state of those tasks, and so to a negative shaping reward. Hence, the positive shaping reward given for progression is mitigated by the negative shaping reward due to completion of a task and regression of the other task that have some resource in common. The learning agent has to deal with this issue, that at the scaling of the problem it might lead to slow the learning.
-	
+
 
 \begin{figure}
 	\centering
