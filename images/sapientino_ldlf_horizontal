@@ -1,0 +1,20 @@
+digraph {
+	#size="6,6";
+	rankdir="LR";
+	fake [style=invisible]
+	0 [root=true]
+	1
+	2
+	6
+	7 [shape=doublecircle]
+	fake -> 0 [style=bold]
+	0 -> 1 [label="{red, bip}"]
+	0 -> 0 [label="!bip"]
+	1 -> 2 [label="{bip, green}"]
+	1 -> 1 [label="!bip"]
+	2 -> 6 [style="dashed"]
+	2 -> 2 [label="!bip"]
+	6 -> 6 [label="!bip"]
+	6 -> 7 [label="{purple, bip}"]
+	7 -> 7 [label="true"]
+}

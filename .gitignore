@@ -10,3 +10,7 @@ newthesis.tex
 
 *.toc
 macros_.tex
+
+*.nav
+*.snm
+*.vrb
