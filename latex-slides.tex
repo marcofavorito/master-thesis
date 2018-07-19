@@ -98,7 +98,7 @@
 
 \title[RL for \LLf goals]{Reinforcement Learning for \LLf: Theory and Implementation}
 \author{Marco Favorito}
-\institute[DIAG at Sapienza, Rome]{Master of Science in Engineering in Computer Science \\at Sapienza, University of Rome}
+\institute[DIAG at Sapienza, Rome]{M.Sc. in \\Engineering in Computer Science \\at Sapienza, University of Rome}
 \date{A.Y. 2017/2018}
 %Advisor: prof. Giuseppe De Giacomo
 
@@ -154,6 +154,21 @@
 
 %\subsection{Tables and Figures}
 
+\begin{frame}{Example of NMRDP: \Breakout}
+	\begin{itemize}
+		\item Non-Markovian reward: remove columns from left to right
+		\item The solution space is restricted
+		\item Policy must depend from a sequence of states: $\Policy: S^* \to A$
+	\end{itemize}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.5\textwidth]{images/breakout.jpg}
+	\end{figure}
+\end{frame}
+
+
+
 \begin{frame}{Goals of the thesis}
 
 \begin{itemize}
@@ -190,7 +205,7 @@
 	\begin{itemize}
 		\item Linear Temporal Logic on finite traces: \LTLf
 			\begin{itemize}
-				\item Exactly the same syntax of \LTLf
+				\item Exactly the same syntax of \LTL
 				\item Interpreted over finite traces
 	
 			\begin{tasks}[counter-format = -](2)
@@ -296,7 +311,7 @@ dfa.to_dot("alternating_AB.svg")
 		\begin{itemize}
 			\item rewards specified by \LLf formulas 
 			\item over a set of propositional symbols $\Prop$
-			\item agent’s state space: $S \subseteq \Prop$
+			\item agent’s state space: $S \subseteq 2^\Prop$
 		\end{itemize}
 		\item 	We can transform it into an equivalent MDP $\MDP$ (Brafman et al. 2018)
 		\begin{itemize}
@@ -474,7 +489,7 @@ trainer.main(...)                # starts the learning process
 		\item \textbf{high-level features}: $get\_wood$, $use\_workbench$ etc.
 		\item \textbf{\LLf goal}: three composite tasks like (approximately):
 		\[
-		\DIAM{\true^*}\DIAM{\true^*; get\_iron ; get\_iron \lAND get\_wood; \dots \lAND use\_factory}tt
+		\DIAM{\true^*}\DIAM{get\_iron ; get\_iron \lAND get\_wood; \dots \lAND use\_factory}tt
 		\]
 	\end{itemize}
 	
@@ -523,7 +538,7 @@ trainer.main(...)                # starts the learning process
 		\item Design of ad-hoc algorithms (e.g. "automata-aware" exploration);
 		\item Extend the approach to the framework of Multi-Agent Systems.
 	\end{itemize}
-	
+	Publication: \href{https://arxiv.org/abs/1807.06333}{https://arxiv.org/abs/1807.06333}. Status: submitted
 	
 \end{frame}
 

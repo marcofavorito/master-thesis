@@ -3,7 +3,7 @@
 
 In this chapter, we discuss Reinforcement Learning with non-Markovian rewards specified by \LLf formulas. The main contribution of this chapter is to devise a natural extension of the construction proposed in \citep{AAAI1817342} for a reinforcement learning task. That is, we show that it is possible to do reinforcement learning for non-Markovian rewards, expressed in \LLf formulas, by expanding the state space of the agent from the automata associated to the \LLf reward formulas.
 
-
+In the first section we summarize the framework of Reinforcement Learning. Then we introduce the foundational topics of MDP models and the Temporal Difference Learning. We explain what is an NMRDP and explain the rationale of the main solutions in the literature. Then we explain the result in \citep{AAAI1817342} and extend this work to the Reinforcement Learning domain.
 \section{Reinforcement Learning}
 \label{RL}
 Reinforcement Learning \citep{Sutton:1998:IRL:551283} is a sort of optimization problem where an \emph{agent} interacts with an \emph{environment} and obtains a \emph{reward} for each action he chooses and the new observed state. The task is to maximize a numerical reward signal obtained after each action during the interaction with the environment. The agent does not know a priori how the environment works (i.e. the effects of his actions), but he can make observations in order to know the new state and the reward. Hence, learning is made in a \emph{trial-and-error} fashion. Moreover, it is worth to notice that in many situation reward might not be affected only from the last action but from an indefinite number of the previous actions. In other words, the reward can be \emph{delayed}, i.e. the agent should be able to foresee the effect of his actions in terms of future expected reward. Figure \ref{fig:agent-environment} represent the interaction between the agent and the environment in this setting.
@@ -447,7 +447,7 @@ the learning agent, can be reduced to RL over the MDP $\MDP$
 defined above.
 \end{theorem}
 
-\section{Conclusions}
+\section{Conclusion}
 In this chapter, we introduced the topic of Reinforcement Learning, as well as foundational definitions (MDP, policy $\Policy$, state-value function $\ValFun_\Policy$) and algorithms (Q($\lambda$), Sarsa($\lambda$)). Then we presented the notion of NMRDP and a technique to build an equivalent MDP, by specifying non-Markovian reward function with \LLf formalisms. We end the chapter by remarking that the transformed MDP can be used for reinforcement learning, formalizing the results with a theorem.
 \endinput
 

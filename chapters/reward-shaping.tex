@@ -28,8 +28,8 @@ Reward shaping consists in defining the \emph{shaping function} $F(s,a,s')$ and 
 
 In the following sections, we will discuss two way to define $F(s,a,s')$. 
 
-\subsection{Potential-Based Reward Shaping}\label{sect:PBRS}
-We give the definition of \emph{potential-based shaping function} (PBRS).
+\subsection{Potential-Based Reward Shaping (PBRS)}\label{sect:PBRS}
+We give the definition of \emph{potential-based shaping function}.
 \begin{definition}[\cite{Ng:1999:PIU:645528.657613}]\label{def:PBSF}
 	Let any $S, A, \DiscFact$ and any shaping function $F: \States\times\Actions\to\Reals$ be given.
 	We say $F$ is a potential-based shaping function if there exists a real-valued function $\Phi: \States \to \Reals$ such that for all $s\in\States, a\in\Actions, s'\in\States$
@@ -57,7 +57,7 @@ In poor words, potential-based reward shaping of the form $F(s, a, s') = \gamma\
 
 % It is not among the purposes of this work to discuss in detail the different ways to design the potential function, for which we refer to \cite{CamachoCSM17b}. Notice that the potential function is not constrained to be \emph{static}, as described above, but can be \emph{dynamic}, i.e. it might change over time during the learning process. To do so one can rely on \emph{dynamic reward shaping} \cite{Devlin:2012:DPR:2343576.2343638}. In this case, the shaping function takes the following form: $$F(q,t, a,q', t') = \gamma\Phi(q', t') - \Phi(q, t)$$ where $\Phi(q, t)$ is the new potential function which depends on automaton state $q$ and time $t$. Optimality and near-optimality guarantees are still preserved as explained in \cite{Devlin:2012:DPR:2343576.2343638}.
 
-\subsection{Dynamic Potential-Based Reward Shaping}\label{sect:DPBRS}
+\subsection{Dynamic Potential-Based Reward Shaping (DPBRS)}\label{sect:DPBRS}
 A limitation of PBRS is that the potential of a state does not change dynamically during the learning. This assumption often is broken, especially if the reward-shaping function is generated automatically.
   
 Equation \ref{eq:PBSF} can be extended to include also the time as parameter of the potential function $\Phi$, while guaranteeing policy invariance. Formally:
@@ -171,14 +171,89 @@ Notice that, by construction, $G(\bar{s}) = G_\Phi(\bar{s})$, where $G_\Phi$ is 
 
 		\EndFor
 		
-		\State Let $n_{max}$ the maximum number of hops  to reach an accepting state \label{alg-line:max-distance}
+		\State Let $n_{max}$ the maximum number of hops  to reach an accepting state $+1$ \label{alg-line:max-distance} 
 		\State $\Phi(sink) \gets \frac{n_{q_0} - n_{max}}{n_{q_0}} \cdot r \ \mathbf{if}\  n_{q_0}\neq 0 \ \mathbf{else}\  (n_{q_0} - n_{max}) \cdot r$ 
 		\State \Return $\Phi$
  	\end{algorithmic}
 
 \end{algorithm}
 
-In the actual implementation of the Algorithm \ref{alg:static-reward-shaping}, $\Phi(q)$ can be computed by a least-fix point over the automaton $\automaton_\varphi$, i.e. starting from the accepting states and then explore the states from the nearest to the farthest ones.
+In the actual implementation of the Algorithm
+ \ref{alg:static-reward-shaping}, $\Phi(q)$ can be computed by a least-fix point over the automaton $\automaton_\varphi$, i.e. starting from the accepting states and then explore the states from the nearest to the farthest ones.
+
+\begin{example}\label{exa:rs-eve}
+	Consider the following \LTLf goal:
+	\begin{equation}\label{eq:eve-a!b-eve-!ab}
+		\Diamond( (A \lAND \lnot B) \lAND \Diamond(\lnot A \lAND B) )
+	\end{equation}
+	
+	and consider its associated automaton, shown in Figure \ref{fig:eve-a!b-eve-!ab}.
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.2\textwidth]{images/eve-a!b-eve-!ab}
+		\caption{The automaton associated to Formula \ref{eq:abcd}.}
+		\label{fig:eve-a!b-eve-!ab}
+	\end{figure}
+	
+	The potential function computed for this automaton, with $r=200$, would be:
+	\begin{alignat*}{4}
+	\Phi(0) & = & \dfrac{2 - 2}{2}\cdot 200 & = & 0\\
+	\Phi(1) & = & \dfrac{2 - 1}{2}\cdot 200 & = & 100\\
+	\Phi(2) & = & \dfrac{2 - 0}{2}\cdot 200 & = & 200
+	\end{alignat*}
+	
+	Now consider the following transitions:
+	\begin{itemize}
+		\item $0\to 0$ gives a shaping reward $F(0, 0) = \Phi(0) - \Phi(0) = 0$
+		\item $0\to 1$ gives a shaping reward $F(0, 1) = \Phi(1) - \Phi(0) = 100$
+		\item $1\to 1$ gives a shaping reward $F(1, 1) = \Phi(1) - \Phi(1) = 0$
+		\item $1\to 2$ gives a shaping reward $F(0, 1) = \Phi(2) - \Phi(1) = 100$
+	\end{itemize}
+	The computations are made by considering that $n_{q_0} = 2$ (i.e. at minimum two transitions that lead to an accepting state, namely $0\to 1$ and $1\to 2$) and that $n_1=1$. For state $2$, $n_2 = 0$ because it is an accepting state.
+
+	
+\end{example}
+
+\begin{example}\label{exa:rs-abcd}
+	Consider the following \LDLf goal:
+	\begin{alignat}{4}\label{eq:abcd}
+	\DIAM{(      &A  \lAND  \lnot &&B  \lAND  \lnot &&C  \lAND  \lnot &&D)^*;\nonumber\\
+	     (\lnot  &A  \lAND        &&B  \lAND  \lnot &&C  \lAND  \lnot &&D)^*;\nonumber\\
+	     (\lnot  &A  \lAND  \lnot &&B  \lAND        &&C  \lAND  \lnot &&D)^*;\nonumber\\
+	     (\lnot  &A  \lAND  \lnot &&B  \lAND  \lnot &&C  \lAND        &&D)}\End
+	\end{alignat}
+	
+	and consider its associated (complete) automaton, shown in Figure \ref{fig:abcd}.
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.6\textwidth]{images/abcd-sink}
+		\caption{The automaton associated to Formula \ref{eq:abcd}.}
+		\label{fig:abcd}
+	\end{figure}
+	
+	The potential function computed for this automaton, with $r=100$, would be:
+	\begin{alignat*}{4}
+	\Phi(0)    & = & \dfrac{1 - 1}{1}\cdot 100 & = & 0\\
+	\Phi(3)    & = & \dfrac{1 - 1}{1}\cdot 100 & = & 0\\
+	\Phi(2)    & = & \dfrac{1 - 1}{1}\cdot 100 & = & 0\\
+	\Phi(1)    & = & \dfrac{1 - 0}{1}\cdot 100 & = & 100\\
+	\Phi(sink) & = & \dfrac{1 - 2}{1}\cdot 100 & = & -100
+	\end{alignat*}
+	
+	Now consider every possible transition from $0$:
+	\begin{itemize}
+		\item $0\to 0$ gives a shaping reward $F(0, 0) = \Phi(0) - \Phi(0) = 0$
+		\item $0\to 3$ gives a shaping reward $F(0, 3) = \Phi(3) - \Phi(0) = 0$
+		\item $0\to 2$ gives a shaping reward $F(0, 2) = \Phi(2) - \Phi(0) = 0$
+		\item $0\to 1$ gives a shaping reward $F(0, 1) = \Phi(1) - \Phi(0) = 100$
+		\item $0\to sink$ gives a shaping reward $F(0, sink) = \Phi(sink) - \Phi(0) = -100$
+	\end{itemize}
+	The computations are made by considering that $n_{q_0} = 1$ due to transition $0 \to_{\set{D}} 3$ and that $n_q=1$ also fo states $2$ and $3$. For state $1$, $n_1 = 0$ because it is an accepting state.
+	Notice that, since states $0, 3, 2$ are at the same distance to the (unique) accepting state $1$, they have the same potential, i.e. $0$. Thus, only transitions to the accepting state $1$ are rewarded. Moreover, notice that $n_{sink} = n_{max} + 1 = n_{q_0} + 1 = 2$. Hence, by construction, $sink$ is the state at the lowest potential.
+	
+	
+	
+\end{example}
 
 \section{On-The-Fly Reward shaping}\label{sect:on-the-fly-reward-shaping}
 Reward shaping can also be used when the \DFAs of the \LTLf /\LDLf formulas are constructed \emph{on-the-fly} \citep{AAAI1817342} so as to avoid to compute the entire automaton off-line. To do so we can rely on dynamic reward shaping (see Section \ref{sect:DPBRS}).
@@ -199,7 +274,61 @@ It is clear that the farther the learning task goes, the more accurate will be t
 
 In order to determine $\Phi(s, t)$ for a given $A_{\varphi, t}$, we consider the same computations of Algorithm \ref{alg:static-reward-shaping} but \emph{considering the leaves (wrt the initial state) of the automaton as accepting state}. In this way, even if a path does not end in an accepting state, its following is still rewarded. It could be \emph{wrongly rewarded}, since the path might lead to a failure state. However, the dynamic reward shaping theory states that until the potential-based condition is preserved, also the optimal and near-optimal solutions are preserved; moreover, eventually, once the final state of the path is discovered, the reward for that path will assume the right values.
 
-The search for the leaves states is done through Depth-First Search, while the computation is the same as the Algorithm \ref{alg:static-reward-shaping}.
+In this setting, a \emph{leaf state} is a state that is at the "boundaries" of the automaton; that is, a state that requires a high number of transitions and that their outer edges does not end in a farthest state from the initial state. 
+The search for the leaf states is done through Breadth-First Search, while the computation is the same as the Algorithm \ref{alg:static-reward-shaping} by considering as accepting state the \emph{true} accepting states, discovered until now, and the leaf states computed as just explained.
+
+\begin{example}
+	Let consider Example \ref{exa:rs-eve}, but with the on-the-fly construction of the potential function just described. Consider the following trace:
+	\[
+	\trace = \tup{\set{}, \set{A},\set{A},\set{B},\set{A}}
+	\]
+	The updates corresponding to each trace symbol are shown in Figure \ref{fig:on-the-fly-example-eve/steps}. Notice that at each relevant change of the automaton's topology, also the potential function changes. Moreover, consider the step in Figure \ref{on-the-fly-example-eve/step4}. In order to compute the potential function, it has been used the Algorithm \ref{alg:static-reward-shaping} by considering the state $1$ to be an accepting one. This implies an overestimation of the true potential function value (i.e. $100$), but it is useful to encourage the agent to explore that path of the automaton. Once a further state is discovered, state $1$ is not considered anymore as fake accepting state: indeed, from step in Figure \ref{on-the-fly-example-eve/step6}, its value is the true one, i.e. $\Phi(1) = 100$. 
+	
+	\begin{figure}[h!]
+		\centering
+		\begin{subfigure}[b]{0.2\textwidth}
+			\includegraphics[width=\textwidth]{images/on-the-fly-example-eve/step2.png}
+			\caption{$\Phi(0)=0$}
+			%	 	\label{a}
+		\end{subfigure}
+		\hfill
+		~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+		%(or a blank line to force the subfigure onto a new line)
+		\begin{subfigure}[b]{0.2\textwidth}
+			\includegraphics[width=\textwidth]{images/on-the-fly-example-eve/step3.png}
+			\caption{After $\set{}$: $\Phi(0)=0$}
+			%	 	\label{}
+		\end{subfigure}
+		\hfill
+		~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+		%(or a blank line to force the subfigure onto a new line)
+		\begin{subfigure}[b]{0.2\textwidth}
+			\includegraphics[width=\textwidth]{images/on-the-fly-example-eve/step4.png}
+			\caption{After $\set{A}$: $\Phi(1)=200$}
+			\label{on-the-fly-example-eve/step4}
+		\end{subfigure}
+		
+		\begin{subfigure}[b]{0.2\textwidth}
+			\includegraphics[width=\textwidth]{images/on-the-fly-example-eve/step5.png}
+			\caption{After $\set{A}$: nothing changes.}
+			%	 	\label{}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}[b]{0.2\textwidth}
+			\includegraphics[width=\textwidth]{images/on-the-fly-example-eve/step6.png}
+			\caption{After $\set{B}$: $\Phi(1)=100\\\Phi(2)=200$}
+			\label{on-the-fly-example-eve/step6}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}[b]{0.2\textwidth}
+			\includegraphics[width=\textwidth]{images/on-the-fly-example-eve/step7.png}
+			\caption{After $\set{A}$: nothing changes.}
+			%	 	\label{}
+		\end{subfigure}
+		\caption{An example of automaton and potential function built from scratch. The formula is the one used for Example \ref{exa:rs-eve}.}\label{fig:on-the-fly-example-eve/steps}
+	\end{figure}
+	
+\end{example}
 
 \medskip
 It is easy to see that:

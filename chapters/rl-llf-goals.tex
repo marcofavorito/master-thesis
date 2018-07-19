@@ -4,7 +4,7 @@ In this chapter, we describe one of the main contributions of the thesis. We def
 \emph{Reinforcement Learning for \LLf Goals}, and propose a solution.
 We focus on the case where we have two separate representations of the world: one for the agent, using the \emph{low-level} features available to it, and one for the goal, expressed in terms of \emph{high-level} (human-understandable) fluents.
 
-In the first section, we describe the context of the problem and the motivations, whereas in the second section we give a formal definition. In the next section, we show how we can reduce this problem to do reinforcement learning on an equivalent MDP. Finally, we give an episodic view of the scenario, which is the one used in the implementation of the experiments.
+In the first section, we describe the context of the problem and the motivations, whereas in the second section we give a formal definition. In the next section, we describe the problem more formally. Then, we show how we can reduce this problem to do reinforcement learning on an equivalent MDP. Finally, we give an episodic view of the scenario, which is the one used in the implementation of the experiments.
 
 \section{Introduction and Motivations}
 Let consider to have a
@@ -349,7 +349,7 @@ Indeed, we can show the following result.
 
 It is worth to remark that in the resulting MDP $\MDPagent^{new}$ the \emph{explicit presence of the fluents configuration $\ell$ has been removed}. Rather, the dependency is compiled into the expanded state space $Q_1\times \dots Q_m \times \States$, where $Q_1, \dots, Q_m$ are the automata state spaces associated to the formulas $\varphi_i$.
 
-\section{An episodic goal-based view}
+\section{An episodic goal-based view}\label{sect:episodic-view}
 Here we clarify how the actual transition model works in the final MDP $\MDPagent^{new}$. We focus on the episodic view, where the learning process is organized in episodes.
 Recall that the state space of $\MDPagent^{new}$ is $Q_1\times \dots Q_m \times \States$, where $Q_i$ is the set of states of $\automaton_{\varphi_i}$, the automaton associated to the \LLf formula $\varphi_i$ (see Section \ref{sect:llf2automata}). 
 Moreover we consider two cases: when there exists a subset of states $\States_{goal} \subseteq \States$ that we call \emph{goal states}, such that every transition in those state make the task completed and hence the end of the episode; and when there are no goal states, but the task is to maximize the obtained reward, until a maximum number of steps is reached. E.g. in Gridworld presented in Example \ref{exa:gridworld}, we can defined $s_{34}$ as a goal state. However, nothing prevents us to set a maximum number of time steps, and let the agent learn how to collect reward as much as possible in a limited amount of time.
@@ -390,5 +390,5 @@ In the following we summarize the results of this Chapter:
 	\item Finally, by proving Theorem \ref{th:goal-mdp}, we showed that we can do reinforcement learning over the equivalent MDP $\MDP_{ag}^{new}$ by simply dropping the fluents $\ell$ from the state space. The optimal policy for $\MDP_{ag}^{new}$ can be transformed to a solution for the original problem $\MDPagent^{goal}$.
 \end{itemize}
 
-\section{Conclusions}
+\section{Conclusion}
 In this chapter, we defined and studied a new problem, \emph{Reinforcement Learning for \LLf goals}, and proposed a reduction that yields an equivalent MDP which can be used to solve the original problem. We first informally introduced the novelty and the motivations of our construction. Then we defined the problem more formally. After that, we described the technical details of the reduction, by leveraging results and concepts from Chapter \ref{ch:rl}. Finally, we gave some details to specify an episodic reinforcement learning view of the built model. 

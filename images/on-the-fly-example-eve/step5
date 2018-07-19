@@ -1,0 +1,9 @@
+digraph {
+	fake [style=invisible]
+	0 [root=true]
+	1
+	fake -> 0 [style=bold]
+	0 -> 0 [label="{}"]
+	0 -> 1 [label="{A}"]
+	1 -> 1 [label="{A}"]
+}

@@ -1,17 +1,16 @@
 \chapter{RLTG}\label{ch:rltg}
-In this chapter, we describe \href{https://github.com/MarcoFavorito/rltg.git}{RLTG} (Reinforcement Learning for Temporal Goals), a software project written in Python.  It is the reference implementation of many of the topics described in Chapter \ref{ch:rl} and Chapter \ref{ch:reward-shaping}. 
-
+In this chapter, we describe \href{https://github.com/MarcoFavorito/rltg.git}{RLTG} (Reinforcement Learning for Temporal Goals), a software project written in Python.  It is the reference implementation of many of the topics described in Chapter \ref{ch:rl} and Chapter \ref{ch:reward-shaping}.
 %We'll see the main features, the package structure, and some code examples.
 
 \section{Introduction}
 \paragraph{Main features:} RLTG is a Python framework that allows you to:
 \begin{itemize}
-	
+
 	\item Setup a classic reinforcement learning task by using OpenAI Gym environments.
 	\item Modularization of a reinforcement learning system: definition of \texttt{Environment, Agent, Brain, Policy}, allowing for easy extension;
 	\item Support for Sarsa($\lambda$) and Q($\lambda$) with $\epsilon$-greedy policy.
 	\item Support for \LLf goal specifications, as described in Chapter \ref{ch:rl} and Chapter \ref{ch:rl-llf-goals}.
-	
+
 \end{itemize}
 
 \paragraph{Dependencies:} RLTG requires Python>=3.5 and depends on the following packages:
@@ -35,12 +34,618 @@ The package is structured as follows:
 		\item \texttt{brains/}: it contains \texttt{Brain.py}, the basic abstraction of the reinforcement learning algorithm, as well as \texttt{TDBrain.py}, the implementation of Temporal Difference learning (see Section \ref{sect:temporal-difference-learning});
 		\item \texttt{parameters/} and \texttt{policies/} contain implementations for eligibility traces and $\epsilon$-greedy policy;
 		\item \texttt{feature\_extraction.py}: it contains classes for feature extraction like \texttt{FeatureExtractor}. They leverage the \texttt{Space} abstraction provided by OpenAI Gym. \href{https://github.com/openai/gym/tree/master/gym/spaces}{Here} you can find many types of state spaces supported.
-		\item \texttt{Agent.py}, the module that contains the \texttt{Agent} abstraction, defining the abstract methods for interact with the environment (e.g. \texttt{observe} for observing the new environment state, \texttt{step} for choose an action). It needs a \texttt{FeatureExtractor} and a \texttt{Brain}. 
+		\item \texttt{Agent.py}, the module that contains the \texttt{Agent} abstraction, defining the abstract methods for interact with the environment (e.g. \texttt{observe} for observing the new environment state, \texttt{step} for choose an action). It needs a \texttt{FeatureExtractor} and a \texttt{Brain}.
 		\item \texttt{TemporalEvaluator.py}, which implements the temporal goal specified by an \LLf formula.
 	\end{itemize}
 	\item \texttt{logic/}: contains the implementations of reward shaping as described in Section \ref{sect:off-line-reward-shaping} and \ref{sect:on-the-fly-reward-shaping}. The main modules are \texttt{CompleteRewardAutomaton.py}, for the implementation of Off-line Reward Shaping, and \texttt{PartialRewardAutomaton.py}, for the On-the-fly Reward Shaping.
 	\item \texttt{trainers/}: contains the implementation of a highly-customizable training loop, e.g. you can specify under which conditions the training should stop, you can visually render the agent during the learning and you can pause/resume the learning. The \texttt{GenericTrainer} is used for classic reinforcement learning, whereas \texttt{TGTrainer} is used for temporal goal reinforcement learning.
 \end{itemize}
+
+In the next sections we will go in deep with the features provided by RLTG and we will see some code examples.
+
+\section{Classic Reinforcement Learning with RLTG}
+RLTG allows you to set up a classic reinforcement learning system. That is, it provides abstractions for the main components of an RL system and also for the training loop.
+
+\subsection{Environment}
+The software assumes that the environment object has the OpenAI Gym interface. That is, the environment implements some methods e.g.:
+\begin{itemize}
+	\item \texttt{step(action): observation, reward, done, info}. From an action, return the new observation, the reward of the last transition, if the episode is ended and some additional informations. It is implicit that the environment object keeps track of the state of the environment in order to compute the next one.
+	\item \texttt{reset()}: reset the environment at the initial state.
+\end{itemize}
+
+\subsection{Agent}
+In Listing \ref{code:agent} it is reported the code in \texttt{agents/Agent.py} that define the abstract class \texttt{Agent}.
+
+\begin{lstlisting}[style=Python, language=Python, escapechar=£, label={code:agent}, caption={The \texttt{Agent} abstraction.}]
+class Agent(ABC):
+  def __init__(self, sensors: RobotFeatureExtractor,
+    brain:Brain,
+    reward_shapers:Tuple[RewardShaping]=(),
+    eval:bool=False):
+    """..."""
+    if brain.observation_space and \
+     sensors.output_space != brain.observation_space:
+        raise ValueError("space dimensions are not compatible.")
+    self.sensors = sensors
+    self.brain = brain
+    self.reward_shapers = reward_shapers
+    self.eval = eval
+
+  def set_eval(self, eval:bool):
+    """Setter method for "eval" field."""
+    self.eval = eval
+    self.brain.set_eval(eval)
+
+  def observe(self, state, action, world_reward, state2):
+    """Called at each observation. """
+    features_1 = self.sensors(state)
+    features_2 = self.sensors(state2)
+    reward = world_reward +
+    sum(rs(features_1, features_2) for rs in self.reward_shapers)
+    return self._observe(features_1, action, reward, features_2)
+
+  def _observe(self, features, action, reward, features2):
+    obs = AgentObservation(features, action, reward, features2)
+    self.brain.observe(obs)
+    return obs
+
+  def update(self):
+    """Called at the end of each iteration.
+    It MUST be called only once for iteration."""
+    self.brain.update()
+
+  def start(self, state):
+    features = self.sensors(state)
+    return self.brain.start(features)
+
+  def step(self, obs: AgentObservation):
+    return self.brain.step(obs)
+
+  def end(self, obs: AgentObservation):
+    """Called at the end of each episode.
+    It MUST be called only once for episode."""
+    self.brain.end(obs)
+
+  def save(self, filepath):
+    with open(filepath + "/agent.pkl", "wb") as fout:
+      pickle.dump(self, fout)
+
+  @staticmethod
+  def load(filepath):
+    with open(filepath + "/agent.pkl", "rb") as fin:
+      agent = pickle.load(fin)
+      return agent
+
+  def reset(self):
+    self.brain.reset()
+
+\end{lstlisting}
+
+As you can see, it is composed by:
+\begin{itemize}
+	\item a \texttt{RobotFeatureExtractor}, that is used in the \texttt{observe} method to extract the relevant features of the world and to generate a new agent's state;
+	\item a \texttt{Brain} which implements the reinforcement learning algorithm used by the agent;
+	\item a collection of \texttt{RewardShaping} object that implements the reward shaping technique.
+\end{itemize}
+
+The main methods are:
+\begin{itemize}
+	\item \texttt{set\_eval} switches from "training mode" to "evalutation mode". In the former, the brain actually learns from experience and modify its estimation of the action-value function $Q(s,a)$. In the latter, the agent does not modify itself, but rather take the optimal decision (according to what it learnt).
+	\item \texttt{observe} take in input a SARS tuple and and returns the observation made by its \texttt{Brain};
+	\item \texttt{update, start, step} and \texttt{end} call the analogous methods of the \texttt{Brain}. The method \texttt{step} actually does the learning step, and returns the next action.
+	\item \texttt{save} and \texttt{load} are the methods for, respectively, save and load the state of the agent on disk.
+\end{itemize}
+
+\subsection{\texttt{FeatureExtractor}}
+The abstract class \texttt{FeatureExtractor} is defined in \texttt{agents/feature\_extraction.py}. Listing \ref{code:featext} shows the implementation.
+\begin{lstlisting}[style=Python, language=Python, escapechar=£, label={code:featext}, caption={The \texttt{FeatureExtractor} abstraction.}]
+class FeatureExtractor(ABC):
+
+  def __init__(self, input_space: Space, output_space: Space):
+    self.input_space = input_space
+    self.output_space = output_space
+
+  def __call__(self, input, **kwargs):
+    """Extract features from the input and make sanity check
+    of the input and the output dimensions of the abstract method
+    '_extract'"""
+
+    if not self.input_space.contains(input):
+      raise ValueError("input space dimensions are not correct.")
+
+    output = self._extract(input, **kwargs)
+
+    if not self.output_space.contains(output):
+      raise ValueError("output space dimensions are not correct.")
+
+    return output
+
+  @abstractmethod
+  def _extract(self, input, **kwargs):
+    """
+    Extract the feature from `input`
+    (contained into `self.input_space`).
+    The features must be contained into `self.output_space`.
+    :param   input:  a state belonging to input_space
+    :returns output: a state belonging to output_space
+    """
+      raise NotImplementedError
+\end{lstlisting}
+A \texttt{FeatureExtractor} object (and its extensions) requires both an \texttt{input\_space} and an \texttt{output\_space}, in order to do some checks about the inputs and the outputs of the operator. The \texttt{\_extract} method is abstract and must be implemented by the subclasses. The method \texttt{\_\_call\_\_} (which makes the object callable) simply checks if the provided \texttt{input} is contained in the input state space; then it calls the \texttt{\_extract} methods which returns the result; finally, It is checked whether the result is contained in the predefined output space.
+
+\subsection{\texttt{Brain}}
+One of the main important abstraction is \texttt{Brain}, which tries to generalize how an RL algorithm can work at high level. In  Listing \ref{code:brain} it is shown the code that implements it, in \texttt{agents/brains}.
+
+\begin{lstlisting}[style=Python, language=Python, escapechar=£, label={code:brain}, caption={The \texttt{Brain} abstraction.}]
+class Brain(ABC):
+  """The class which implements the core of the algorithms"""
+
+  def __init__(self, observation_space:Space, action_space:Space,
+    policy:Policy):
+    """
+    :param observation_space: instance of Space or None.
+                  If None, it means that the observation space
+                  is not known a priori and so it is not needed
+                  for the algorithm.
+    :param action_space:    instance of Space.
+    :param policy:          behavior policy.
+    """
+
+    self.observation_space = observation_space
+    self.action_space = action_space
+    self.policy = policy
+
+    self.episode = 0
+    self.iteration = 0
+    self.episode_iteration = 0
+    self.obs_history = []
+    self.total_reward = 0
+
+    self.eval = False
+
+  def set_eval(self, eval:bool):
+    self.eval = eval
+      self.policy.set_eval(eval)
+
+  @abstractmethod
+  def choose_action(self, state, **kwargs):
+    """From a state, return the action for the implemented approach.
+    e.g. in Q-Learning, select the argmax of the Q-values
+     relative to the 'state' parameter."""
+      raise NotImplementedError
+
+  @abstractmethod
+  def observe(self, obs:AgentObservation, *args, **kwargs):
+      """Called at each observation.
+      E.g. in args there can be the S,A,R,S' tuple
+      for save it in a buffer
+      that will be read in the "learn" method."""
+      self.obs_history.append(obs)
+      self.total_reward += obs.reward
+
+  def update(self, *args, **kwargs):
+    """action performed at the end of each iteration
+    Subclass implementations should call this method.
+    """
+    self.episode_iteration += 1
+    self.iteration += 1
+    self.policy.update()
+
+  def start(self, state):
+    if not self.eval:
+      self.episode += 1
+    self.episode_iteration = 0
+    self.total_reward = 0
+    self.policy.reset()
+    self.obs_history = []
+
+  @abstractmethod
+  def step(self, obs: AgentObservation, *args, **kwargs):
+    """The method performing the learning
+    (e.g. in Q-Learning, update the table)"""
+    raise NotImplementedError
+
+  def end(self, obs:AgentObservation, *args, **kwargs):
+    """action performed at the end of each episode
+    Subclasses implementations should call this method.
+    """
+    self.episode_iteration += 1
+
+  @abstractmethod
+  def reset(self):
+      raise NotImplementedError
+
+\end{lstlisting}
+ You can notice that the abstract methods do some utility computations (e.g. track of the numbers of episodes, number of steps per episode, total reward collected in the last episode etc.) but some of them has to be expanded in order to implement the core functionality of a given RL algorithm. It is the case of \texttt{choose\_action}, which returns optimal action, \texttt{observe} which is called from the class \texttt{Agent} at each observation (after the feature extraction), \texttt{step} which actually implements the learning.
+
+ A \texttt{Brain} requires an \texttt{observation\_space} and an \texttt{action\_space} that define the dimensions of the task, and \texttt{policy} which is used for determine the next action to take (e.g. in the \texttt{EGreedy} policy, it chooses whether the action must be taken optimally or randomly).
+
+\subsection{Trainer}
+The \texttt{Trainer} class implements the RL training loop.
+
+
+\begin{lstlisting}[style=Python, language=Python, escapechar=£, label={code:trainer}, caption={The \texttt{Trainer} that implements the training loop.}]
+class GenericTrainer(Trainer):
+
+  def __init__(self, env:GoalEnvWrapper, agent:Agent, n_episodes=1000,
+         data_dir=DEFAULT_DATA_DIR,
+         stop_conditions=(GoalPercentage(10, 1.0), ),):
+    self.env = env
+    self.n_episodes = n_episodes
+    self.stop_conditions = list(stop_conditions)
+    self.agent = agent
+
+    self.stats = StatsManager(name="train_stats")
+    self.optimal_stats = StatsManager(name="eval_stats")
+
+
+  def main(self, eval:bool=False, render:bool=False, verbosity:int=1):
+
+    ...
+
+    if eval:
+      stats.reset()
+      optimal_stats.reset()
+      self.cur_episode = 0
+
+    for ep in range(self.cur_episode, num_episodes):
+
+      if not eval:
+        steps, total_reward, goal = self.train_loop(render=render)
+        stats.update(steps, len(agent.brain.Q), total_reward, goal)
+        ...
+
+      # try optimal run
+      agent.set_eval(True)
+      steps, total_reward, goal = self.train_loop(render=render)
+      optimal_stats.update(steps, len(agent.brain.Q),
+        total_reward, goal)
+      ...
+      agent.set_eval(False)
+
+
+      if self.check_stop_conditions(optimal_stats, eval=eval):
+        break
+
+      if self.cur_episode%100==0 and not eval:
+        agent.save(self.agent_data_dir)
+        self.save()
+
+      self.cur_episode = ep
+
+    if not eval:
+      self.save()
+      agent.save(self.agent_data_dir)
+      ...
+
+    return stats, optimal_stats
+
+
+  def train_loop(self, render:bool=False):
+    env = self.env
+    agent = self.agent
+
+    stop_condition = False
+    info = {"goal": False}
+
+    state = env.reset()
+    action = agent.start(state)
+    obs = None
+
+    while not stop_condition:
+      state2, reward, done, info = env.step(action)
+      if render: env.render()
+
+      stop_condition = self.check_episode_stop_conditions(done,
+        info.get("goal", False))
+      obs = agent.observe(state, action, reward, state2,
+        is_terminal_state=stop_condition)
+
+      if stop_condition:
+        break
+
+      action = agent.step(obs)
+      agent.update()
+      state = state2
+
+    agent.end(obs)
+    steps, tot_reward = agent.brain.episode_iteration,
+      agent.brain.total_reward
+    return steps, tot_reward, self.is_goal(info)
+
+  def check_stop_conditions(self, stats:StatsManager, eval=False):
+    return not eval and \
+      all([s.check_condition(stats_manager=stats)
+        for s in self.stop_conditions])
+
+  def check_episode_stop_conditions(self, done, goal):
+    return done or goal
+
+  def is_goal(self, info, *args, **kwargs):
+    return info.get("goal", False)
+
+  def save(self):
+    with open(self.data_dir + "/trainer.pkl", "wb") as fout:
+      pickle.dump(self, fout)
+
+  def reset(self):
+    self.cur_episode = 0
+    self.stats.reset()
+    self.optimal_stats.reset()
+\end{lstlisting}
+The main method \texttt{main} starts and manages the learning process. It can be run in training mode (\texttt{eval=False}), where the agent actually learns, and in evaluation mode (\texttt{eval=True}), where there is no learning at all, but the agent just chooses the optimal actions. There is the main for-loop that iterates for a number of episode specified by the user.
+
+At each iteration it is executed an episode by calling the method \texttt{train\_loop}. This method does the following steps:
+\begin{itemize}
+	\item Reset the environment and the agent.
+	\item While the stop condition is not true: take an action, observe the new state and from the SARS tuple make an agent step (i.e. learn from the observation).
+	\item When the stop condition is true, the episode is terminated, and the control is passed to the \texttt{main} method.
+\end{itemize}
+
+The stop conditions are specified when constructing the \texttt{GeneralTrainer} object. They uses the statistics collected during the simulations and could be to reach a threshold of average reward, or of the percentage of goals reached.
+
+In the main loop, for each episode, two simulations are executed: one where the behavior policy is followed and where the agent learns, and the other when, during the simulation, the optimal policy is adopted. The evaluation of the stop conditions is done by using the statistics from the optimal run.
+
+\section{Reinforcement Learning for Temporal Goals}
+In this section we show how to use RLTG for setting up a RL system as described in previous chapters (i.e. Chapter \ref{ch:rl}, \ref{ch:rl-llf-goals} and \ref{ch:reward-shaping}).
+
+\subsection{\texttt{TGTrainer}}
+Analogously to \texttt{GeneralTrainer} described before, we introduce the \texttt{TGTrainer} (temporal goal trainer), which allow to run a \emph{RL for \LLf goals} task. Its implementation is shown in Listing \ref{code:temporalGoalTrainer}.
+
+\begin{lstlisting}[style=Python, language=Python, escapechar=£, label={code:temporalGoalTrainer}, caption={\texttt{TGTrainer}}]
+class TGTrainer(GenericTrainer):
+  """Temporal Goal Trainer"""
+
+  def __init__(self, env:GoalEnvWrapper, agent:TGAgent=None,
+       n_episodes=1000,
+       data_dir="data",
+     stop_conditions=(GoalPercentage(10, 1.0), ),
+  ):
+  super().__init__(env, agent, n_episodes, data_dir, stop_conditions)
+  self.stop_conditions.append(CheckAutomataInFinalState())
+
+  def train_loop(self, render:bool=False):
+  env = self.env
+  agent = self.agent
+
+  stop_condition = False
+  info = {"goal": False}
+
+  state = env.reset()
+  action = agent.start(state)
+  obs = None
+  if render: env.render()
+
+  while not stop_condition:
+    state2, reward, done, info = env.step(action)
+    if render: env.render()
+
+    old_automata_state = agent.get_automata_state()
+    new_automata_state = agent.sync(action, state2)
+
+    stop_condition = self.check_episode_stop_conditions(done,
+     info.get("goal", False))
+    obs = agent.observe(state, action, reward, state2,
+        old_automata_state=old_automata_state,
+        new_automata_state=new_automata_state,
+        is_terminal_state=stop_condition)
+
+    if stop_condition:
+    break
+
+    action = agent.step(obs)
+    agent.update()
+    state = state2
+
+  agent.end(obs)
+  steps, tot_reward = agent.brain.episode_iteration,
+  agent.brain.total_reward
+  return steps, tot_reward, self.is_goal(info)
+
+
+  def check_stop_conditions(self, stats:StatsManager, eval=False):
+  return not eval and\
+    all([s.check_condition(
+      stats_manager=stats,
+      temporal_evaluators=self.agent.temporal_evaluators
+      ) for s in self.stop_conditions])
+
+  def check_episode_stop_conditions(self, done, goal):
+  temp_evals = self.agent.temporal_evaluators
+  any_te_failed = any(t.is_failed() for t in temp_evals)
+  all_te_true = all(t.is_true() for t in temp_evals)\
+    if len(temp_evals) > 0 else False
+
+  if any_te_failed:
+    logging.debug("some automaton in failure state: end episode")
+
+  return done or any_te_failed or (goal and all_te_true)
+
+  def is_goal(self, info, *args, **kwargs):
+  return super().is_goal(info) and\
+    all(t.is_true() for t in self.agent.temporal_evaluators)
+
+\end{lstlisting}
+\texttt{TGTrainer} extends \texttt{GenericTrainer} and reimplements some methods from the parent class:
+\begin{itemize}
+	\item \texttt{train\_loop} is adapted so that are included the automata states and the synchronization of the automata.
+	\item \texttt{check\_stop\_conditions} of the main loop includes also the temporal evaluators objects;
+	\item \texttt{check\_episode\_stop\_conditions} is defined as explained in Section \ref{sect:episodic-view}.
+	\item \texttt{is\_goal} is adapted so that we check if every automaton $\automaton_{\varphi_i}$ is in an accepting state.
+\end{itemize}
+
+\subsection{\texttt{TGAgent}}
+The \texttt{TGAgent} class extends the abstract \texttt{Agent} class, and implements an agent that learns temporal goals. In Listing \ref{code:temporalGoalAgent} you can see the code.
+\begin{lstlisting}[style=Python, language=Python, escapechar=£, label={code:temporalGoalAgent}, caption={\texttt{TGAgent}}]
+class TGAgent(Agent):
+  """Temporal Goal agent"""
+
+  def __init__(self,
+         sensors: RobotFeatureExtractor,
+         brain: Brain,
+         temporal_evaluators: List[TemporalEvaluator],
+         reward_shaping: bool = True):
+    assert len(temporal_evaluators) >= 1
+
+    ...
+
+  def sync(self, action, state2):
+    new_automata_state =
+      tuple(temp_eval.update(action, state2)
+        for temp_eval in self.temporal_evaluators)
+    return new_automata_state
+
+  def start(self, state):
+    for t in self.temporal_evaluators:
+      t.reset()
+    automata_states = [temp_eval.get_state()
+      for temp_eval in self.temporal_evaluators]
+    transformed_state = self.state_extractor(state, automata_states)
+    # return super().start(transformed_state)
+    return self.brain.start(transformed_state)
+
+  def state_extractor(self, world_state, automata_states: List):
+    # the state is a tuple: (features, A_1 state, ..., A_n state)
+    # A_i is the i_th automaton associated to the i_th temporal goal
+    state = tuple([self.sensors(world_state)] + list(automata_states))
+    return state
+
+  def reward_extractor(self, world_reward, automata_rewards: List):
+    res = world_reward + sum(automata_rewards)
+    return res
+
+  def get_automata_state(self):
+    return tuple(temp_eval.get_state()
+      for temp_eval in self.temporal_evaluators)
+
+  def observe(self, state, action, reward, state2,
+        old_automata_state=(), new_automata_state=(),
+        is_terminal_state=False):
+
+    automata_rewards = [te.reward \
+      if is_terminal_state and te.is_true() else 0
+      for te in self.temporal_evaluators]
+
+    # apply reward shaping to the observed automata rewards
+    for i in range(len(self.reward_shapers)):
+      plus = self.reward_shapers[i](old_automata_state[i],
+                      new_automata_state[i],
+                      is_terminal_state=is_terminal_state)
+      automata_rewards[i] += plus
+
+    old_state = self.state_extractor(state, old_automata_state)
+    new_state2 = self.state_extractor(state2, new_automata_state)
+    new_reward = self.reward_extractor(reward, automata_rewards)
+
+    ...
+
+    return super()._observe(old_state, action, new_reward, new_state2)
+
+  def save(self, filepath):
+    super().save(filepath)
+    for idx, te in enumerate(self.temporal_evaluators):
+      with open(filepath + "/te%02d.dump" % idx, "wb") as fout:
+        te.reset()
+        pickle.dump(te, fout)
+
+  @staticmethod
+  def load(filepath):
+    ...
+
+  def set_eval(self, eval: bool):
+    super().set_eval(eval)
+    for te in self.temporal_evaluators:
+      te.set_eval(eval)
+
+  def reset(self):
+    super().reset()
+    for te in self.temporal_evaluators:
+      te.reset()
+\end{lstlisting}
+The \texttt{TGAgent} object requires the sensors and a brain as the class \texttt{Agent}. Moreover, it includes a list of \texttt{TemporalEvaluator}, which manages the temporal goal associated to a formula.
+Notice that:
+\begin{itemize}
+	\item Some of the methods of the parent class are wrapped or reimplemented in order to be adapted in the new settings. Some examples are: \texttt{observe} that now includes the cartesian product between low-level states and automata states.
+	\item The \texttt{sync} method is used to update every automata after a transition.
+\end{itemize}
+
+\subsection{\texttt{TemporalEvaluator}}
+The \texttt{TemporalEvaluator} object implements what is needed to keep track the \LLf goal and the associated automaton, as well as the automata-based reward shaping.
+\begin{lstlisting}[style=Python, language=Python, escapechar=£, label={code:temporalEvaluator}, caption={\texttt{TemporalEvaluator}}]
+class TemporalEvaluator(ABC):
+  def __init__(self, goal_feature_extractor:FeatureExtractor, 
+               alphabet:Set[Symbol], 
+               formula:LDLfFormula, reward,
+               gamma=0.99, on_the_fly=False):
+    self.goal_feature_extractor = goal_feature_extractor
+    self.alphabet = Alphabet(alphabet)
+    self.formula = formula
+    self.reward = reward
+    self.on_the_fly = on_the_fly
+    if not on_the_fly:
+      self._automaton = CompleteRewardAutomaton._fromFormula(alphabet,
+              formula, reward, gamma=gamma)
+      self.simulator = RewardAutomatonSimulator(self._automaton)
+    else:
+      self.simulator = PartialRewardAutomaton(self.alphabet,
+              self.formula, reward, gamma=gamma)
+
+    self.eval = False
+
+  @abstractmethod
+  def fromFeaturesToPropositional(self, features, action) -> Set[Symbol]:
+    raise NotImplementedError
+
+  def update(self, action, state):
+    """update the automaton.
+    :param action: the action to reach the state
+    :param state:  the new state of the MDP
+    :returns (new_automaton_state, reward)"""
+    features = self.goal_feature_extractor(state)
+    propositional = self.fromFeaturesToPropositional(features, action)
+    old_state = self.simulator.get_current_state()
+    new_state = self.simulator.make_transition(propositional, 
+        eval=self.eval)
+    return self.simulator.get_current_state()
+
+
+  def get_state(self):
+    return self.simulator.get_current_state()
+
+  def get_state_space(self):
+    if not self.on_the_fly:
+      return Discrete(len(self.simulator.state2id))
+    else:
+      # estimate the state space size.
+      # the estimate MUST overestimate the true size.
+      # return Discrete(100)
+      return None
+
+  def reset(self):
+    self.simulator.reset()
+
+  def is_failed(self):
+    return self.simulator.is_failed()
+
+  def is_true(self):
+    return self.simulator.is_true()
+
+  def is_terminal(self):
+    return self.is_true() or self.is_failed()
+
+  def set_eval(self, eval:bool):
+    self.eval = eval
+\end{lstlisting}
+The Temporal Evaluator is an abstract class composed by:
+\begin{itemize}
+	\item A \texttt{FeatureExtractor} which generates a high-level representation of the world state;
+	\item A set of \texttt{Symbols} that are used from the automaton and to specify the formulas.
+	\item The reward associated to the temporal goal of interest.
+	\item The \texttt{on\_the\_fly} parameter which switch from off-line reward shaping and on-the-fly reward shaping, associated respectively to \texttt{CompleteRewardAutomaton} class and \texttt{PartialRewardAutomaton} class, both defined in the \texttt{logic/} package.
+\end{itemize}
+
+The implementations of a Temporal Evaluator must implement the method \texttt{fromFeaturesToPropositional}, which take as input the features of a state and the action taken and returns a set of symbols that determine the transition of the automaton in the \texttt{update} method.
+
 
 \section{Code examples}
 \subsection{Classic Reinforcement Learning}
@@ -64,21 +669,21 @@ def taxi_goal(*args):
   return done and reward == 20
 
 if __name__ == '__main__':
-  env = gym.make("Taxi-v2")£\label{line:env-taxi-1}£ 
+  env = gym.make("Taxi-v2")£\label{line:env-taxi-1}£
   env = GoalEnvWrapper(env, taxi_goal)£\label{line:env-taxi-2}£
-  
+
   observation_space = env.observation_space
   action_space = env.action_space
   print(observation_space, action_space)
   agent = RLAgent( £\label{line:define-rl-agent}£
-    IdentityFeatureExtractor(observation_space),
-    Sarsa(observation_space, action_space, 
+  IdentityFeatureExtractor(observation_space),
+  Sarsa(observation_space, action_space,
       EGreedy(0.1), alpha=0.1, gamma=0.99, lambda_=0.0)
   )
-  
+
   tr = GenericTrainer(£\label{line:generic-trainer}£
-    env, 
-    agent, 
+    env,
+    agent,
     n_episodes=10000
     stop_conditions=(
       AvgRewardPercentage(window_size=100, target_mean=9.0)
@@ -91,7 +696,7 @@ Now we analyze some of the APIs provided by RLTG:
 	\item In line \ref{line:env-taxi-1} we defined the environment by OpenAI Gym APIs. In line and \ref{line:env-taxi-2} we wrapped with a function that make it \emph{goal-based}.
 	\item In line \ref{line:define-rl-agent} we defined our reinforcement learning agent. We had to specify a \texttt{FeatureExtractor}, i.e. which features of the state provided from the environment we consider relevant, and a \texttt{Brain}, i.e. the responsible for the learning of the policy. In particular:
 	\begin{itemize}
-		\item \texttt{IdentityFeatureExtractor} extends \texttt{FeatureExtractor} and it simply get the entire state space from the environment, without modifying it; It requires the observation state space of the environment to do some sanity checks. 
+		\item \texttt{IdentityFeatureExtractor} extends \texttt{FeatureExtractor} and it simply get the entire state space from the environment, without modifying it; It requires the observation state space of the environment to do some sanity checks.
 		\item \texttt{Sarsa} extends \texttt{TDBrain}, and implements Sarsa($\lambda$) (see Section \ref{sect:temporal-difference-learning}). It requires:
 		\begin{itemize}
 			\item the observation space where the algorithm learns (in this case is the same of the one provided by the environment);
@@ -125,8 +730,8 @@ if __name__ == '__main__':
       alpha=0.1, gamma=gamma, lambda_=0.99
     ),
     [BreakoutCompleteColumnsTemporalEvaluator(£\label{line:list-of-te}£
-      env.observation_space, bricks_rows=env.brick_rows, 
-      bricks_cols=env.brick_cols, left_right=True, 
+      env.observation_space, bricks_rows=env.brick_rows,
+      bricks_cols=env.brick_cols, left_right=True,
       gamma=gamma, on_the_fly=on_the_fly)
     ],
     reward_shaping=reward_shaping
@@ -143,3 +748,6 @@ Observe that:
 	\item In Listing \ref{ex:rltg-classic-rl-example} we used \texttt{RLAgent}, while in this case, in line \ref{line:tgagent}, we use \texttt{TGAgent}. The arguments provided in the constructors are the same of the previous example except for an additional argument which is the list of \texttt{TemporalEvaluator} (line \ref{line:list-of-te}). Notice that this definition of \emph{list of temporal goals} is compliant with Definition \ref{def:rl-for-llf-goals}. We do not discuss here details about this particular temporal evaluator, i.e. \texttt{BreakoutCompleteColumnsTemporalEvaluator}. Observe that we can specify if the temporal evaluator should use a off-line automaton or a on-the-fly automaton by the boolean parameter \texttt{on\_the\_fly}. Finally, notice the \texttt{reward\_shaping} flag to toggle automata-based reward shaping (Section \ref{sect:off-line-reward-shaping} and \ref{sect:on-the-fly-reward-shaping}).
 	\item Another difference is in using \texttt{TGTrainer} instead of \texttt{GenericTrainer}. This version is more specialized to deal with the setting explained in Section \ref{sect:rl-goals-reduction-to-mdp}. The signature of the constructor is the same of \texttt{GenericTrainer}. Notice that in this particular case we used \texttt{GoalPercentage(100, 0.2)}, which means we require the agent have reached the goal at least 20 times in the last 100 episodes.
 \end{itemize}
+
+\section{Conclusion}
+In this chapter we described RLTG, a Python package to implement a reinforcement learning system in a modular way, both for classic tasks and for the setting described in previous chapters. We've seen the implementation of the main classes of the software and provided some typical use case with code examples.
