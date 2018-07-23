@@ -122,8 +122,8 @@
 	\item Classic Reinforcement Learning:
 		\begin{itemize}
 			\item 	An \emph{agent} interacts with an \emph{environment} by taking \emph{actions} so to maximize \emph{rewards};
-			\item 	No knowledge about the transition model, but assume Markov property (history does not matter);
-			\item 	Based on Markov Decision Process (MDP)
+			\item 	No knowledge about the transition model, but assume Markov property (history does not matter): Markov Decision Process (MDP)
+			\item 	Solution: (Markovian) policy $\Policy: \States\to\Actions$
 		\end{itemize}
 		
 	\vskip 0.5cm
@@ -131,6 +131,7 @@
 		\begin{itemize}
 			\item 	Rewards depend from history, not just the last transition;
 			\item 	Specify proper behaviours by using temporal logic formulas;
+			\item 	Solution: (Non-Markovian) policy $\Policy: \States^* \to\Actions$
 			\item 	Reduce the problem to MDP (with extended state space)
 		\end{itemize}
 	
